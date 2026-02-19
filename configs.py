@@ -16,3 +16,4 @@ GRAVITY = 1
 
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+clock = pygame.time.Clock()
