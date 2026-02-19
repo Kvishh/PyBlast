@@ -22,6 +22,9 @@ create_tiles()
 # Function for creating background-------------------
 load_bg_images()
 
+# Function for loading background images-------------
+load_long_rocks()
+
 
 def game_run():
     running = True
@@ -55,11 +58,16 @@ def game_run():
         # For drawing background
         draw_background(scroll)
 
+        # Drawing behind platforms but in front of background
+        draw_behind_long_rocks(scroll)
+
         # For drawing tiles
         draw_tiles(scroll)
         
         player.update(pygame.key.get_pressed(), dt)
         player.render(scroll)
+
+        draw_front_long_rocks(scroll)
 
         # last methods to be called
         window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
