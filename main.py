@@ -9,14 +9,12 @@ pygame.display.init()
 
 player = Player(0, 0)
 
-# bg_bottom = pygame.image.load("assets/images/bg_1.png").convert_alpha()
-
 create_tiles()
 
 def game_run():
     running = True
     while running:
-        clock.tick(FPS)
+        dt = clock.tick(FPS) / 1000
         display.fill((56, 56, 56))
 
         for event in pygame.event.get():
@@ -25,10 +23,8 @@ def game_run():
 
         draw_tiles()
         
-        player.update()
+        player.update(pygame.key.get_pressed(), dt)
         player.render([0, 0])
-
-        # display.blit(bg_bottom, (0, 0))
 
         # keys_hold = pygame.key.get_pressed()
         # if keys_hold[pygame.K_SPACE] and not player.jumping:
