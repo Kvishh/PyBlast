@@ -14,6 +14,7 @@ TILE_SIZE = 32
 
 FRICTION = 15
 GRAVITY = 2400
+FLOOR = 672
 
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))

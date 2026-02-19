@@ -26,7 +26,7 @@ class Player(pygame.sprite.Sprite):
             self.pos.y = 0
         elif self.pos.y > WINDOW_HEIGHT - PLAYER_HEIGHT:
             self.y_velocity = 0
-            self.pos.y = WINDOW_HEIGHT - PLAYER_HEIGHT
+            self.pos.y = FLOOR - PLAYER_HEIGHT
         
         # Responsible for x movement
         if int(self.x_velocity) == 0:
