@@ -1,0 +1,18 @@
+import pygame
+
+FPS = 60
+
+WINDOW_WIDTH = 1300
+WINDOW_HEIGHT = 800
+DISPLAY_WIDTH = 1000
+DISPLAY_HEIGHT = 600
+
+PLAYER_WIDTH = 42
+PLAYER_HEIGHT = 48
+
+TILE_SIZE = 32
+
+GRAVITY = 1
+
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
