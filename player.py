@@ -13,7 +13,9 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.x_direction = 1
 
-    def update(self):
+    def update(self, keys, dt):
+        self._move(keys)
+
         # Border limit x
         if self.pos.x < 0:
             self.pos.x = 0
@@ -27,25 +29,39 @@ class Player(pygame.sprite.Sprite):
             self.pos.y = WINDOW_HEIGHT - PLAYER_HEIGHT
         
         # Responsible for x movement
-        if self.x_velocity > 0:
-            self.x_velocity -= 1
+        if int(self.x_velocity) == 0:
+            self.x_velocity == 0
+        elif self.x_velocity > 0:
+            self.x_velocity -= FRICTION
         elif self.x_velocity < 0:
-            self.x_velocity += 1
-        self.pos.x += self.x_velocity
+            self.x_velocity += FRICTION
+        self.pos.x += self.x_velocity * dt
         self.rect.x = int(self.pos.x)
         
         self._detect_tiles_collision_x()
 
         # Responsible for y movement
-        self.y_velocity += GRAVITY
-        self.pos.y += self.y_velocity
+        self.y_velocity += GRAVITY * dt * .8
+        self.pos.y += self.y_velocity * dt * .8
         self.rect.y = int(self.pos.y)
+        self.y_velocity += GRAVITY * dt * .8
 
         self._detect_tiles_collision_y()
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
     
+    def _move(self, keys_hold):
+        if keys_hold[pygame.K_SPACE] and not self.jumping:
+            self.y_velocity = -1000 # ORIGINAL
+            self.jumping = True
+        elif keys_hold[pygame.K_d]:
+            self.x_velocity = 300
+            self.x_direction = 1
+        elif keys_hold[pygame.K_a]:
+            self.x_velocity = -300
+            self.x_direction = -1
+
     def _get_tile_collision(self):
         for tile in tiles:
             if tile.rect.colliderect(self.rect):
