@@ -53,7 +53,7 @@ class Player(pygame.sprite.Sprite):
     
     def _move(self, keys_hold):
         if keys_hold[pygame.K_SPACE] and not self.jumping:
-            self.y_velocity = -1000 # ORIGINAL
+            self.y_velocity = -1030 # ORIGINAL
             self.jumping = True
         elif keys_hold[pygame.K_d]:
             self.x_velocity = 300
