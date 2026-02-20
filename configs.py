@@ -16,6 +16,9 @@ FRICTION = 15
 GRAVITY = 2400
 FLOOR = 672
 
+BULLET_SIZE = 12
+SHOOTING_COOLDOWN = 300
+
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 clock = pygame.time.Clock()
