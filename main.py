@@ -93,10 +93,10 @@ def game_run():
         draw_tiles(scroll)
         
         # Player and Wand update and draw methods
-        player.update(pygame.key.get_pressed(), dt)
-        player.render(scroll)
         wand.update(player, scroll, player.rect.centerx, player.rect.centery)
         wand.render(scroll)
+        player.update(pygame.key.get_pressed(), dt)
+        player.render(scroll)
 
         # Checking of mouse hold and creation of bullet
         shoot_bullet(previous_time, scroll, player.rect.centerx, player.rect.centery)
