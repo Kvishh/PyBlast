@@ -7,6 +7,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.pos = pygame.Vector2(x, y)
         self.image = pygame.transform.scale(pygame.image.load("assets/images/megaman-right-walk0.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
+        self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
         self.x_velocity = 0
         self.y_velocity = 0
@@ -14,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.x_direction = 1
 
     def update(self, keys, dt):
+        self.image = self.orientation[self.x_direction]
         self._move(keys)
 
         # Border limit x

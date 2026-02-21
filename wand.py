@@ -20,6 +20,7 @@ class Wand(pygame.sprite.Sprite):
         dy = mouse_pos_y - pl_y
         angle_mouse = math.degrees(math.atan2(dy, dx))
         self._rotate_around_pivot(angle_mouse, x, y)
+        self._switch_player_orientation(player, angle_mouse)
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x - scroll[0], self.rect.y - scroll[1]))
@@ -29,4 +30,7 @@ class Wand(pygame.sprite.Sprite):
         rotated_offset = self.offset.rotate(angle)
 
         self.rect = self.image.get_rect(center = (self.rect.centerx+5, self.rect.centery+6) + rotated_offset)
+
+    def _switch_player_orientation(self, player, angle):
+        player.x_direction = -1 if angle > 90 or angle < -90 else 1
        
