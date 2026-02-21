@@ -36,11 +36,22 @@ load_long_rocks()
 
 def shoot_bullet(previous_time):
     mouse_hold = pygame.mouse.get_pressed()
-    mouse_pos = pygame.mouse.get_pos()
     if mouse_hold[0]:
         current_time = pygame.time.get_ticks()
         if current_time - previous_time[0] > SHOOTING_COOLDOWN:
-            bullet = Bullet("assets/images/bullet.png", player.rect.centerx, player.rect.centery, scroll, player.x_direction, mouse_pos[0], mouse_pos[1])
+
+            # mouse_x = pygame.mouse.get_pos()[0]
+            # mouse_y = pygame.mouse.get_pos()[1]
+            mouse_x = pygame.mouse.get_pos()[0] / (WINDOW_WIDTH / DISPLAY_WIDTH)
+            mouse_y = pygame.mouse.get_pos()[1] / (WINDOW_HEIGHT / DISPLAY_HEIGHT)
+            
+            bullet = Bullet("assets/images/bullet.png", 
+                            player.rect.centerx, 
+                            player.rect.centery, 
+                            scroll, 
+                            player.x_direction, 
+                            mouse_x,
+                            mouse_y)
             bullet_group.add(bullet)
             previous_time[0] = current_time
 
@@ -99,6 +110,13 @@ def game_run():
 
         # Rendering of front objects (long rocks)
         draw_front_long_rocks(scroll)
+
+        # mouse_x = pygame.mouse.get_pos()[0]
+        # mouse_y = pygame.mouse.get_pos()[1]
+        mouse_x = pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH # PAIR with last line
+        mouse_y = pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT # PAIR with last line
+        # pygame.draw.line(display, (255, 0, 0), (player.rect.centerx - scroll[0], player.rect.centery - scroll[1]), (mouse_x - scroll[0], mouse_y - scroll[1]))
+        pygame.draw.line(display, (255, 0, 0), (player.rect.centerx - scroll[0], player.rect.centery - scroll[1]), (mouse_x, mouse_y)) # This line above draws the line exactly where the mouse is
 
         # last methods to be called
         window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))

@@ -6,19 +6,19 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, image, x, y, scroll, direction, mouse_target_x, mouse_target_y):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load(image), (BULLET_SIZE, BULLET_SIZE))
-        # self.rect = self.image.get_rect(topleft=(x, y)) # ORIGINAL
-        self.rect = self.image.get_rect(center=(x, y))
+        self.rect = self.image.get_rect(center=(x, y)) # x and y are player centerx and centery
         self.speed = 450
         self.direction = direction
         self.pos = pygame.Vector2(x, y)
+
+        # self._mouse_target_x = mouse_target_x
+        # self._mouse_target_y = mouse_target_y
         self._mouse_target_x = mouse_target_x + scroll[0]
         self._mouse_target_y = mouse_target_y + scroll[1]
 
-        # self.dy = self._mouse_target_y - y
-        # self.dx = self._mouse_target_x - x
-
         self.dy = self._mouse_target_y - y
         self.dx = self._mouse_target_x - x
+        
         self._angle = math.atan2(self.dy, self.dx)
         self._x_vel = math.cos(self._angle)*self.speed
         self._y_vel = math.sin(self._angle)*self.speed
@@ -54,8 +54,8 @@ class Bullet(pygame.sprite.Sprite):
     def _move(self, dt):
         self.pos.x += self._x_vel * dt
         self.pos.y += self._y_vel * dt
-        self.rect.x = int(self.pos.x)
-        self.rect.y = int(self.pos.y)
+        self.rect.centerx = int(self.pos.x)
+        self.rect.centery = int(self.pos.y)
 
     def _draw_particles(self, scroll):
         for i, particle in enumerate(self.particles):
