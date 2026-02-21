@@ -9,14 +9,17 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y+10))
         self.speed = 450
         self.direction = direction
-        self.pos = pygame.Vector2(x, y+10)
+        self.pos = pygame.Vector2(x, y+15)
         self._mouse_target_x = mouse_target_x
         self._mouse_target_y = mouse_target_y
+
         self.dy = self._mouse_target_y - self.pos.y
         self.dx = self._mouse_target_x - self.pos.x
         self._angle = math.atan2(self.dy, self.dx)
         self._x_vel = math.cos(self._angle)*self.speed
         self._y_vel = math.sin(self._angle)*self.speed
+
+        self.pos += pygame.Vector2(17, 0).rotate(math.degrees(self._angle))
 
         self.particles = []
     
