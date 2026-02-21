@@ -6,14 +6,14 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, image, x, y, direction, mouse_target_x, mouse_target_y):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load(image), (BULLET_SIZE, BULLET_SIZE))
-        self.rect = self.image.get_rect(center=(x, y))
+        self.rect = self.image.get_rect(center=(x, y+10))
         self.speed = 450
         self.direction = direction
-        self.pos = pygame.Vector2(x, y)
+        self.pos = pygame.Vector2(x, y+10)
         self._mouse_target_x = mouse_target_x
         self._mouse_target_y = mouse_target_y
-        self.dy = self._mouse_target_y - y
-        self.dx = self._mouse_target_x - x
+        self.dy = self._mouse_target_y - self.pos.y
+        self.dx = self._mouse_target_x - self.pos.x
         self._angle = math.atan2(self.dy, self.dx)
         self._x_vel = math.cos(self._angle)*self.speed
         self._y_vel = math.sin(self._angle)*self.speed
