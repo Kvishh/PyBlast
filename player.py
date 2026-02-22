@@ -18,6 +18,12 @@ class Player(pygame.sprite.Sprite):
         self.image = self.orientation[self.x_direction]
         self._move(keys)
 
+        # this is for checking whether enemy is stuck below or above
+        self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
+        # pygame.draw.rect(display, (255, 0, 0), self.vertical_rect, 2) # original
+        
+
+
         # Border limit x
         if self.pos.x < 0:
             self.pos.x = 0

@@ -6,6 +6,7 @@ from player import *
 from wand import *
 from bullet import *
 from customgroup import *
+from enemy import *
 
 # Must calls
 pygame.init()
@@ -17,6 +18,9 @@ player = Player(0, 0)
 
 # Wand------------------------------------------------
 wand = Wand(player.rect.centerx, player.rect.centery)
+
+# Enemy-----------------------------------------------
+enemy = Enemy(0, 0)
 
 # Bullets---------------------------------------------
 bullet_group = CustomGroup()
@@ -97,6 +101,10 @@ def game_run():
         wand.render(scroll)
         player.update(pygame.key.get_pressed(), dt)
         player.render(scroll)
+
+        # Enemmy update and render
+        enemy.update(dt, scroll, player)
+        enemy.render(scroll)
 
         # Checking of mouse hold and creation of bullet
         shoot_bullet(previous_time, scroll, player.rect.centerx, player.rect.centery)
