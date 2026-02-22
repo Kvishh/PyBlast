@@ -6,7 +6,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/megaman-right-walk0.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
+        self.image = pygame.transform.scale(pygame.image.load("assets/images/wizard.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
         self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
         self.x_velocity = 0
@@ -55,7 +55,7 @@ class Player(pygame.sprite.Sprite):
     
     def _move(self, keys_hold):
         if keys_hold[pygame.K_SPACE] and not self.jumping:
-            self.y_velocity = -1050 # ORIGINAL
+            self.y_velocity = -1170 # ORIGINAL 1050
             self.jumping = True
         elif keys_hold[pygame.K_d]:
             self.x_velocity = 350
