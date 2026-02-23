@@ -29,7 +29,7 @@ class Wand(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.orig_image, -angle)
         rotated_offset = self.offset.rotate(angle)
 
-        self.rect = self.image.get_rect(center = (self.rect.centerx+5, self.rect.centery+6) + rotated_offset)
+        self.rect = self.image.get_rect(center = (self.rect.centerx+5, self.rect.centery) + rotated_offset)
 
     def _switch_player_orientation(self, player, angle):
         player.x_direction = -1 if angle > 90 or angle < -90 else 1
