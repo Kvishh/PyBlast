@@ -86,7 +86,7 @@ class Enemy(pygame.sprite.Sprite):
         if self.stuck:
             if self.stuck_center_posx <= (544 + (PLAYER_WIDTH // 2)) and self.rect.centerx > MAP_HALF + 20:
                 self.stuck = False
-            elif self.stuck_center_posx > 685 and self.rect.centerx < MAP_HALF - 50:
+            elif self.stuck_center_posx > 685 and self.rect.centerx < MAP_HALF - 70:
                 self.stuck = False
             elif (self.stuck_center_posx > (544 + (PLAYER_WIDTH // 2))) and (self.stuck_center_posx < (704 - (PLAYER_WIDTH // 2))) and self.rect.centerx < (363 - PLAYER_WIDTH*3):
                 self.stuck = False
