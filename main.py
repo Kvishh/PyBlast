@@ -12,7 +12,7 @@ from enemy import *
 pygame.init()
 pygame.display.init()
 
-# game components
+# GAME COMPONENTS--------------------------------------
 # Player----------------------------------------------
 player = Player(0, 0)
 
@@ -38,6 +38,9 @@ load_bg_images()
 # Function for loading background images-------------
 load_long_rocks()
 
+# For background particles
+background_particles = []
+
 def shoot_bullet(previous_time, scroll, player_rect_centerx, player_rect_centery):
     mouse_hold = pygame.mouse.get_pressed()
     if mouse_hold[0]:
@@ -56,6 +59,34 @@ def shoot_bullet(previous_time, scroll, player_rect_centerx, player_rect_centery
             bullet_group.add(bullet)
             previous_time[0] = current_time
 
+def create_background_particles(background_particles):
+    if len(background_particles) < 7: # loc, radius, direction
+        background_particles.append([[random.randrange(DISPLAY_WIDTH), random.randrange(DISPLAY_HEIGHT)],
+                                     random.randrange(2, 4),
+                                     [random.choice([.5, -.5]), random.choice([.5, -.5])]])
+
+def draw_background_particles(background_particles, scroll):
+    if background_particles:
+        background_particles[:] = [background_particle for background_particle in background_particles
+                                 if (background_particle[0][1] > 0 and background_particle[0][1] < DISPLAY_HEIGHT) and 
+                                 (background_particle[0][0] > 0 and background_particle[0][0] < DISPLAY_WIDTH)]
+        
+        # loc, radius, direction
+        for bg_particle in background_particles:
+            # bg_particle[0][1] += -.5
+            bg_particle[0][0] += bg_particle[2][0]
+            bg_particle[0][1] += bg_particle[2][1]
+            pygame.draw.circle(display, (255, 255, 255), [int(bg_particle[0][0])-scroll[0], int(bg_particle[0][1])-scroll[1]], bg_particle[1])
+
+            # change the multiplier if you want to make the glow particle (circle) to be bigger
+            bg_particle_radius = bg_particle[1]*3
+
+            particle_surface = pygame.Surface((bg_particle_radius * 2, bg_particle_radius * 2))
+            pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius, bg_particle_radius), bg_particle_radius)
+            # pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius-scroll[0], bg_particle_radius-scroll[1]), bg_particle_radius) # ORIGINAL!!
+            particle_surface.set_colorkey((0,0,0))
+
+            display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-scroll[0], int(bg_particle[0][1] - bg_particle_radius)-scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
 
 def game_run():
     previous_time = [pygame.time.get_ticks()]
@@ -95,6 +126,9 @@ def game_run():
 
         # For drawing tiles
         draw_tiles(scroll)
+
+        # Creating background particles
+        create_background_particles(background_particles)
         
         # Player and Wand update and draw methods
         wand.update(player, scroll, player.rect.centerx, player.rect.centery)
@@ -115,6 +149,9 @@ def game_run():
 
         # Rendering of front objects (long rocks)
         draw_front_long_rocks(scroll)
+
+        # Drawing background particles
+        draw_background_particles(background_particles, scroll)
 
         # last methods to be called
         window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
