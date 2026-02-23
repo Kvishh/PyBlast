@@ -1,5 +1,6 @@
 import pygame
 from configs import *
+from customgroup import CustomGroup
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -8,6 +9,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
 
 tiles: list[Tile] = []
+tiles_group = pygame.sprite.Group()
 bg_images = []
 long_rocks = []
 
@@ -47,7 +49,9 @@ def create_tiles():
     for x, row in enumerate(tile_map):
         for y, column in enumerate(row):
             if column == 1:
-                tiles.append(Tile(y*TILE_SIZE, x*TILE_SIZE))
+                tile = Tile(y*TILE_SIZE, x*TILE_SIZE)
+                tiles.append(tile)
+                tiles_group.add(tile)
 
 def draw_tiles(scroll):
     for tile in tiles:
