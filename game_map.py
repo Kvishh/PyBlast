@@ -83,13 +83,13 @@ def load_long_rocks():
         i+=1
 
 def draw_behind_long_rocks(scroll):
-    long_rocks[1].set_alpha(210)
-    long_rocks[2].set_alpha(210)
+    long_rocks[1].set_alpha(220)
+    long_rocks[2].set_alpha(220)
     display.blit(long_rocks[1], (0-scroll[0], 200-scroll[1]))
     display.blit(long_rocks[2], ((WINDOW_WIDTH - long_rocks[2].width + 150) - scroll[0], 0 - scroll[1]))
 
 def draw_front_long_rocks(scroll):
-    long_rocks[0].set_alpha(160)
-    long_rocks[3].set_alpha(160)
+    long_rocks[0].set_alpha(150)
+    long_rocks[3].set_alpha(150)
     display.blit(long_rocks[0], (-100 - scroll[0], 0 - scroll[1]))
     display.blit(long_rocks[3], ((WINDOW_WIDTH - long_rocks[3].width+300) - scroll[0], 200 - scroll[1]))
