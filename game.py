@@ -1,18 +1,19 @@
-import pygame, random
+import pygame, random, math
 from configs import *
-from game_map import *
+from game_map import tiles_group, draw_background, create_tiles, load_bg_images, load_long_rocks, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
 from bullet import Bullet
 from customgroup import CustomGroup
 from enemy import Enemy
+from spark import Spark
 
 class Game:
     def __init__(self):
         # Initialize pygame
         pygame.init()
 
-        # GAME COMPONENTS--------------------------------------
+        # GAME COMPONENTS-------------------------------------
         # Scrolling (Camera effect)---------------------------
         self.true_scroll = [0, 0]
         self.scroll = [0, 0]
@@ -26,12 +27,17 @@ class Game:
         # Enemy-----------------------------------------------
         self.enemy = Enemy(0, 0)
 
-        # Bullet group---------------------------------------------
+        # Bullet group----------------------------------------
         self.bullet_group = CustomGroup()
 
         # For background particles
         self.background_particles = []
 
+        # For sparks
+        self.sparks = []
+
+        # For walking enemies
+        self.all_enemies = CustomGroup(self.enemy)
 
         # Function before starting game loop
         # Function for creating tile--------------------------
@@ -42,6 +48,9 @@ class Game:
 
         # Function for loading background images-------------
         load_long_rocks()
+
+        # For every sprite when collided with bullet it will create spark
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_enemies)
 
     
     def game_run(self):
@@ -103,6 +112,11 @@ class Game:
             self.bullet_group.update(dt, self.scroll)
             self.bullet_group.draw(display, self.scroll)
 
+            # Creating and drawing sparks
+            self.create_impact()
+            self.draw_impact()
+
+
             # Rendering of front objects (long rocks)
             draw_front_long_rocks(self.scroll)
 
@@ -163,5 +177,16 @@ class Game:
 
                 display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-self.scroll[0], int(bg_particle[0][1] - bg_particle_radius)-self.scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
 
+    def create_impact(self):
+        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_sprites_group, True, False)
 
-
+        for bullet, collided_sprites in hits.items():
+            for _ in range(6):
+                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
+    
+    def draw_impact(self):
+        for i, spark in sorted(enumerate(self.sparks), reverse=True):
+            spark.move(1)
+            spark.draw(display, self.scroll)
+            if not spark.alive:
+                self.sparks.pop(i)
