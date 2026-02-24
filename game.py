@@ -25,7 +25,7 @@ class Game:
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
 
         # Enemy--------------------------------------------------------------------------
-        self.enemy = Enemy(0, 0)
+        self.ground_enemy = Enemy(0, 0)
 
         # Bullet group-------------------------------------------------------------------
         self.bullet_group = CustomGroup()
@@ -39,8 +39,11 @@ class Game:
         # For particles------------------------------------------------------------------
         self.particles = []
 
+        # For falling particles----------------------------------------------------------
+        self.falling_particles = []
+
         # For walking enemies------------------------------------------------------------
-        self.all_enemies = CustomGroup(self.enemy)
+        self.all_ground_enemies = CustomGroup(self.ground_enemy)
 
         # Function before starting game loop
         # Function for creating tile-----------------------------------------------------
@@ -53,7 +56,7 @@ class Game:
         load_long_rocks()
 
         # For every sprite when collided with bullet it will create spark---------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_enemies)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies)
 
     
     def game_run(self):
@@ -109,6 +112,9 @@ class Game:
             self.create_impact_and_floating_particles()
             self.draw_impact()
 
+            # Creating falling particles
+            self.create_falling_particles()
+
             # Player and Wand update and draw methods
             self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
             self.wand.render(self.scroll)
@@ -116,11 +122,14 @@ class Game:
             self.player.render(self.scroll)
 
             # Enemmy update and render
-            self.enemy.update(dt, self.scroll, self.player)
-            self.enemy.render(self.scroll)            
+            self.ground_enemy.update(dt, self.scroll, self.player)
+            self.ground_enemy.render(self.scroll)            
 
-            # Drawing particlels
+            # Drawing particles
             self.draw_floating_particles()
+
+            # Drawing falling particles
+            self.draw_falling_particles()
 
             # Rendering of front objects (long rocks)
             draw_front_long_rocks(self.scroll)
@@ -183,7 +192,7 @@ class Game:
                 display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-self.scroll[0], int(bg_particle[0][1] - bg_particle_radius)-self.scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
 
     def create_impact_and_floating_particles(self):
-        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_sprites_group, True, False)
+        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_sprites_group, False, False)
 
         for bullet, collided_sprites in hits.items():
             self.create_floating_particles(bullet.rect.center)
@@ -206,6 +215,17 @@ class Game:
                                     random.randrange(24, 30),
                                     255])
     
+    def create_falling_particles(self):
+        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_ground_enemies, True, False)
+
+        for bullet, enemy in hits.items():
+            pos = list(bullet.rect.center)
+            for _ in range(10): # location, velocity, radius
+                self.falling_particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
+                                        [random.randrange(-3, 3), -2], 
+                                        random.randrange(10, 14),
+                                        255])
+
     def draw_floating_particles(self):
         if self.particles:
             self.particles = [particle for particle in self.particles if particle[2] > 0]
@@ -225,5 +245,25 @@ class Game:
                 particle[3] -= random.randint(1, 3)
                 pygame.draw.circle(display,
                                    (int(particle[3]), int(particle[3]), int(particle[3])),
+                                   (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
+                                   int(particle[2]))
+
+    def draw_falling_particles(self):
+        if self.falling_particles:
+            self.falling_particles = [particle for particle in self.falling_particles if particle[2] > 0]
+
+            for particle in self.falling_particles:
+                # radius decrement
+                particle[2] -= .2
+
+                # change position over time
+                particle[0][0] += particle[1][0]
+                particle[0][1] += particle[1][1]
+
+                # change y velocity over time
+                particle[1][1] += .2
+
+                pygame.draw.circle(display,
+                                   (78, 45, 145),
                                    (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
                                    int(particle[2]))
