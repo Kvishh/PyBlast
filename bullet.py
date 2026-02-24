@@ -9,7 +9,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y+10))
         self.speed = 450
         self.direction = direction
-        self.pos = pygame.Vector2(x, y+15)
+        self.pos = pygame.Vector2(x, y+4)
         self._mouse_target_x = mouse_target_x
         self._mouse_target_y = mouse_target_y
 
