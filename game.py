@@ -13,43 +13,46 @@ class Game:
         # Initialize pygame
         pygame.init()
 
-        # GAME COMPONENTS-------------------------------------
-        # Scrolling (Camera effect)---------------------------
+        # GAME COMPONENTS----------------------------------------------------------------
+        # Scrolling (Camera effect)------------------------------------------------------
         self.true_scroll = [0, 0]
         self.scroll = [0, 0]
 
-        # Player----------------------------------------------
+        # Player-------------------------------------------------------------------------
         self.player = Player(0, 0)
 
-        # Wand------------------------------------------------
+        # Wand---------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
 
-        # Enemy-----------------------------------------------
+        # Enemy--------------------------------------------------------------------------
         self.enemy = Enemy(0, 0)
 
-        # Bullet group----------------------------------------
+        # Bullet group-------------------------------------------------------------------
         self.bullet_group = CustomGroup()
 
-        # For background particles
+        # For background particles-------------------------------------------------------
         self.background_particles = []
 
-        # For sparks
+        # For sparks---------------------------------------------------------------------
         self.sparks = []
 
-        # For walking enemies
+        # For particles------------------------------------------------------------------
+        self.particles = []
+
+        # For walking enemies------------------------------------------------------------
         self.all_enemies = CustomGroup(self.enemy)
 
         # Function before starting game loop
-        # Function for creating tile--------------------------
+        # Function for creating tile-----------------------------------------------------
         create_tiles()
 
-        # Function for creating background-------------------
+        # Function for creating background----------------------------------------------
         load_bg_images()
 
-        # Function for loading background images-------------
+        # Function for loading background images----------------------------------------
         load_long_rocks()
 
-        # For every sprite when collided with bullet it will create spark
+        # For every sprite when collided with bullet it will create spark---------------
         self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_enemies)
 
     
@@ -116,6 +119,8 @@ class Game:
             self.create_impact()
             self.draw_impact()
 
+            # Drawing particlels
+            self.draw_particles()
 
             # Rendering of front objects (long rocks)
             draw_front_long_rocks(self.scroll)
@@ -181,6 +186,8 @@ class Game:
         hits = pygame.sprite.groupcollide(self.bullet_group, self.all_sprites_group, True, False)
 
         for bullet, collided_sprites in hits.items():
+            self.create_particles(bullet.rect.center)
+
             for _ in range(6):
                 self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
     
@@ -190,3 +197,33 @@ class Game:
             spark.draw(display, self.scroll)
             if not spark.alive:
                 self.sparks.pop(i)
+
+    def create_particles(self, pos):
+        pos = list(pos)
+        for _ in range(10): # location, velocity, radius, color
+            self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
+                                    [random.randrange(-2, 2), -2], 
+                                    random.randrange(8, 12),
+                                    255])
+    
+    def draw_particles(self):
+        if self.particles:
+            self.particles = [particle for particle in self.particles if particle[2] > 0]
+
+            for particle in self.particles:
+                # radius decrement
+                particle[2] -= .1
+
+                # change position over time
+                particle[0][0] += particle[1][0]
+                particle[0][1] += particle[1][1]
+
+                # change y velocity over time
+                particle[1][1] += .1
+
+                # change color over time
+                particle[3] -= 2
+                pygame.draw.circle(display,
+                                   (int(particle[3]), int(particle[3]), int(particle[3])),
+                                   (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
+                                   int(particle[2]))
