@@ -97,16 +97,6 @@ class Game:
 
             # Creating background particles
             self.create_background_particles()
-            
-            # Player and Wand update and draw methods
-            self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
-            self.wand.render(self.scroll)
-            self.player.update(pygame.key.get_pressed(), dt)
-            self.player.render(self.scroll)
-
-            # Enemmy update and render
-            self.enemy.update(dt, self.scroll, self.player)
-            self.enemy.render(self.scroll)
 
             # Checking of mouse hold and creation of bullet
             self.shoot_bullet(previous_time, self.player.rect.centerx, self.player.rect.centery)
@@ -116,11 +106,21 @@ class Game:
             self.bullet_group.draw(display, self.scroll)
 
             # Creating and drawing sparks
-            self.create_impact()
+            self.create_impact_and_floating_particles()
             self.draw_impact()
 
+            # Player and Wand update and draw methods
+            self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
+            self.wand.render(self.scroll)
+            self.player.update(pygame.key.get_pressed(), dt)
+            self.player.render(self.scroll)
+
+            # Enemmy update and render
+            self.enemy.update(dt, self.scroll, self.player)
+            self.enemy.render(self.scroll)            
+
             # Drawing particlels
-            self.draw_particles()
+            self.draw_floating_particles()
 
             # Rendering of front objects (long rocks)
             draw_front_long_rocks(self.scroll)
@@ -182,15 +182,15 @@ class Game:
 
                 display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-self.scroll[0], int(bg_particle[0][1] - bg_particle_radius)-self.scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
 
-    def create_impact(self):
+    def create_impact_and_floating_particles(self):
         hits = pygame.sprite.groupcollide(self.bullet_group, self.all_sprites_group, True, False)
 
         for bullet, collided_sprites in hits.items():
-            self.create_particles(bullet.rect.center)
+            self.create_floating_particles(bullet.rect.center)
 
             for _ in range(6):
                 self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
-    
+
     def draw_impact(self):
         for i, spark in sorted(enumerate(self.sparks), reverse=True):
             spark.move(1)
@@ -198,31 +198,31 @@ class Game:
             if not spark.alive:
                 self.sparks.pop(i)
 
-    def create_particles(self, pos):
+    def create_floating_particles(self, pos):
         pos = list(pos)
         for _ in range(10): # location, velocity, radius, color
             self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
-                                    [random.randrange(-2, 2), -2], 
-                                    random.randrange(8, 12),
+                                    [random.randrange(-3, 3), -2], 
+                                    random.randrange(24, 30),
                                     255])
     
-    def draw_particles(self):
+    def draw_floating_particles(self):
         if self.particles:
             self.particles = [particle for particle in self.particles if particle[2] > 0]
 
             for particle in self.particles:
                 # radius decrement
-                particle[2] -= .1
+                particle[2] -= .4
 
                 # change position over time
                 particle[0][0] += particle[1][0]
                 particle[0][1] += particle[1][1]
 
                 # change y velocity over time
-                particle[1][1] += .1
+                particle[1][1] += .001
 
                 # change color over time
-                particle[3] -= 2
+                particle[3] -= random.randint(1, 3)
                 pygame.draw.circle(display,
                                    (int(particle[3]), int(particle[3]), int(particle[3])),
                                    (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
