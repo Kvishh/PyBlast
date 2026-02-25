@@ -254,8 +254,8 @@ class Game:
 
         for bullet, enemy in hits.items():
             pos = list(bullet.rect.center)
-            for _ in range(10): # location, velocity, radius
-                self.falling_particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
+            for _ in range(20): # location, velocity, radius
+                self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
                                         [random.randrange(-3, 3), -2], 
                                         random.randrange(10, 14),
                                         255])
