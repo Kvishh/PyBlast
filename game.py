@@ -8,11 +8,12 @@ from customgroup import CustomGroup
 from enemy import Enemy
 from spark import Spark
 from flying_enemy import FlyingEnemy
+from shooting_enemy import ShootingEnemy
 
 
 class Game:
     def __init__(self):
-        # Initialize pygame
+        # Initialize pygame--------------------------------------------------------------
         pygame.init()
 
         # GAME COMPONENTS----------------------------------------------------------------
@@ -20,11 +21,11 @@ class Game:
         self.true_scroll = [0, 0]
         self.scroll = [0, 0]
 
-        # Shake timer
+        # Shake timer--------------------------------------------------------------------
         self.shake_timer = 0
 
         # Player-------------------------------------------------------------------------
-        self.player = Player(0, 0)
+        self.player = Player(WINDOW_WIDTH - PLAYER_WIDTH, 0)
 
         # Wand---------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
@@ -35,8 +36,14 @@ class Game:
         # Flying Enemy-------------------------------------------------------------------
         self.flying_enemy = FlyingEnemy(50, 0)
 
+        # Shooting Enemy-----------------------------------------------------------------
+        self.shooting_enemy = ShootingEnemy(250, 0)
+
         # Bullet group-------------------------------------------------------------------
         self.bullet_group = CustomGroup()
+
+        # Enemy Bullet group-------------------------------------------------------------
+        self.enemy_bullet_group = CustomGroup()
 
         # For background particles-------------------------------------------------------
         self.background_particles = []
@@ -57,7 +64,10 @@ class Game:
         self.all_ground_enemies = CustomGroup(self.ground_enemy)
 
         # For flying enemies------------------------------------------------------------
-        self.all_flying_enemies = CustomGroup(self.flying_enemy)
+        self.all_flying_enemies = CustomGroup(self.flying_enemy, self.shooting_enemy)
+
+        # For shooting enemies----------------------------------------------------------
+        self.all_shooting_enemies = CustomGroup(self.shooting_enemy)
 
         # Function before starting game loop
         # Function for creating tile-----------------------------------------------------
@@ -70,7 +80,10 @@ class Game:
         load_long_rocks()
 
         # For every sprite when collided with bullet it will create spark---------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.all_flying_enemies)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.all_flying_enemies, self.all_shooting_enemies)
+
+        # For shooting enemy when enemy bullet hits player and tiles--------------------
+        self.enemy_hits = pygame.sprite.Group(tiles_group, pygame.sprite.Group(self.player))
 
     
     def game_run(self):
@@ -127,6 +140,13 @@ class Game:
             self.bullet_group.update(dt, self.scroll)
             self.bullet_group.draw(display, self.scroll)
 
+            # Update and draw methods of enemy bullet groups
+            self.enemy_bullet_group.update(dt, self.scroll)
+            self.enemy_bullet_group.draw(display, self.scroll)
+
+            # Enemy bullet hit player
+            self.enemy_bullets_hit_player()
+
             # Creating and drawing sparks
             self.create_impact_and_floating_particles()
             self.draw_impact()
@@ -150,6 +170,10 @@ class Game:
             # Flying Enemy update and render
             self.flying_enemy.update(self.player, dt)
             self.flying_enemy.render(self.scroll)
+
+            # Shooting Enemy update and render
+            self.shooting_enemy.update(self.enemy_bullet_group, self.player, self.scroll, dt)
+            self.shooting_enemy.render(self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
@@ -233,6 +257,16 @@ class Game:
 
             for _ in range(6):
                 self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
+    
+    def enemy_bullets_hit_player(self):
+        hits = pygame.sprite.groupcollide(self.enemy_bullet_group, self.enemy_hits, True, False)
+
+        for bullet, sprite_collided in hits.items():
+            self.shake_timer = 20
+            self.create_floating_particles(bullet.rect.center)
+
+            for _ in range(6):
+                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))            
 
     def draw_impact(self):
         for i, spark in sorted(enumerate(self.sparks), reverse=True):
