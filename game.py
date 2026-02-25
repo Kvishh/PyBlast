@@ -7,6 +7,8 @@ from bullet import Bullet
 from customgroup import CustomGroup
 from enemy import Enemy
 from spark import Spark
+from flying_enemy import FlyingEnemy
+
 
 class Game:
     def __init__(self):
@@ -27,6 +29,9 @@ class Game:
         # Enemy--------------------------------------------------------------------------
         self.ground_enemy = Enemy(0, 0)
 
+        # Flying Enemy-------------------------------------------------------------------
+        self.flying_enemy = FlyingEnemy(50, 0)
+
         # Bullet group-------------------------------------------------------------------
         self.bullet_group = CustomGroup()
 
@@ -45,6 +50,9 @@ class Game:
         # For walking enemies------------------------------------------------------------
         self.all_ground_enemies = CustomGroup(self.ground_enemy)
 
+        # For flying enemies------------------------------------------------------------
+        self.all_flying_enemies = CustomGroup(self.flying_enemy)
+
         # Function before starting game loop
         # Function for creating tile-----------------------------------------------------
         create_tiles()
@@ -56,7 +64,7 @@ class Game:
         load_long_rocks()
 
         # For every sprite when collided with bullet it will create spark---------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.all_flying_enemies)
 
     
     def game_run(self):
@@ -123,7 +131,11 @@ class Game:
 
             # Enemmy update and render
             self.ground_enemy.update(dt, self.scroll, self.player)
-            self.ground_enemy.render(self.scroll)            
+            self.ground_enemy.render(self.scroll)
+
+            # Flying Enemy update and render
+            self.flying_enemy.update(self.player, dt)
+            self.flying_enemy.render(self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
