@@ -20,6 +20,9 @@ class Game:
         self.true_scroll = [0, 0]
         self.scroll = [0, 0]
 
+        # Shake timer
+        self.shake_timer = 0
+
         # Player-------------------------------------------------------------------------
         self.player = Player(0, 0)
 
@@ -46,6 +49,9 @@ class Game:
 
         # For falling particles----------------------------------------------------------
         self.falling_particles = []
+
+        # For radiation------------------------------------------------------------------
+        self.radiations = []
 
         # For walking enemies------------------------------------------------------------
         self.all_ground_enemies = CustomGroup(self.ground_enemy)
@@ -97,6 +103,11 @@ class Game:
             self.scroll[0] = int(self.true_scroll[0])
             self.scroll[1] = int(self.true_scroll[1])
 
+            # Applying shake in scroll
+            if self.shake_timer:
+                self.scroll[0] += random.randint(-4, 4)
+                self.scroll[1] += random.randint(-4, 4)
+
             # For drawing background
             draw_background(self.scroll)
 
@@ -123,6 +134,9 @@ class Game:
             # Creating falling particles
             self.create_falling_particles()
 
+            # Create radiations
+            self.create_radiation()
+
             # Player and Wand update and draw methods
             self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
             self.wand.render(self.scroll)
@@ -143,11 +157,18 @@ class Game:
             # Drawing falling particles
             self.draw_falling_particles()
 
+            # Drawing radiation
+            self.draw_radiations()
+
             # Rendering of front objects (long rocks)
             draw_front_long_rocks(self.scroll)
 
             # Drawing background particles
             self.draw_background_particles()
+
+            # Shake timer decrement
+            if self.shake_timer > 0:
+                self.shake_timer -= 1
 
             # last methods to be called
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
@@ -207,6 +228,7 @@ class Game:
         hits = pygame.sprite.groupcollide(self.bullet_group, self.all_sprites_group, False, False)
 
         for bullet, collided_sprites in hits.items():
+            self.shake_timer = 20
             self.create_floating_particles(bullet.rect.center)
 
             for _ in range(6):
@@ -237,6 +259,16 @@ class Game:
                                         [random.randrange(-3, 3), -2], 
                                         random.randrange(10, 14),
                                         255])
+
+    def create_radiation(self):
+        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_flying_enemies, True, False)
+
+        for bullet, enemy in hits.items():
+            pos = list(bullet.rect.center)
+            # location, radius, width
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8])
 
     def draw_floating_particles(self):
         if self.particles:
@@ -279,3 +311,15 @@ class Game:
                                    (78, 45, 145),
                                    (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
                                    int(particle[2]))
+
+    def draw_radiations(self):
+        if self.radiations:
+            self.radiations = [radiation for radiation in self.radiations if radiation[2] > 1.1]
+
+            for radiation in self.radiations:
+                radiation[1] += 6 # radius
+                radiation[2] -= .1 # width
+                pygame.draw.circle(display,
+                                   (81, 143, 85),
+                                   (radiation[0][0]-self.scroll[0], radiation[0][1]-self.scroll[1]), int(radiation[1]),
+                                   int(radiation[2]))
