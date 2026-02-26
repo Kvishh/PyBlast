@@ -1,9 +1,9 @@
 import pygame, random, math
 from configs import *
-from game_map import tiles_group, draw_background, create_tiles, load_bg_images, load_long_rocks, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from game_map import tiles_group, tiles_blocks, draw_background, create_tiles, load_bg_images, load_long_rocks, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
-from bullet import Bullet
+from bullet import PlayerBullet
 from customgroup import CustomGroup
 from enemy import Enemy
 from spark import Spark
@@ -39,8 +39,8 @@ class Game:
         # Shooting Enemy-----------------------------------------------------------------
         self.shooting_enemy = ShootingEnemy(250, 0)
 
-        # Bullet group-------------------------------------------------------------------
-        self.bullet_group = CustomGroup()
+        # Player Bullet group-----------------------------------------------------------
+        self.player_bullet_group = CustomGroup()
 
         # Enemy Bullet group-------------------------------------------------------------
         self.enemy_bullet_group = CustomGroup()
@@ -59,6 +59,9 @@ class Game:
 
         # For radiation------------------------------------------------------------------
         self.radiations = []
+
+        # For debris---------------------------------------------------------------------
+        self.debris = []
 
         # For walking enemies------------------------------------------------------------
         self.all_ground_enemies = CustomGroup(self.ground_enemy)
@@ -85,6 +88,8 @@ class Game:
         # For shooting enemy when enemy bullet hits player and tiles--------------------
         self.enemy_hits = pygame.sprite.Group(tiles_group, pygame.sprite.Group(self.player))
 
+        # Group for all projectiles
+        self.all_bullets_group = CustomGroup(self.player_bullet_group, self.enemy_bullet_group)
     
     def game_run(self):
         previous_time = [pygame.time.get_ticks()]
@@ -136,13 +141,16 @@ class Game:
             # Checking of mouse hold and creation of bullet
             self.shoot_bullet(previous_time, self.player.rect.centerx, self.player.rect.centery)
 
-            # Drawing of bullets
-            self.bullet_group.update(dt, self.scroll)
-            self.bullet_group.draw(display, self.scroll)
+            # Drawing of player bullets
+            self.player_bullet_group.update(dt, self.scroll)
+            self.player_bullet_group.draw(display, self.scroll)
 
             # Update and draw methods of enemy bullet groups
             self.enemy_bullet_group.update(dt, self.scroll)
             self.enemy_bullet_group.draw(display, self.scroll)
+
+            # Create debris
+            self.create_debris()
 
             # Enemy bullet hit player
             self.enemy_bullets_hit_player()
@@ -171,8 +179,8 @@ class Game:
             self.flying_enemy.update(self.player, dt)
             self.flying_enemy.render(self.scroll)
 
-            # Shooting Enemy update and render
-            self.shooting_enemy.update(self.enemy_bullet_group, self.player, self.scroll, dt)
+            # # Shooting Enemy update and render
+            self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, self.scroll, dt)
             self.shooting_enemy.render(self.scroll)
 
             # Drawing particles
@@ -183,6 +191,9 @@ class Game:
 
             # Drawing radiation
             self.draw_radiations()
+
+            # Drawing debris
+            self.draw_debris()
 
             # Rendering of front objects (long rocks)
             draw_front_long_rocks(self.scroll)
@@ -210,13 +221,14 @@ class Game:
                 mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + self.scroll[0]
                 mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + self.scroll[1]
                 
-                bullet = Bullet("assets/images/bullet.png", 
+                bullet = PlayerBullet("assets/images/bullet.png", 
                                 player_rect_centerx, 
                                 player_rect_centery, 
                                 self.player.x_direction, 
                                 mouse_x,
                                 mouse_y)
-                self.bullet_group.add(bullet)
+                self.player_bullet_group.add(bullet)
+                self.all_bullets_group.add(bullet)
                 previous_time[0] = current_time
 
     def create_background_particles(self):
@@ -249,7 +261,7 @@ class Game:
                 display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-self.scroll[0], int(bg_particle[0][1] - bg_particle_radius)-self.scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
 
     def create_impact_and_floating_particles(self):
-        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_sprites_group, False, False)
+        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_sprites_group, False, False)
 
         for bullet, collided_sprites in hits.items():
             self.shake_timer = 20
@@ -284,7 +296,7 @@ class Game:
                                     255])
     
     def create_falling_particles(self):
-        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_ground_enemies, True, False)
+        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_ground_enemies, True, False)
 
         for bullet, enemy in hits.items():
             pos = list(bullet.rect.center)
@@ -295,7 +307,7 @@ class Game:
                                         255])
 
     def create_radiation(self):
-        hits = pygame.sprite.groupcollide(self.bullet_group, self.all_flying_enemies, True, False)
+        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, True, False)
 
         for bullet, enemy in hits.items():
             pos = list(bullet.rect.center)
@@ -303,6 +315,19 @@ class Game:
             self.radiations.append([[pos[0], pos[1]],
                                     15,
                                     8])
+
+    def create_debris(self):
+        hits = pygame.sprite.groupcollide(self.all_bullets_group, tiles_group, False, False)
+
+        for bullet, tiles_hit_list in hits.items():
+            pos = list(bullet.rect.center) # location, velocity, radius, color
+            for _ in range(20):
+                r = random.randrange(60, 80)
+                g = r
+                self.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
+                            [random.randrange(-3, 3), random.randrange(-3, 3)], 
+                            random.randrange(10, 16),
+                            (r, g, 125)])
 
     def draw_floating_particles(self):
         if self.particles:
@@ -357,3 +382,34 @@ class Game:
                                    (81, 143, 85),
                                    (radiation[0][0]-self.scroll[0], radiation[0][1]-self.scroll[1]), int(radiation[1]),
                                    int(radiation[2]))
+    
+    def draw_debris(self):
+        if self.debris:
+            self.debris = [debris for debris in self.debris if debris[2] > 0]
+
+            for debris in self.debris:
+                # radius decrement
+                debris[2] -= .1
+
+                # change position over time
+                debris[0][0] += debris[1][0]
+                debris_loc = str(int(debris[0][0] / TILE_SIZE)) + ';' + str(int(debris[0][1] / TILE_SIZE))
+                if debris_loc in tiles_blocks:
+                    debris[1][0] = -.85 * debris[1][0]
+                    debris[1][1] *= 0.95
+                    debris[0][0] += debris[1][0] * 2
+
+                debris[0][1] += debris[1][1]
+                debris_loc = str(int(debris[0][0] / TILE_SIZE)) + ';' + str(int(debris[0][1] / TILE_SIZE))
+                if debris_loc in tiles_blocks:
+                    debris[1][1] = -.65 * debris[1][1]
+                    debris[1][0] *= 0.95
+                    debris[0][1] += debris[1][1] * 2
+
+                # change y velocity over time
+                debris[1][1] += .2
+
+                pygame.draw.circle(display,
+                                   debris[3],
+                                   (debris[0][0] - self.scroll[0], debris[0][1] - self.scroll[1]),
+                                   debris[2])
