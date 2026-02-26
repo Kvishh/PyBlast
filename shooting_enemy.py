@@ -14,6 +14,7 @@ class ShootingEnemy(pygame.sprite.Sprite):
         self.speed = 150
 
         self.previous_time = pygame.time.get_ticks()
+        self.previous_time_slowing_down = pygame.time.get_ticks()
 
     def update(self, enemy_bullet_group, all_bullets_group, pl, scroll, dt):
         # pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)
@@ -51,6 +52,7 @@ class ShootingEnemy(pygame.sprite.Sprite):
 
     def shoot(self, enemy_bullet_group, all_bullets_group, player, scroll):
         current_time = pygame.time.get_ticks()
+        self.slow_down()
         if current_time - self.previous_time > 5000:
                 self.previous_time = current_time
                 target_x = (player.rect.midbottom[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
@@ -64,6 +66,14 @@ class ShootingEnemy(pygame.sprite.Sprite):
                                 target_y)
                 enemy_bullet_group.add(bullet)
                 all_bullets_group.add(bullet)
+
+                self.speed = 150
+                self.previous_time_slowing_down = current_time
+
+    def slow_down(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.previous_time_slowing_down > 3000:
+            self.speed -= 2
 
 
     def render(self, scroll):
