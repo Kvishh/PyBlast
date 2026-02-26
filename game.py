@@ -289,7 +289,7 @@ class Game:
 
     def create_floating_particles(self, pos):
         pos = list(pos)
-        for _ in range(10): # location, velocity, radius, color
+        for _ in range(15): # location, velocity, radius, color
             self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
                                     [random.randrange(-3, 3), -2], 
                                     random.randrange(24, 30),
@@ -378,6 +378,12 @@ class Game:
             for radiation in self.radiations:
                 radiation[1] += 6 # radius
                 radiation[2] -= .1 # width
+
+                pygame.draw.circle(display,
+                                   (35, 61, 37),
+                                   (radiation[0][0] + 6 - self.scroll[0], radiation[0][1] + 3 - self.scroll[1]), int(radiation[1]),
+                                   int(radiation[2]))
+
                 pygame.draw.circle(display,
                                    (81, 143, 85),
                                    (radiation[0][0]-self.scroll[0], radiation[0][1]-self.scroll[1]), int(radiation[1]),
@@ -408,6 +414,11 @@ class Game:
 
                 # change y velocity over time
                 debris[1][1] += .2
+
+                pygame.draw.circle(display,
+                                   (32, 33, 48),
+                                   (debris[0][0] + 5 - self.scroll[0], debris[0][1] + 5 - self.scroll[1]),
+                                   debris[2])
 
                 pygame.draw.circle(display,
                                    debris[3],
