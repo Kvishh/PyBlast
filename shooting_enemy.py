@@ -16,9 +16,11 @@ class ShootingEnemy(pygame.sprite.Sprite):
         self.previous_time = pygame.time.get_ticks()
         self.previous_time_slowing_down = pygame.time.get_ticks()
 
-    def update(self, enemy_bullet_group, all_bullets_group, pl, scroll, dt):
-        # pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)
-        self.shoot(enemy_bullet_group, all_bullets_group, pl, scroll)
+    def update(self, enemy_bullet_group, all_bullets_group, pl, dt):
+        # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
+        # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
+
+        self.shoot(enemy_bullet_group, all_bullets_group, pl)
 
         if self.rect.left < 0:
             self.rect.left = 0
@@ -50,13 +52,13 @@ class ShootingEnemy(pygame.sprite.Sprite):
         self.rect.centery = int(self.pos.y)
         self._detect_tiles_collision_y()
 
-    def shoot(self, enemy_bullet_group, all_bullets_group, player, scroll):
+    def shoot(self, enemy_bullet_group, all_bullets_group, player):
         current_time = pygame.time.get_ticks()
         self.slow_down()
         if current_time - self.previous_time > 5000:
                 self.previous_time = current_time
-                target_x = (player.rect.midbottom[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
-                target_y = (player.rect.midbottom[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + scroll[1]
+                target_x = player.rect.centerx
+                target_y = player.rect.centery
 
                 bullet = EnemyBullet("assets/images/bullet.png", 
                                 self.rect.centerx, 

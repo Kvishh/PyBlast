@@ -90,7 +90,8 @@ class Game:
 
         # Group for all projectiles
         self.all_bullets_group = CustomGroup(self.player_bullet_group, self.enemy_bullet_group)
-    
+
+
     def game_run(self):
         previous_time = [pygame.time.get_ticks()]
         running = True
@@ -180,7 +181,7 @@ class Game:
             self.flying_enemy.render(self.scroll)
 
             # # Shooting Enemy update and render
-            self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, self.scroll, dt)
+            self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt)
             self.shooting_enemy.render(self.scroll)
 
             # Drawing particles
