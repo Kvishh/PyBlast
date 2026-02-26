@@ -12,6 +12,7 @@ tiles: list[Tile] = []
 tiles_group = pygame.sprite.Group()
 bg_images = []
 long_rocks = []
+tiles_blocks = set([])
 
 # 1300/32 = 40.625 round up 41
 # 800/32 = 25
@@ -52,6 +53,7 @@ def create_tiles():
                 tile = Tile(y*TILE_SIZE, x*TILE_SIZE)
                 tiles.append(tile)
                 tiles_group.add(tile)
+                tiles_blocks.add(f"{y};{x}")
 
 def draw_tiles(scroll):
     for tile in tiles:
