@@ -4,23 +4,42 @@ from game_map import tiles
 from enemy_bullet import EnemyBullet
 
 class ShootingEnemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
+    def __init__(self, x, y, *groups):
+        super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
         self.image = pygame.transform.scale(pygame.image.load("assets/images/blader-left.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
         self.rect = self.image.get_rect()
         self.x_vel = 0
         self.y_vel = 0
-        self.speed = 150
+        self.speed = 30
 
         self.previous_time = pygame.time.get_ticks()
         self.previous_time_slowing_down = pygame.time.get_ticks()
 
-    def update(self, enemy_bullet_group, all_bullets_group, pl, dt):
+        self.vel = pygame.Vector2(0, 0)
+
+        self.seek_force = pygame.Vector2(0, 0)
+        self.avoid_force = pygame.Vector2(0, 0)
+
+        self.flee_rad = 60
+
+    def update(self, enemy_bullet_group, all_bullets_group, pl, dt, flying_enemies_group):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
         # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
 
         self.shoot(enemy_bullet_group, all_bullets_group, pl)
+
+        self.seek_force = self.seek(pl)
+        self.avoid_force = self.flee(flying_enemies_group)
+        self.vel += ((self.seek_force * 2) + (self.avoid_force * 3))
+
+        if self.vel.length() > 5:
+            self.vel.scale_to_length(5)
+
+        self.x_vel, self.y_vel = self.vel.x * dt * self.speed, self.vel.y * dt * self.speed
+
+        self.pos.x += self.x_vel
+        self.pos.y += self.y_vel        
 
         if self.rect.left < 0:
             self.rect.left = 0
@@ -31,20 +50,6 @@ class ShootingEnemy(pygame.sprite.Sprite):
             self.rect.y = WINDOW_HEIGHT
         elif self.rect.y < 0:
             self.rect.y = 0
-        
-        dx = pl.rect.x - self.rect.x
-        dy = pl.rect.y - self.rect.y
-        dist = pygame.Vector2(dx, dy).length()
-
-        if dist > 1:
-            direction_vector = pygame.Vector2(dx, dy).normalize()
-            self.x_vel = direction_vector.x * self.speed * dt
-            self.y_vel = direction_vector.y * self.speed * dt
-            
-            self.pos += direction_vector * self.speed * dt
-        else:
-            self.x_vel = 0
-            self.y_vel = 0
         
         self.rect.centerx = int(self.pos.x)
         self._detect_tiles_collision_x()
@@ -69,14 +74,37 @@ class ShootingEnemy(pygame.sprite.Sprite):
                 enemy_bullet_group.add(bullet)
                 all_bullets_group.add(bullet)
 
-                self.speed = 150
+                self.speed = 30
                 self.previous_time_slowing_down = current_time
 
     def slow_down(self):
         current_time = pygame.time.get_ticks()
         if current_time - self.previous_time_slowing_down > 3000:
-            self.speed -= 2
+            self.speed -= .5
 
+    def seek(self, player):
+        desired = (player.pos - self.pos).normalize() * 5
+
+        steer = desired - self.vel
+        if steer.length() > .2:
+            steer.scale_to_length(.2)
+
+        return steer
+
+    def flee(self, flying_enemies_group):
+        steer = pygame.Vector2(0, 0)
+        for flying_enemy in flying_enemies_group.sprites():
+            if flying_enemy is not self:
+                dist = self.pos - flying_enemy.pos
+                if dist.length() < self.flee_rad:
+                    self.desired = dist.normalize() * 5
+                    steer = self.desired - self.vel
+                else:
+                    self.desired = dist.normalize() * 5
+                if steer.length() > .6:
+                    steer.scale_to_length(.6)
+
+        return steer
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))        
