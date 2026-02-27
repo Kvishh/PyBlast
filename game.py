@@ -22,6 +22,37 @@ class Game:
         self.true_scroll = [0, 0]
         self.scroll = [0, 0]
 
+        ### INDIVIDUAL GROUPS ------------------------------------------------------------------------------------------------ ###
+        # Player Group---------------------------------------------------------------------------------------------
+        self.player_group = CustomGroup()
+
+        # Light enemy Group----------------------------------------------------------------------------------------
+        self.light_enemy_group = CustomGroup()
+
+        # Tank enemy Group-----------------------------------------------------------------------------------------
+        self.tank_enemy_group = CustomGroup()
+
+        # Flying enemy group---------------------------------------------------------------------------------------
+        self.flying_enemy_group = CustomGroup()
+
+        # Shooting enemy group-------------------------------------------------------------------------------------
+        self.shooting_enemy_group = CustomGroup()
+
+        # Player Bullet group--------------------------------------------------------------------------------------
+        self.player_bullet_group = CustomGroup()
+
+        # Enemy Bullet group---------------------------------------------------------------------------------------
+        self.enemy_bullet_group = CustomGroup()
+
+
+        ### RELATED GROUPS --------------------------------------------------------------------------------------------------- ###
+        # For walking enemies--------------------------------------------------------------------------------------
+        self.all_ground_enemies = CustomGroup(self.light_enemy_group, self.tank_enemy_group)
+
+        # For flying enemies---------------------------------------------------------------------------------------
+        self.all_flying_enemies = CustomGroup(self.flying_enemy_group, self.shooting_enemy_group)
+
+
         ### INDIVIDUAL COMPONENTS --------------------------------------------------------------------------------------------- ###
         # Shake timer----------------------------------------------------------------------------------------------
         self.shake_timer = 0
@@ -33,24 +64,18 @@ class Game:
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
 
         # Light Enemy----------------------------------------------------------------------------------------------
-        self.light = Light(0, 0)
+        self.light = Light(0, 0, self.light_enemy_group, self.all_ground_enemies)
+        self.another_light = Light(300, 0, self.light_enemy_group, self.all_ground_enemies)
+        self.ground_en = Light(600, 0, self.light_enemy_group, self.all_ground_enemies)
 
         # Heavy Enemy----------------------------------------------------------------------------------------------
-        self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0)
+        self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0, self.tank_enemy_group, self.all_ground_enemies)
 
         # Flying Enemy---------------------------------------------------------------------------------------------
-        self.flying_enemy = FlyingEnemy(50, 0)
+        self.flying_enemy = FlyingEnemy(50, 0, self.flying_enemy_group, self.all_flying_enemies)
 
         # Shooting Enemy-------------------------------------------------------------------------------------------
-        self.shooting_enemy = ShootingEnemy(250, 0)
-
-
-        ### INDIVIDUAL GROUPS ------------------------------------------------------------------------------------------------ ###
-        # Player Bullet group--------------------------------------------------------------------------------------
-        self.player_bullet_group = CustomGroup()
-
-        # Enemy Bullet group---------------------------------------------------------------------------------------
-        self.enemy_bullet_group = CustomGroup()
+        self.shooting_enemy = ShootingEnemy(250, 0, self.shooting_enemy_group, self.all_flying_enemies)
 
 
         ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
@@ -73,20 +98,6 @@ class Game:
         self.debris = []
 
 
-        ### RELATED GROUPS ------------------------------------------------------------------------------------------------- ###
-        # Player Group---------------------------------------------------------------------------------------------
-        self.player_group = CustomGroup(self.player)
-
-        # For walking enemies--------------------------------------------------------------------------------------
-        self.all_ground_enemies = CustomGroup(self.light, self.tank)
-
-        # For flying enemies---------------------------------------------------------------------------------------
-        self.all_flying_enemies = CustomGroup(self.flying_enemy, self.shooting_enemy)
-
-        # For shooting enemies-------------------------------------------------------------------------------------
-        self.all_shooting_enemies = CustomGroup(self.shooting_enemy)
-
-
         ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------- ###
         # Function for creating tile-------------------------------------------------------------------------------
         create_tiles()
@@ -100,7 +111,7 @@ class Game:
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
         # For every sprite when collided with bullet it will create spark------------------------------------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.all_flying_enemies, self.all_shooting_enemies)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flying_enemy_group, self.shooting_enemy_group)
 
         # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
         self.enemy_hits = pygame.sprite.Group(tiles_group, self.player_group)
@@ -189,21 +200,24 @@ class Game:
             self.player.update(pygame.key.get_pressed(), dt)
             self.player.render(self.scroll)
 
-            # # Enemmy update and render
-            # self.light.update(dt, self.player)
-            # self.light.render(self.scroll)
+            # Enemy update and render
+            self.light_enemy_group.update(dt, self.player)
+            self.light_enemy_group.draw(display, self.scroll)
+
+            # # Avoid overlapping between ground enemies
+            self.avoid_overlap()
 
             # # Heave Enemy update and render
-            # self.tank.update(dt, self.player)
-            # self.tank.render(self.scroll)
+            self.tank_enemy_group.update(dt, self.player)
+            self.tank_enemy_group.draw(display, self.scroll)
 
             # # Flying Enemy update and render
-            # self.flying_enemy.update(self.player, dt)
-            # self.flying_enemy.render(self.scroll)
+            self.flying_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            self.flying_enemy_group.draw(display, self.scroll)
 
-            # # Shooting Enemy update and render
-            self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt)
-            self.shooting_enemy.render(self.scroll)
+            # # # Shooting Enemy update and render
+            self.shooting_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
+            self.shooting_enemy_group.draw(display, self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
@@ -233,6 +247,26 @@ class Game:
         
         # Quit the window
         pygame.quit()
+
+    def avoid_overlap(self):
+        for x in self.all_ground_enemies:
+            for y in self.all_ground_enemies:
+                if x is y:
+                    continue
+
+                if x.rect.colliderect(y.rect):
+                    overlap = x.rect.clip(y.rect)
+
+                    if overlap.w < overlap.h:
+                        if x.rect.centerx < y.rect.centerx:
+                            x.pos.x -= overlap.w // 6
+                            y.pos.x += overlap.w // 6
+                        else:
+                            x.pos.x += overlap.w // 6
+                            y.pos.x -= overlap.w // 6
+                    elif overlap.h < overlap.w:
+                            x.pos.x += overlap.h // 6
+                            y.pos.x -= overlap.h // 6
 
     def shoot_bullet(self, previous_time, player_rect_centerx, player_rect_centery):
         mouse_hold = pygame.mouse.get_pressed()
