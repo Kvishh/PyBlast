@@ -5,7 +5,7 @@ from player import Player
 from wand import Wand
 from bullet import PlayerBullet
 from customgroup import CustomGroup
-from enemy import Enemy
+from enemy import Light
 from spark import Spark
 from flying_enemy import FlyingEnemy
 from shooting_enemy import ShootingEnemy
@@ -14,85 +14,98 @@ from tank import Tank
 
 class Game:
     def __init__(self):
-        # Initialize pygame--------------------------------------------------------------
+        # Initialize pygame---------------------------------------------------------------------------------------
         pygame.init()
 
-        # GAME COMPONENTS----------------------------------------------------------------
-        # Scrolling (Camera effect)------------------------------------------------------
+        # GAME COMPONENTS-----------------------------------------------------------------------------------------
+        # Scrolling (Camera effect)-------------------------------------------------------------------------------
         self.true_scroll = [0, 0]
         self.scroll = [0, 0]
 
-        # Shake timer--------------------------------------------------------------------
+        ### INDIVIDUAL COMPONENTS --------------------------------------------------------------------------------------------- ###
+        # Shake timer----------------------------------------------------------------------------------------------
         self.shake_timer = 0
 
-        # Player-------------------------------------------------------------------------
+        # Player---------------------------------------------------------------------------------------------------
         self.player = Player(WINDOW_WIDTH - PLAYER_WIDTH, 0)
 
-        # Wand---------------------------------------------------------------------------
+        # Wand-----------------------------------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
 
-        # Enemy--------------------------------------------------------------------------
-        self.ground_enemy = Enemy(0, 0)
+        # Light Enemy----------------------------------------------------------------------------------------------
+        self.light = Light(0, 0)
 
-        # Heavy Enemy--------------------------------------------------------------------------
-        self.heavy_enemy = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0)
+        # Heavy Enemy----------------------------------------------------------------------------------------------
+        self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0)
 
-        # Flying Enemy-------------------------------------------------------------------
+        # Flying Enemy---------------------------------------------------------------------------------------------
         self.flying_enemy = FlyingEnemy(50, 0)
 
-        # Shooting Enemy-----------------------------------------------------------------
+        # Shooting Enemy-------------------------------------------------------------------------------------------
         self.shooting_enemy = ShootingEnemy(250, 0)
 
-        # Player Bullet group-----------------------------------------------------------
+
+        ### INDIVIDUAL GROUPS ------------------------------------------------------------------------------------------------ ###
+        # Player Bullet group--------------------------------------------------------------------------------------
         self.player_bullet_group = CustomGroup()
 
-        # Enemy Bullet group-------------------------------------------------------------
+        # Enemy Bullet group---------------------------------------------------------------------------------------
         self.enemy_bullet_group = CustomGroup()
 
-        # For background particles-------------------------------------------------------
+
+        ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
+        # For background particles---------------------------------------------------------------------------------
         self.background_particles = []
 
-        # For sparks---------------------------------------------------------------------
+        # For sparks-----------------------------------------------------------------------------------------------
         self.sparks = []
 
-        # For particles------------------------------------------------------------------
+        # For particles--------------------------------------------------------------------------------------------
         self.particles = []
 
-        # For falling particles----------------------------------------------------------
+        # For falling particles------------------------------------------------------------------------------------
         self.falling_particles = []
 
-        # For radiation------------------------------------------------------------------
+        # For radiation--------------------------------------------------------------------------------------------
         self.radiations = []
 
-        # For debris---------------------------------------------------------------------
+        # For debris-----------------------------------------------------------------------------------------------
         self.debris = []
 
-        # For walking enemies------------------------------------------------------------
-        self.all_ground_enemies = CustomGroup(self.ground_enemy, self.heavy_enemy)
 
-        # For flying enemies------------------------------------------------------------
+        ### RELATED GROUPS ------------------------------------------------------------------------------------------------- ###
+        # Player Group---------------------------------------------------------------------------------------------
+        self.player_group = CustomGroup(self.player)
+
+        # For walking enemies--------------------------------------------------------------------------------------
+        self.all_ground_enemies = CustomGroup(self.light, self.tank)
+
+        # For flying enemies---------------------------------------------------------------------------------------
         self.all_flying_enemies = CustomGroup(self.flying_enemy, self.shooting_enemy)
 
-        # For shooting enemies----------------------------------------------------------
+        # For shooting enemies-------------------------------------------------------------------------------------
         self.all_shooting_enemies = CustomGroup(self.shooting_enemy)
 
-        # Function before starting game loop
-        # Function for creating tile-----------------------------------------------------
+
+        ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------- ###
+        # Function for creating tile-------------------------------------------------------------------------------
         create_tiles()
 
-        # Function for creating background----------------------------------------------
+        # Function for creating background-------------------------------------------------------------------------
         load_bg_images()
 
-        # Function for loading background images----------------------------------------
+        # Function for loading background images-------------------------------------------------------------------
         load_long_rocks()
 
-        # For every sprite when collided with bullet it will create spark---------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.all_flying_enemies, self.all_shooting_enemies)
 
-        # For shooting enemy when enemy bullet hits player and tiles--------------------
-        self.enemy_hits = pygame.sprite.Group(tiles_group, pygame.sprite.Group(self.player))
+        ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
+        # For every sprite when collided with bullet it will create spark------------------------------------------
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.player_group, self.all_ground_enemies, self.all_flying_enemies, self.all_shooting_enemies)
 
-        # Group for all projectiles
+        # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
+        self.enemy_hits = pygame.sprite.Group(tiles_group, self.player_group)
+
+        # Group for all projectiles---------------------------------------------------------------------------------
         self.all_bullets_group = CustomGroup(self.player_bullet_group, self.enemy_bullet_group)
 
 
@@ -177,12 +190,12 @@ class Game:
             self.player.render(self.scroll)
 
             # Enemmy update and render
-            self.ground_enemy.update(dt, self.player)
-            self.ground_enemy.render(self.scroll)
+            self.light.update(dt, self.player)
+            self.light.render(self.scroll)
 
             # Heave Enemy update and render
-            self.heavy_enemy.update(dt, self.player)
-            self.heavy_enemy.render(self.scroll)
+            self.tank.update(dt, self.player)
+            self.tank.render(self.scroll)
 
             # Flying Enemy update and render
             self.flying_enemy.update(self.player, dt)

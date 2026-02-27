@@ -2,7 +2,7 @@ import pygame
 from configs import *
 from game_map import tiles
 
-class Enemy(pygame.sprite.Sprite):
+class Light(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.pos = pygame.Vector2(x, y)
