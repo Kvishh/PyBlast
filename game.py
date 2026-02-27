@@ -100,7 +100,7 @@ class Game:
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
         # For every sprite when collided with bullet it will create spark------------------------------------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.player_group, self.all_ground_enemies, self.all_flying_enemies, self.all_shooting_enemies)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.all_flying_enemies, self.all_shooting_enemies)
 
         # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
         self.enemy_hits = pygame.sprite.Group(tiles_group, self.player_group)
