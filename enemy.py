@@ -6,11 +6,13 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/wizard.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
+        self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("assets/images/slime.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT)), True, False)
+        self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}        
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
         self.x_velocity = 120
         self.y_velocity = 0
         self.jumping = False
+        self.x_direction = 0
 
         self.sensor = pygame.Rect(0, 0, PLAYER_WIDTH+80, 80)
         self.stuck = False
@@ -18,7 +20,10 @@ class Enemy(pygame.sprite.Sprite):
 
         self.stuck_rect_collision_count = 0
     
-    def update(self, dt, scroll, player):
+    def update(self, dt, player):
+        self.switch_orientation(player)
+        self.image = self.orientation[self.x_direction]
+
         # Border limit x
         if self.pos.x < 0:
             self.pos.x = 0
@@ -35,8 +40,6 @@ class Enemy(pygame.sprite.Sprite):
 
         self.sensor.center = (self.rect.x+20, self.rect.centery - PLAYER_HEIGHT)
         # pygame.draw.rect(display, (255, 255, 255), ((self.sensor.x-scroll[0], self.sensor.y-scroll[1]), (self.sensor.w, self.sensor.h)), 1)
-
-        # try to put if else in jump. Jump if on certain position else jump like it usually do
 
         self._detect_jump(player)
     
@@ -116,6 +119,12 @@ class Enemy(pygame.sprite.Sprite):
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
+
+    def switch_orientation(self, player):
+        if player.rect.centerx < self.rect.centerx:
+            self.x_direction = -1
+        elif player.rect.centerx > self.rect.centerx:
+            self.x_direction = 1
 
     def _detect_jump(self, player):
         is_going_right = player.rect.centerx > self.rect.centerx
