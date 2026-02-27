@@ -9,6 +9,7 @@ from enemy import Enemy
 from spark import Spark
 from flying_enemy import FlyingEnemy
 from shooting_enemy import ShootingEnemy
+from tank import Tank
 
 
 class Game:
@@ -32,6 +33,9 @@ class Game:
 
         # Enemy--------------------------------------------------------------------------
         self.ground_enemy = Enemy(0, 0)
+
+        # Heavy Enemy--------------------------------------------------------------------------
+        self.heavy_enemy = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0)
 
         # Flying Enemy-------------------------------------------------------------------
         self.flying_enemy = FlyingEnemy(50, 0)
@@ -64,7 +68,7 @@ class Game:
         self.debris = []
 
         # For walking enemies------------------------------------------------------------
-        self.all_ground_enemies = CustomGroup(self.ground_enemy)
+        self.all_ground_enemies = CustomGroup(self.ground_enemy, self.heavy_enemy)
 
         # For flying enemies------------------------------------------------------------
         self.all_flying_enemies = CustomGroup(self.flying_enemy, self.shooting_enemy)
@@ -173,8 +177,12 @@ class Game:
             self.player.render(self.scroll)
 
             # Enemmy update and render
-            self.ground_enemy.update(dt, self.scroll, self.player)
+            self.ground_enemy.update(dt, self.player)
             self.ground_enemy.render(self.scroll)
+
+            # Heave Enemy update and render
+            self.heavy_enemy.update(dt, self.player)
+            self.heavy_enemy.render(self.scroll)
 
             # Flying Enemy update and render
             self.flying_enemy.update(self.player, dt)
