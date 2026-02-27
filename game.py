@@ -189,21 +189,21 @@ class Game:
             self.player.update(pygame.key.get_pressed(), dt)
             self.player.render(self.scroll)
 
-            # Enemmy update and render
-            self.light.update(dt, self.player)
-            self.light.render(self.scroll)
+            # # Enemmy update and render
+            # self.light.update(dt, self.player)
+            # self.light.render(self.scroll)
 
-            # Heave Enemy update and render
-            self.tank.update(dt, self.player)
-            self.tank.render(self.scroll)
+            # # Heave Enemy update and render
+            # self.tank.update(dt, self.player)
+            # self.tank.render(self.scroll)
 
             # # Flying Enemy update and render
             # self.flying_enemy.update(self.player, dt)
             # self.flying_enemy.render(self.scroll)
 
-            # # # Shooting Enemy update and render
-            # self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt)
-            # self.shooting_enemy.render(self.scroll)
+            # # Shooting Enemy update and render
+            self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt)
+            self.shooting_enemy.render(self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()

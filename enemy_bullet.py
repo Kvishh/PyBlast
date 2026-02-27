@@ -29,7 +29,7 @@ class EnemyBullet(pygame.sprite.Sprite):
         for particle in self.particles:
             particle[0][0] -= 1
             particle[0][1] += particle[1]
-        particle = [list(self.rect.midleft), random.uniform(-2, 2), pygame.Color(255, random.randrange(255), 0)]
+        particle = [list(self.rect.midleft), random.uniform(-2, 2), pygame.Color(random.randrange(80, 159), 217, 0)]
         self.particles.append(particle)
         if len(self.particles) > 20:
             self.particles.pop(0)
