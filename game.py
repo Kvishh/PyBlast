@@ -197,13 +197,13 @@ class Game:
             self.tank.update(dt, self.player)
             self.tank.render(self.scroll)
 
-            # Flying Enemy update and render
-            self.flying_enemy.update(self.player, dt)
-            self.flying_enemy.render(self.scroll)
+            # # Flying Enemy update and render
+            # self.flying_enemy.update(self.player, dt)
+            # self.flying_enemy.render(self.scroll)
 
-            # # Shooting Enemy update and render
-            self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt)
-            self.shooting_enemy.render(self.scroll)
+            # # # Shooting Enemy update and render
+            # self.shooting_enemy.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt)
+            # self.shooting_enemy.render(self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
@@ -320,13 +320,21 @@ class Game:
     def create_falling_particles(self):
         hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_ground_enemies, True, False)
 
-        for bullet, enemy in hits.items():
+        for bullet, enemies in hits.items():
             pos = list(bullet.rect.center)
-            for _ in range(20): # location, velocity, radius
-                self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
-                                        [random.randrange(-3, 3), -2], 
-                                        random.randrange(10, 14),
-                                        255])
+            for enemy in enemies:
+                if isinstance(enemy, Light):
+                    for _ in range(20): # location, velocity, radius, color
+                        self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
+                                                [random.randrange(-3, 3), -2], 
+                                                random.randrange(10, 14),
+                                                (78, 45, 145)])
+                elif isinstance(enemy, Tank):
+                    for _ in range(20): # location, velocity, radius
+                        self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
+                                                [random.randrange(-3, 3), -2], 
+                                                random.randrange(10, 14),
+                                                (135, 152, 173)])
 
     def create_radiation(self):
         hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, True, False)
@@ -389,7 +397,12 @@ class Game:
                 particle[1][1] += .2
 
                 pygame.draw.circle(display,
-                                   (78, 45, 145),
+                                   (32, 33, 48),
+                                   (particle[0][0] + 3 - self.scroll[0], particle[0][1] + 3 - self.scroll[1]),
+                                   int(particle[2]))
+
+                pygame.draw.circle(display,
+                                   particle[3],
                                    (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
                                    int(particle[2]))
 
