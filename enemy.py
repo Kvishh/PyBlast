@@ -3,8 +3,8 @@ from configs import *
 from game_map import tiles
 
 class Light(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
+    def __init__(self, x, y, *groups):
+        super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
         self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("assets/images/slime.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT)), True, False)
         self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}        
@@ -19,7 +19,7 @@ class Light(pygame.sprite.Sprite):
         self.stuck_center_posx = 0
 
         self.stuck_rect_collision_count = 0
-    
+
     def update(self, dt, player):
         self.switch_orientation(player)
         self.image = self.orientation[self.x_direction]

@@ -3,8 +3,8 @@ from configs import *
 from game_map import tiles
 
 class Tank(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
+    def __init__(self, x, y, *groups):
+        super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
         self.image = pygame.transform.scale(pygame.image.load("assets/images/tank.png").convert_alpha(), (HEAVY_ENEMY_WIDTH, HEAVY_ENEMY_HEIGHT))
         self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}
