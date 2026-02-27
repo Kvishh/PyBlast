@@ -121,9 +121,9 @@ class Light(pygame.sprite.Sprite):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
 
     def switch_orientation(self, player):
-        if player.rect.centerx < self.rect.centerx:
+        if self.x_velocity < 0:
             self.x_direction = -1
-        elif player.rect.centerx > self.rect.centerx:
+        elif self.x_velocity > 0:
             self.x_direction = 1
 
     def _detect_jump(self, player):
