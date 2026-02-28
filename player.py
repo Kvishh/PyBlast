@@ -22,7 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
         # pygame.draw.rect(display, (255, 0, 0), self.vertical_rect, 2) # original
         
-
+        if self.y_velocity > 3000: self.y_velocity = 3000
 
         # Border limit x
         if self.pos.x < 0:
