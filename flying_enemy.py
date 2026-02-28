@@ -2,7 +2,7 @@ import pygame, math
 from configs import *
 from game_map import tiles
 
-class FlyingEnemy(pygame.sprite.Sprite):
+class Flight(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)

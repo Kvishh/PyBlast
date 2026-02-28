@@ -7,7 +7,7 @@ from bullet import PlayerBullet
 from customgroup import CustomGroup
 from enemy import Light
 from spark import Spark
-from flying_enemy import FlyingEnemy
+from flying_enemy import Flight
 from soar import Soar
 from shooting_enemy import ShootingEnemy
 from tank import Tank
@@ -76,7 +76,7 @@ class Game:
         self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0, self.tank_enemy_group, self.all_ground_enemies)
 
         # Flight Enemy---------------------------------------------------------------------------------------------
-        self.flight_enemy = FlyingEnemy(50, 0, self.flight_enemy_group, self.all_flying_enemies)
+        self.flight_enemy = Flight(50, 0, self.flight_enemy_group, self.all_flying_enemies)
 
         # Soar Enemy----------------------------------------------------------------------------------------------
         self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
