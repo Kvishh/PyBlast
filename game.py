@@ -208,17 +208,17 @@ class Game:
             self.player.render(self.scroll)
 
             # Enemy update and render
-            self.light_enemy_group.update(dt, self.player)
-            self.light_enemy_group.draw(display, self.scroll)
+            # self.light_enemy_group.update(dt, self.player)
+            # self.light_enemy_group.draw(display, self.scroll)
 
-            # # Avoid overlapping between ground enemies
-            self.avoid_overlap()
+            # # # Avoid overlapping between ground enemies
+            # self.avoid_overlap()
 
-            # # Heave Enemy update and render
-            self.tank_enemy_group.update(dt, self.player)
-            self.tank_enemy_group.draw(display, self.scroll)
+            # # # Heave Enemy update and render
+            # self.tank_enemy_group.update(dt, self.player)
+            # self.tank_enemy_group.draw(display, self.scroll)
 
-            # # Flight Enemy update and render
+            # # # Flight Enemy update and render
             self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
             self.flight_enemy_group.draw(display, self.scroll)
 
@@ -227,8 +227,8 @@ class Game:
             self.soar_enemy_group.draw(display, self.scroll)
 
             # # # Shooting Enemy update and render
-            self.shooting_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
-            self.shooting_enemy_group.draw(display, self.scroll)
+            # self.shooting_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
+            # self.shooting_enemy_group.draw(display, self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
@@ -384,12 +384,28 @@ class Game:
     def create_radiation(self):
         hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, True, False)
 
-        for bullet, enemy in hits.items():
+        for bullet, flying_enemies in hits.items():
             pos = list(bullet.rect.center)
-            # location, radius, width
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8])
+
+            for enemy in flying_enemies: # location, radius, width, id, color (main and shadow)
+                if isinstance(enemy, Soar):
+                    self.radiations.append([[pos[0], pos[1]],
+                                                        25,
+                                                        8,
+                                                        1,
+                                                        (145, 47, 47)])
+
+                    self.radiations.append([[pos[0], pos[1]],
+                                            15,
+                                            8,
+                                            0,
+                                            [(145, 47, 47), (82, 27, 27)]])
+                elif isinstance(enemy, Flight):
+                    self.radiations.append([[pos[0], pos[1]],
+                                            15,
+                                            8,
+                                            0,
+                                            [(81, 143, 85), (35, 61, 37)]])
 
     def create_debris(self):
         hits = pygame.sprite.groupcollide(self.all_bullets_group, tiles_group, False, False)
@@ -456,18 +472,28 @@ class Game:
             self.radiations = [radiation for radiation in self.radiations if radiation[2] > 1.1]
 
             for radiation in self.radiations:
-                radiation[1] += 6 # radius
-                radiation[2] -= .1 # width
+                if radiation[3] == 1:
+                    radiation[1] += 12 # radius
+                    radiation[2] -= .4 # width
 
-                pygame.draw.circle(display,
-                                   (35, 61, 37),
-                                   (radiation[0][0] + 6 - self.scroll[0], radiation[0][1] + 3 - self.scroll[1]), int(radiation[1]),
-                                   int(radiation[2]))
+                    if radiation[2] < 1: radiation[2] = 1
 
-                pygame.draw.circle(display,
-                                   (81, 143, 85),
-                                   (radiation[0][0]-self.scroll[0], radiation[0][1]-self.scroll[1]), int(radiation[1]),
-                                   int(radiation[2]))
+                    pygame.draw.circle(display,
+                                    radiation[4],
+                                    (radiation[0][0] - self.scroll[0], radiation[0][1] - self.scroll[1]), int(radiation[1]),
+                                    int(radiation[2]))
+                else:
+                    radiation[1] += 6 # radius
+                    radiation[2] -= .1 # width
+                    pygame.draw.circle(display,
+                                    radiation[4][1],
+                                    (radiation[0][0] + 6 - self.scroll[0], radiation[0][1] + 3 - self.scroll[1]), int(radiation[1]),
+                                    int(radiation[2]))
+
+                    pygame.draw.circle(display,
+                                    radiation[4][0],
+                                    (radiation[0][0]-self.scroll[0], radiation[0][1]-self.scroll[1]), int(radiation[1]),
+                                    int(radiation[2]))
     
     def draw_debris(self):
         if self.debris:
