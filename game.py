@@ -58,7 +58,7 @@ class Game:
         self.shake_timer = 0
 
         # Player---------------------------------------------------------------------------------------------------
-        self.player = Player(WINDOW_WIDTH - PLAYER_WIDTH, 0)
+        self.player = Player(WINDOW_WIDTH - PLAYER_WIDTH, 0, self.player_group)
 
         # Wand-----------------------------------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
