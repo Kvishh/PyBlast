@@ -5,9 +5,9 @@ from player import Player
 from wand import Wand
 from bullet import PlayerBullet
 from customgroup import CustomGroup
-from enemy import Light
+from light import Light
 from spark import Spark
-from flying_enemy import Flight
+from flight import Flight
 from soar import Soar
 from shooting_enemy import ShootingEnemy
 from tank import Tank
