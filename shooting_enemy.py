@@ -97,7 +97,7 @@ class ShootingEnemy(pygame.sprite.Sprite):
             if flying_enemy is not self:
                 dist = self.pos - flying_enemy.pos
                 if dist.length() < self.flee_rad:
-                    self.desired = dist.normalize() * 5
+                    self.desired = dist.normalize() * 5 if dist.length() > 0.1 else pygame.Vector2(1, 1)
                     steer = self.desired - self.vel
                 else:
                     self.desired = dist.normalize() * 5
