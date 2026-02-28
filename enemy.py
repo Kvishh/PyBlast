@@ -6,7 +6,7 @@ class Light(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("assets/images/slime.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT)), True, False)
+        self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("assets/images/slime.png").convert_alpha(), (LIGHT_ENEMY_WIDTH, LIGHT_ENEMY_HEIGHT)), True, False)
         self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}        
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
         self.x_velocity = 120
@@ -14,7 +14,7 @@ class Light(pygame.sprite.Sprite):
         self.jumping = False
         self.x_direction = 0
 
-        self.sensor = pygame.Rect(0, 0, PLAYER_WIDTH+80, 80)
+        self.sensor = pygame.Rect(0, 0, LIGHT_ENEMY_WIDTH+80, 80)
         self.stuck = False
         self.stuck_center_posx = 0
 
@@ -27,18 +27,18 @@ class Light(pygame.sprite.Sprite):
         # Border limit x
         if self.pos.x < 0:
             self.pos.x = 0
-        elif self.pos.x > WINDOW_WIDTH - PLAYER_WIDTH:
-            self.pos.x = WINDOW_WIDTH - PLAYER_WIDTH
+        elif self.pos.x > WINDOW_WIDTH - LIGHT_ENEMY_WIDTH:
+            self.pos.x = WINDOW_WIDTH - LIGHT_ENEMY_WIDTH
 
         # Border limit y
         if self.pos.y < 0:
             self.pos.y = 0
-        elif self.pos.y > WINDOW_HEIGHT - PLAYER_HEIGHT:
+        elif self.pos.y > WINDOW_HEIGHT - LIGHT_ENEMY_HEIGHT:
             self.y_velocity = 0
-            self.pos.y = FLOOR - PLAYER_HEIGHT
+            self.pos.y = FLOOR - LIGHT_ENEMY_HEIGHT
 
 
-        self.sensor.center = (self.rect.x+20, self.rect.centery - PLAYER_HEIGHT)
+        self.sensor.center = (self.rect.x+20, self.rect.centery - LIGHT_ENEMY_HEIGHT)
         # pygame.draw.rect(display, (255, 255, 255), ((self.sensor.x-scroll[0], self.sensor.y-scroll[1]), (self.sensor.w, self.sensor.h)), 1)
 
         self._detect_jump(player)
@@ -87,19 +87,19 @@ class Light(pygame.sprite.Sprite):
         # if self.stuck and self.rect.centerx >= 562 and self.rect.centerx <= 686:# and not self.stuck_in_below_middle_platform():
         #     self.stuck = False
         if self.stuck:
-            if self.stuck_center_posx <= (544 + (PLAYER_WIDTH // 2)) and self.rect.centerx > MAP_HALF + 20:
+            if self.stuck_center_posx <= (544 + (LIGHT_ENEMY_WIDTH // 2)) and self.rect.centerx > MAP_HALF + 20:
                 self.stuck = False
             elif self.stuck_center_posx > 685 and self.rect.centerx < MAP_HALF - 70:
                 self.stuck = False
-            elif (self.stuck_center_posx > (544 + (PLAYER_WIDTH // 2))) and (self.stuck_center_posx < (704 - (PLAYER_WIDTH // 2))) and self.rect.centerx < (363 - PLAYER_WIDTH*3):
+            elif (self.stuck_center_posx > (544 + (LIGHT_ENEMY_WIDTH // 2))) and (self.stuck_center_posx < (704 - (LIGHT_ENEMY_WIDTH // 2))) and self.rect.centerx < (363 - LIGHT_ENEMY_WIDTH*3):
                 self.stuck = False
         
         # print(self.rect.centerx)
-        if self.stuck and self.stuck_center_posx <= (544 + (PLAYER_WIDTH // 2)):
+        if self.stuck and self.stuck_center_posx <= (544 + (LIGHT_ENEMY_WIDTH // 2)):
             self.x_velocity = 150
-        elif self.stuck and self.stuck_center_posx > (704 - (PLAYER_WIDTH // 2)):
+        elif self.stuck and self.stuck_center_posx > (704 - (LIGHT_ENEMY_WIDTH // 2)):
             self.x_velocity = -150
-        elif self.stuck and self.stuck_center_posx > (544 + (PLAYER_WIDTH // 2)) and self.stuck_center_posx < (704 - (PLAYER_WIDTH // 2)):
+        elif self.stuck and self.stuck_center_posx > (544 + (LIGHT_ENEMY_WIDTH // 2)) and self.stuck_center_posx < (704 - (LIGHT_ENEMY_WIDTH // 2)):
             self.x_velocity = -150
 
         
@@ -187,7 +187,7 @@ class Light(pygame.sprite.Sprite):
         tile = self._get_tile_collision()
         if tile is not None:
             if self.x_velocity > 0:
-                self.pos.x = tile.rect.left - PLAYER_WIDTH
+                self.pos.x = tile.rect.left - LIGHT_ENEMY_WIDTH
                 self.rect.x = int(self.pos.x)
             elif self.x_velocity < 0:
                 self.pos.x = tile.rect.right
@@ -198,7 +198,7 @@ class Light(pygame.sprite.Sprite):
         tile = self._get_tile_collision()
         if tile is not None:
             if self.y_velocity > 0:
-                self.pos.y = tile.rect.top - PLAYER_HEIGHT
+                self.pos.y = tile.rect.top - LIGHT_ENEMY_HEIGHT
                 self.rect.y = int(self.pos.y)
                 self.jumping = False
             elif self.y_velocity < 0:
