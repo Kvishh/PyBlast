@@ -8,6 +8,7 @@ from customgroup import CustomGroup
 from enemy import Light
 from spark import Spark
 from flying_enemy import FlyingEnemy
+from soar import Soar
 from shooting_enemy import ShootingEnemy
 from tank import Tank
 
@@ -32,8 +33,11 @@ class Game:
         # Tank enemy Group-----------------------------------------------------------------------------------------
         self.tank_enemy_group = CustomGroup()
 
-        # Flying enemy group---------------------------------------------------------------------------------------
-        self.flying_enemy_group = CustomGroup()
+        # Flight enemy group---------------------------------------------------------------------------------------
+        self.flight_enemy_group = CustomGroup()
+
+        # Soar enemy group---------------------------------------------------------------------------------------
+        self.soar_enemy_group = CustomGroup()        
 
         # Shooting enemy group-------------------------------------------------------------------------------------
         self.shooting_enemy_group = CustomGroup()
@@ -50,7 +54,7 @@ class Game:
         self.all_ground_enemies = CustomGroup(self.light_enemy_group, self.tank_enemy_group)
 
         # For flying enemies---------------------------------------------------------------------------------------
-        self.all_flying_enemies = CustomGroup(self.flying_enemy_group, self.shooting_enemy_group)
+        self.all_flying_enemies = CustomGroup(self.flight_enemy_group, self.soar_enemy_group, self.shooting_enemy_group)
 
 
         ### INDIVIDUAL COMPONENTS --------------------------------------------------------------------------------------------- ###
@@ -71,8 +75,11 @@ class Game:
         # Heavy Enemy----------------------------------------------------------------------------------------------
         self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0, self.tank_enemy_group, self.all_ground_enemies)
 
-        # Flying Enemy---------------------------------------------------------------------------------------------
-        self.flying_enemy = FlyingEnemy(50, 0, self.flying_enemy_group, self.all_flying_enemies)
+        # Flight Enemy---------------------------------------------------------------------------------------------
+        self.flight_enemy = FlyingEnemy(50, 0, self.flight_enemy_group, self.all_flying_enemies)
+
+        # Soar Enemy----------------------------------------------------------------------------------------------
+        self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
 
         # Shooting Enemy-------------------------------------------------------------------------------------------
         self.shooting_enemy = ShootingEnemy(250, 0, self.shooting_enemy_group, self.all_flying_enemies)
@@ -111,7 +118,7 @@ class Game:
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
         # For every sprite when collided with bullet it will create spark------------------------------------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flying_enemy_group, self.shooting_enemy_group)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shooting_enemy_group)
 
         # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
         self.enemy_hits = pygame.sprite.Group(tiles_group, self.player_group)
@@ -211,9 +218,13 @@ class Game:
             self.tank_enemy_group.update(dt, self.player)
             self.tank_enemy_group.draw(display, self.scroll)
 
-            # # Flying Enemy update and render
-            self.flying_enemy_group.update(self.player, dt, self.all_flying_enemies)
-            self.flying_enemy_group.draw(display, self.scroll)
+            # # Flight Enemy update and render
+            self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            self.flight_enemy_group.draw(display, self.scroll)
+
+            # # Soar Enemy update and render
+            self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            self.soar_enemy_group.draw(display, self.scroll)
 
             # # # Shooting Enemy update and render
             self.shooting_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
