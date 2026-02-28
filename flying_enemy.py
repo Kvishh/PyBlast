@@ -6,11 +6,13 @@ class FlyingEnemy(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/sorcerer.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
+        self.image = pygame.transform.scale(pygame.image.load("assets/images/flight.png").convert_alpha(), (FLIGHT_ENEMY_WIDTH, FLIGHT_ENEMY_HEIGHT))
+        self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}
         self.rect = self.image.get_rect()
         self.x_vel = 0
         self.y_vel = 0
         self.speed = 40
+        self.x_direction = 1
 
         self.vel = pygame.Vector2(0, 0)
 
@@ -20,6 +22,9 @@ class FlyingEnemy(pygame.sprite.Sprite):
         self.flee_rad = 60
 
     def update(self, pl, dt, flying_enemies_group):
+        self.switch_orientation()
+        self.image = self.orientation[self.x_direction]
+
         # pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)
         self.seek_force = self.seek(pl)
         self.avoid_force = self.flee(flying_enemies_group)
@@ -35,8 +40,8 @@ class FlyingEnemy(pygame.sprite.Sprite):
 
         if self.rect.left < 0:
             self.rect.left = 0
-        elif self.rect.left > WINDOW_WIDTH - PLAYER_WIDTH:
-            self.rect.left = WINDOW_WIDTH - PLAYER_WIDTH
+        elif self.rect.left > WINDOW_WIDTH - FLIGHT_ENEMY_WIDTH:
+            self.rect.left = WINDOW_WIDTH - FLIGHT_ENEMY_WIDTH
         
         if self.rect.y > WINDOW_HEIGHT:
             self.rect.y = WINDOW_HEIGHT
@@ -76,6 +81,11 @@ class FlyingEnemy(pygame.sprite.Sprite):
 
         return steer
 
+    def switch_orientation(self):
+        if self.x_vel < 0:
+            self.x_direction = -1
+        elif self.x_vel > 0:
+            self.x_direction = 1
 
     def get_tile_collided(self):
         for tile in tiles:
