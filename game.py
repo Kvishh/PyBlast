@@ -347,7 +347,7 @@ class Game:
         pos = list(pos)
         for _ in range(15): # location, velocity, radius, color
             self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
-                                    [random.randrange(-3, 3), -2], 
+                                    [random.randrange(-3, 3), -3], 
                                     random.randrange(24, 30),
                                     255])
     
@@ -406,7 +406,7 @@ class Game:
                 particle[0][1] += particle[1][1]
 
                 # change y velocity over time
-                particle[1][1] += .001
+                particle[1][1] += .02
 
                 # change color over time
                 particle[3] -= random.randint(1, 3)
