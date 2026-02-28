@@ -4,7 +4,7 @@ from game_map import tiles_group, tiles_blocks, draw_background, create_tiles, l
 from player import Player
 from wand import Wand
 from bullet import PlayerBullet
-from customgroup import CustomGroup
+from customgroup import CustomGroup, ShootCustomGroup
 from light import Light
 from spark import Spark
 from flight import Flight
@@ -40,7 +40,7 @@ class Game:
         self.soar_enemy_group = CustomGroup()        
 
         # Shooting enemy group-------------------------------------------------------------------------------------
-        self.shoot_enemy_group = CustomGroup()
+        self.shoot_enemy_group = ShootCustomGroup()
 
         # Player Bullet group--------------------------------------------------------------------------------------
         self.player_bullet_group = CustomGroup()
@@ -208,28 +208,37 @@ class Game:
             self.player.render(self.scroll)
 
             # Enemy update and render
-            # self.light_enemy_group.update(dt, self.player)
-            # self.light_enemy_group.draw(display, self.scroll)
+            self.light_enemy_group.update(dt, self.player)
+            self.light_enemy_group.draw(display, self.scroll)
 
-            # # # Avoid overlapping between ground enemies
-            # self.avoid_overlap()
+            # Avoid overlapping between ground enemies
+            self.avoid_overlap()
 
-            # # # Heave Enemy update and render
-            # self.tank_enemy_group.update(dt, self.player)
-            # self.tank_enemy_group.draw(display, self.scroll)
+            # # Heave Enemy update and render
+            self.tank_enemy_group.update(dt, self.player)
+            self.tank_enemy_group.draw(display, self.scroll)
 
-            # # # Flight Enemy update and render
-            # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
-            # self.flight_enemy_group.draw(display, self.scroll)
+            # Flight Enemy update and render
+            self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            self.flight_enemy_group.draw(display, self.scroll)
 
-            # # # Soar Enemy update and render
-            # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
-            # self.soar_enemy_group.draw(display, self.scroll)
+            # Soar Enemy update and render
+            self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            self.soar_enemy_group.draw(display, self.scroll)
 
-            # # Shooting Enemy update and render
+            # Shooting Enemy update and render
             self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
             self.shoot_enemy_group.draw(display, self.scroll)
-            # pygame.draw.rect(display, (255,0,0), (self.shoot_enemy.rect.x - self.scroll[0], self.shoot_enemy.rect.y - self.scroll[1], self.shoot_enemy.rect.w, self.shoot_enemy.rect.h), 2)
+            # pygame.draw.rect(display,
+            #                  (255, 0, 0),
+            #                  (self.shoot_enemy.hit_rect.x - self.scroll[0], self.shoot_enemy.hit_rect.y - self.scroll[1],
+            #                   self.shoot_enemy.hit_rect.w, self.shoot_enemy.hit_rect.h),
+            #                   2) # for blitting actual image rect
+            # pygame.draw.rect(display,
+            #                  (0,255,0),
+            #                  (self.shoot_enemy.rect.x - self.scroll[0], self.shoot_enemy.rect.y - self.scroll[1],
+            #                   self.shoot_enemy.rect.w, self.shoot_enemy.rect.h),
+            #                   2) # for blitting the hitbox_rect used for tiles collision
 
             # Drawing particles
             self.draw_floating_particles()
