@@ -9,7 +9,7 @@ from light import Light
 from spark import Spark
 from flight import Flight
 from soar import Soar
-from shooting_enemy import ShootingEnemy
+from shoot import Shoot
 from tank import Tank
 
 
@@ -40,7 +40,7 @@ class Game:
         self.soar_enemy_group = CustomGroup()        
 
         # Shooting enemy group-------------------------------------------------------------------------------------
-        self.shooting_enemy_group = CustomGroup()
+        self.shoot_enemy_group = CustomGroup()
 
         # Player Bullet group--------------------------------------------------------------------------------------
         self.player_bullet_group = CustomGroup()
@@ -54,7 +54,7 @@ class Game:
         self.all_ground_enemies = CustomGroup(self.light_enemy_group, self.tank_enemy_group)
 
         # For flying enemies---------------------------------------------------------------------------------------
-        self.all_flying_enemies = CustomGroup(self.flight_enemy_group, self.soar_enemy_group, self.shooting_enemy_group)
+        self.all_flying_enemies = CustomGroup(self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group)
 
 
         ### INDIVIDUAL COMPONENTS --------------------------------------------------------------------------------------------- ###
@@ -82,7 +82,7 @@ class Game:
         self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
 
         # Shooting Enemy-------------------------------------------------------------------------------------------
-        self.shooting_enemy = ShootingEnemy(250, 0, self.shooting_enemy_group, self.all_flying_enemies)
+        self.shoot_enemy = Shoot(250, 0, self.shoot_enemy_group, self.all_flying_enemies)
 
 
         ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
@@ -118,7 +118,7 @@ class Game:
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
         # For every sprite when collided with bullet it will create spark------------------------------------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shooting_enemy_group)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group)
 
         # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
         self.enemy_hits = pygame.sprite.Group(tiles_group, self.player_group)
@@ -219,16 +219,17 @@ class Game:
             # self.tank_enemy_group.draw(display, self.scroll)
 
             # # # Flight Enemy update and render
-            self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
-            self.flight_enemy_group.draw(display, self.scroll)
+            # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            # self.flight_enemy_group.draw(display, self.scroll)
 
-            # # Soar Enemy update and render
-            self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
-            self.soar_enemy_group.draw(display, self.scroll)
+            # # # Soar Enemy update and render
+            # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            # self.soar_enemy_group.draw(display, self.scroll)
 
-            # # # Shooting Enemy update and render
-            # self.shooting_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
-            # self.shooting_enemy_group.draw(display, self.scroll)
+            # # Shooting Enemy update and render
+            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
+            self.shoot_enemy_group.draw(display, self.scroll)
+            # pygame.draw.rect(display, (255,0,0), (self.shoot_enemy.rect.x - self.scroll[0], self.shoot_enemy.rect.y - self.scroll[1], self.shoot_enemy.rect.w, self.shoot_enemy.rect.h), 2)
 
             # Drawing particles
             self.draw_floating_particles()

@@ -3,15 +3,20 @@ from configs import *
 from game_map import tiles
 from enemy_bullet import EnemyBullet
 
-class ShootingEnemy(pygame.sprite.Sprite):
+class Shoot(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/blader-left.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
+        # self.image = pygame.transform.scale(pygame.image.load("assets/images/shoot.png").convert_alpha(), (SHOOTING_ENEMY_HEIGHT, SHOOTING_ENEMY_HEIGHT))
+        self.image = pygame.image.load("assets/images/shoot.png").convert_alpha()
         self.rect = self.image.get_rect()
+        self.orig_image = self.image
         self.x_vel = 0
         self.y_vel = 0
         self.speed = 30
+
+        # self.hit_rect = pygame.Rect(0, 0, 50, 50)
+        # self.hit_rect.center = self.rect.center
 
         self.previous_time = pygame.time.get_ticks()
         self.previous_time_slowing_down = pygame.time.get_ticks()
@@ -26,6 +31,11 @@ class ShootingEnemy(pygame.sprite.Sprite):
     def update(self, enemy_bullet_group, all_bullets_group, pl, dt, flying_enemies_group):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
         # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
+
+        # self.rect.x = self.pos.x
+        # self.rect.y = self.pos.y
+
+        self.rotate_sprite(pl)
 
         self.shoot(enemy_bullet_group, all_bullets_group, pl)
 
@@ -109,6 +119,15 @@ class ShootingEnemy(pygame.sprite.Sprite):
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))        
 
+    def rotate_sprite(self, player):
+        target_x = player.rect.centerx
+        target_y = player.rect.centery
+        dx = target_x - self.pos.x
+        dy = target_y - self.pos.y
+        angle = math.degrees(math.atan2(dy, dx))
+        self.image = pygame.transform.rotate(self.orig_image, -angle)
+        self.rect = self.image.get_rect(center = (self.rect.centerx, self.rect.centery))
+
     def get_tile_collided(self):
         for tile in tiles:
             if tile.rect.colliderect(self.rect):
@@ -119,16 +138,16 @@ class ShootingEnemy(pygame.sprite.Sprite):
         collided_tile = self.get_tile_collided()
         if collided_tile is not None:
             if self.x_vel > 0:
-                self.rect.right = collided_tile.rect.left
+                self.pos.x = collided_tile.rect.left - self.rect.width // 2
             elif self.x_vel < 0:
-                self.rect.left = collided_tile.rect.right
-            self.pos.x = pygame.Vector2(self.rect.center).x
+                self.pos.x = collided_tile.rect.right + self.rect.width // 2
+            self.rect.centerx = int(self.pos.x)
 
     def _detect_tiles_collision_y(self):
         collided_tile = self.get_tile_collided()
         if collided_tile is not None:
             if self.y_vel > 0:
-                self.rect.bottom = collided_tile.rect.top
+                self.pos.y = collided_tile.rect.top - self.rect.height // 2
             elif self.y_vel < 0:
-                self.rect.top = collided_tile.rect.bottom
-            self.pos.y = pygame.Vector2(self.rect.center).y
+                self.pos.y = collided_tile.rect.bottom + self.rect.height // 2
+            self.rect.centery = int(self.pos.y)
