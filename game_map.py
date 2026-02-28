@@ -60,15 +60,16 @@ def draw_tiles(scroll):
         display.blit(tile.image, (tile.rect.x-scroll[0], tile.rect.y-scroll[1]))
 
 def load_bg_images():
-    for i in range(1, 4):
+    for i in range(1, 5):
         image = pygame.image.load(f"assets/images/bg_{i}.png").convert_alpha()
         bg_images.append(image)
 
+
 def draw_background(scroll):
-    speed = .2
+    speed = .4
     for bg_image in bg_images:
         display.blit(bg_image, (0 - scroll[0] * speed, 0-scroll[1]))
-        speed+=.3
+        speed+=.2
 
 def load_long_rocks():
     i = 1
