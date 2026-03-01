@@ -7,16 +7,14 @@ class Burst(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/shoot.png").convert_alpha(), (SHOOTING_ENEMY_WIDTH, SHOOTING_ENEMY_HEIGHT))
-        # self.image = pygame.transform.scale(pygame.image.load("assets/images/shoot.png").convert_alpha(), (BURST_ENEMY_WIDTH, BURST_ENEMY_HEIGHT))
+        self.image = pygame.transform.scale(pygame.image.load("assets/images/burst.png").convert_alpha(), (BURST_ENEMY_WIDTH, BURST_ENEMY_HEIGHT))
         self.rect = self.image.get_rect()
         self.orig_image = self.image
         self.x_vel = 0
         self.y_vel = 0
         self.speed = 30
 
-        self.hit_rect = pygame.Rect(0, 0, 50, 50)
-        # self.hit_rect = pygame.Rect(0, 0, 62, 50)
+        self.hit_rect = pygame.Rect(0, 0, 62, 62)
         self.hit_rect.center = self.rect.center
 
         self.previous_time = pygame.time.get_ticks()
@@ -72,9 +70,9 @@ class Burst(pygame.sprite.Sprite):
 
     def shoot(self, enemy_bullet_group, all_bullets_group, player):
         current_time = pygame.time.get_ticks()
-        
+
         if current_time - self.previous_time_slowing_down > 3000:
-            self.speed -= .5 if self.speed > 0 else 0
+            self.speed -= .5
         else:
             self.speed += .5 if self.speed < 30 else 0
 
@@ -95,19 +93,12 @@ class Burst(pygame.sprite.Sprite):
                     all_bullets_group.add(bullet)
 
                     self.shoot_count += 1
+                    self.speed = 15
 
                 elif self.shoot_count >= 3:
                     self.previous_time_slowing_down = current_time
                     self.previous_time = current_time
                     self.shoot_count = 0
-
-
-    def slow_down(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.previous_time_slowing_down > 3000:
-            self.speed -= .5 if self.speed > 0 else 0
-        else:
-            self.speed += .5 if self.speed < 30 else 0
 
     def seek(self, player):
         desired = (player.pos - self.pos).normalize() * 5

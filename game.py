@@ -249,7 +249,18 @@ class Game:
 
             # Shooting Enemy update and render
             self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
-            self.burst_enemy_group.draw(display, self.scroll)            
+            self.burst_enemy_group.draw(display, self.scroll)
+            # pygame.draw.rect(display,
+            #                  (255, 0, 0),
+            #                  (self.burst_enemy.hit_rect.x - self.scroll[0], self.burst_enemy.hit_rect.y - self.scroll[1],
+            #                   self.burst_enemy.hit_rect.w, self.burst_enemy.hit_rect.h),
+            #                   2) # for blitting actual image rect
+            # pygame.draw.rect(display,
+            #                  (0,255,0),
+            #                  (self.burst_enemy.rect.x - self.scroll[0], self.burst_enemy.rect.y - self.scroll[1],
+            #                   self.burst_enemy.rect.w, self.burst_enemy.rect.h),
+            #                   2) # for blitting the hitbox_rect used for tiles collision
+
 
             # Drawing particles
             self.draw_floating_particles()
