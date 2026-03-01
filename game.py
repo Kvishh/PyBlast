@@ -19,6 +19,11 @@ class Game:
         # Initialize pygame---------------------------------------------------------------------------------------
         pygame.init()
 
+        # Setting custom cursor-----------------------------------------------------------------------------------
+        crosshair_image = pygame.transform.scale(pygame.image.load("assets/images/crosshair.png").convert_alpha(), (32, 32))
+        cursor = pygame.cursors.Cursor((16, 16,), crosshair_image)
+        pygame.mouse.set_cursor(cursor)
+
         # GAME COMPONENTS-----------------------------------------------------------------------------------------
         # Scrolling (Camera effect)-------------------------------------------------------------------------------
         self.true_scroll = [0, 0]
@@ -247,7 +252,7 @@ class Game:
             #                   self.shoot_enemy.rect.w, self.shoot_enemy.rect.h),
             #                   2) # for blitting the hitbox_rect used for tiles collision
 
-            # Shooting Enemy update and render
+            # Burst Enemy update and render
             self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
             self.burst_enemy_group.draw(display, self.scroll)
             # pygame.draw.rect(display,
