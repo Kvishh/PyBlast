@@ -3,9 +3,9 @@ from configs import *
 from game_map import tiles
 
 class EnemyBullet(pygame.sprite.Sprite):
-    def __init__(self, image, x, y, direction, target_x, target_y):
+    def __init__(self, x, y, direction, target_x, target_y):
         super().__init__()
-        self.image = pygame.transform.scale(pygame.image.load(image), (BULLET_SIZE, BULLET_SIZE))
+        self.image = pygame.transform.scale(pygame.image.load("assets/images/enemy_projectile.png"), (BULLET_SIZE, BULLET_SIZE))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 450
         self.direction = direction

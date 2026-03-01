@@ -73,8 +73,7 @@ class Shoot(pygame.sprite.Sprite):
                 target_x = player.rect.centerx
                 target_y = player.rect.centery
 
-                bullet = EnemyBullet("assets/images/bullet.png", 
-                                self.rect.centerx, 
+                bullet = EnemyBullet(self.rect.centerx, 
                                 self.rect.centery, 
                                 1, 
                                 target_x,
