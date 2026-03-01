@@ -11,6 +11,7 @@ from flight import Flight
 from soar import Soar
 from shoot import Shoot
 from burst import Burst
+from specter import Specter
 from tank import Tank
 
 
@@ -42,14 +43,17 @@ class Game:
         # Flight enemy group---------------------------------------------------------------------------------------
         self.flight_enemy_group = CustomGroup()
 
-        # Soar enemy group---------------------------------------------------------------------------------------
+        # Soar enemy group-----------------------------------------------------------------------------------------
         self.soar_enemy_group = CustomGroup()        
 
         # Shooting enemy group-------------------------------------------------------------------------------------
         self.shoot_enemy_group = ShootCustomGroup()
 
-        # Burst enemy group-------------------------------------------------------------------------------------
+        # Burst enemy group----------------------------------------------------------------------------------------
         self.burst_enemy_group = ShootCustomGroup()
+
+        # Specter enemy group--------------------------------------------------------------------------------------
+        self.specter_enemy_group = ShootCustomGroup()
 
         # Player Bullet group--------------------------------------------------------------------------------------
         self.player_bullet_group = CustomGroup()
@@ -57,13 +61,16 @@ class Game:
         # Enemy Bullet group---------------------------------------------------------------------------------------
         self.enemy_bullet_group = CustomGroup()
 
+        # Specter Enemy Bullet group---------------------------------------------------------------------------------------
+        self.specter_enemy_bullet_group = CustomGroup()
+
 
         ### RELATED GROUPS --------------------------------------------------------------------------------------------------- ###
         # For walking enemies--------------------------------------------------------------------------------------
         self.all_ground_enemies = CustomGroup(self.light_enemy_group, self.tank_enemy_group)
 
         # For flying enemies---------------------------------------------------------------------------------------
-        self.all_flying_enemies = CustomGroup(self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group, self.burst_enemy_group)
+        self.all_flying_enemies = CustomGroup(self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group, self.burst_enemy_group, self.specter_enemy_group)
 
 
         ### INDIVIDUAL COMPONENTS --------------------------------------------------------------------------------------------- ###
@@ -87,14 +94,17 @@ class Game:
         # Flight Enemy---------------------------------------------------------------------------------------------
         self.flight_enemy = Flight(50, 0, self.flight_enemy_group, self.all_flying_enemies)
 
-        # Soar Enemy----------------------------------------------------------------------------------------------
+        # Soar Enemy-----------------------------------------------------------------------------------------------
         self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
 
         # Shooting Enemy-------------------------------------------------------------------------------------------
         self.shoot_enemy = Shoot(250, 0, self.shoot_enemy_group, self.all_flying_enemies)
 
-        # Burst Shooting Enemy-------------------------------------------------------------------------------------------
+        # Burst Shooting Enemy-------------------------------------------------------------------------------------
         self.burst_enemy = Burst(350, 0, self.burst_enemy_group, self.all_flying_enemies)
+
+        # Specter Shooting Enemy-----------------------------------------------------------------------------------
+        self.specter_enemy = Specter(350, 0, self.specter_enemy_group, self.all_flying_enemies)
 
 
         ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
@@ -130,10 +140,10 @@ class Game:
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
         # For every sprite when collided with bullet it will create spark------------------------------------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group, self.burst_enemy_group)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group, self.burst_enemy_group, self.specter_enemy_group)
 
         # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
-        self.enemy_hits = pygame.sprite.Group(tiles_group, self.player_group)
+        self.enemy_projectiles_hit_entities = pygame.sprite.Group(self.player_group, tiles_group)
 
         # Group for all projectiles---------------------------------------------------------------------------------
         self.all_bullets_group = CustomGroup(self.player_bullet_group, self.enemy_bullet_group)
@@ -197,11 +207,17 @@ class Game:
             self.enemy_bullet_group.update(dt, self.scroll)
             self.enemy_bullet_group.draw(display, self.scroll)
 
+            self.specter_enemy_bullet_group.update(dt, self.scroll)
+            self.specter_enemy_bullet_group.draw(display, self.scroll)
+
             # Create debris
             self.create_debris()
 
-            # Enemy bullet hit player
-            self.enemy_bullets_hit_player()
+            # Enemy bullets hit player and tiles
+            self.enemy_bullets_hit_player_and_tiles()
+
+            # Specter Enemy bullets hit player
+            self.specter_enemy_bullets_hit_player()
 
             # Creating and drawing sparks
             self.create_impact_and_floating_particles()
@@ -238,34 +254,17 @@ class Game:
             # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
             # self.soar_enemy_group.draw(display, self.scroll)
 
-            # Shooting Enemy update and render
+            # # Shooting Enemy update and render
             # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
             # self.shoot_enemy_group.draw(display, self.scroll)
-            # pygame.draw.rect(display,
-            #                  (255, 0, 0),
-            #                  (self.shoot_enemy.hit_rect.x - self.scroll[0], self.shoot_enemy.hit_rect.y - self.scroll[1],
-            #                   self.shoot_enemy.hit_rect.w, self.shoot_enemy.hit_rect.h),
-            #                   2) # for blitting actual image rect
-            # pygame.draw.rect(display,
-            #                  (0,255,0),
-            #                  (self.shoot_enemy.rect.x - self.scroll[0], self.shoot_enemy.rect.y - self.scroll[1],
-            #                   self.shoot_enemy.rect.w, self.shoot_enemy.rect.h),
-            #                   2) # for blitting the hitbox_rect used for tiles collision
 
             # Burst Enemy update and render
             self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
             self.burst_enemy_group.draw(display, self.scroll)
-            # pygame.draw.rect(display,
-            #                  (255, 0, 0),
-            #                  (self.burst_enemy.hit_rect.x - self.scroll[0], self.burst_enemy.hit_rect.y - self.scroll[1],
-            #                   self.burst_enemy.hit_rect.w, self.burst_enemy.hit_rect.h),
-            #                   2) # for blitting actual image rect
-            # pygame.draw.rect(display,
-            #                  (0,255,0),
-            #                  (self.burst_enemy.rect.x - self.scroll[0], self.burst_enemy.rect.y - self.scroll[1],
-            #                   self.burst_enemy.rect.w, self.burst_enemy.rect.h),
-            #                   2) # for blitting the hitbox_rect used for tiles collision
 
+            # Specter Enemy update and render
+            self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
+            self.specter_enemy_group.draw(display, self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
@@ -374,15 +373,25 @@ class Game:
             for _ in range(6):
                 self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
     
-    def enemy_bullets_hit_player(self):
-        hits = pygame.sprite.groupcollide(self.enemy_bullet_group, self.enemy_hits, True, False)
+    def enemy_bullets_hit_player_and_tiles(self):
+        hits = pygame.sprite.groupcollide(self.enemy_bullet_group, self.enemy_projectiles_hit_entities, True, False)
 
         for bullet, sprite_collided in hits.items():
             self.shake_timer = 20
             self.create_floating_particles(bullet.rect.center)
 
             for _ in range(6):
-                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))            
+                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
+
+    def specter_enemy_bullets_hit_player(self):
+        hits = pygame.sprite.groupcollide(self.specter_enemy_bullet_group, self.player_group, True, False)
+
+        for bullet, sprite_collided in hits.items():
+            self.shake_timer = 20
+            self.create_floating_particles(bullet.rect.center)
+
+            for _ in range(6):
+                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
 
     def draw_impact(self):
         for i, spark in sorted(enumerate(self.sparks), reverse=True):
