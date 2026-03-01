@@ -7,7 +7,7 @@ class Shoot(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.image.load("assets/images/shoot.png").convert_alpha()
+        self.image = pygame.transform.scale(pygame.image.load("assets/images/shoot.png").convert_alpha(), (SHOOTING_ENEMY_WIDTH, SHOOTING_ENEMY_HEIGHT))
         self.rect = self.image.get_rect()
         self.orig_image = self.image
         self.x_vel = 0
