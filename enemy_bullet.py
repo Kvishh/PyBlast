@@ -19,9 +19,6 @@ class EnemyBullet(pygame.sprite.Sprite):
         self._x_vel = math.cos(self._angle)*self.speed
         self._y_vel = math.sin(self._angle)*self.speed
 
-        # self.pos += pygame.Vector2(17, 0).rotate(math.degrees(self._angle))
-        self.end_point = target_x, target_y
-
         self.particles = []
     
     def update(self, dt, scroll):
@@ -40,13 +37,16 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.kill()
         elif self.rect.x < 0:
             self.kill()
+
+        if self.rect.y > WINDOW_HEIGHT:
+            self.kill()
+        elif self.rect.y < 0:
+            self.kill()
         
         if self.direction > 0:
             self.speed = self.speed
         elif self.direction < 0:
             self.speed = -400
-
-        self._kill_if_tile_collision()
 
         self._move(dt)
 
@@ -59,8 +59,3 @@ class EnemyBullet(pygame.sprite.Sprite):
     def _draw_particles(self, scroll):
         for i, particle in enumerate(self.particles):
             pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
-
-    def _kill_if_tile_collision(self):
-        for tile in tiles:
-            if self.rect.colliderect(tile.rect):
-                self.kill()
