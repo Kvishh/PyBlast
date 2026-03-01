@@ -11,7 +11,7 @@ class Soar(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.x_vel = 0
         self.y_vel = 0
-        self.speed = 25
+        self.speed = 20
         self.x_direction = 1
 
         self.vel = pygame.Vector2(0, 0)

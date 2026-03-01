@@ -11,7 +11,7 @@ class Flight(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.x_vel = 0
         self.y_vel = 0
-        self.speed = 40
+        self.speed = 35
         self.x_direction = 1
 
         self.vel = pygame.Vector2(0, 0)

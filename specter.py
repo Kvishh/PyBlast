@@ -12,7 +12,7 @@ class Specter(pygame.sprite.Sprite):
         self.orig_image = self.image
         self.x_vel = 0
         self.y_vel = 0
-        self.speed = 30
+        self.speed = 20
 
         self.hit_rect = pygame.Rect(0, 0, 50, 50)
         self.hit_rect.center = self.rect.center
@@ -68,7 +68,7 @@ class Specter(pygame.sprite.Sprite):
     def shoot(self, specter_enemy_bullet_group, player):
         current_time = pygame.time.get_ticks()
         self.slow_down()
-        if current_time - self.previous_time > 5000:
+        if current_time - self.previous_time > 3000:
                 self.previous_time = current_time
                 target_x = player.rect.centerx
                 target_y = player.rect.centery
@@ -81,12 +81,12 @@ class Specter(pygame.sprite.Sprite):
                                 target_y)
                 specter_enemy_bullet_group.add(bullet)
 
-                self.speed = 30
+                self.speed = 20
                 self.previous_time_slowing_down = current_time
 
     def slow_down(self):
         current_time = pygame.time.get_ticks()
-        if current_time - self.previous_time_slowing_down > 3000:
+        if current_time - self.previous_time_slowing_down > 1500:
             self.speed -= .5
 
     def seek(self, player):
