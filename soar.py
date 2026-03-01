@@ -7,7 +7,6 @@ class Soar(pygame.sprite.Sprite):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
         self.image = pygame.transform.scale(pygame.image.load("assets/images/soar.png").convert_alpha(), (SOAR_ENEMY_WIDTH, SOAR_ENEMY_HEIGHT))
-        self.image = pygame.transform.flip(self.image, True, False)
         self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}
         self.rect = self.image.get_rect()
         self.x_vel = 0
