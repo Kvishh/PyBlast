@@ -27,6 +27,9 @@ class Specter(pygame.sprite.Sprite):
 
         self.flee_rad = 60
 
+        self.allow_increase = True
+        self.opacity = 255
+
     def update(self, specter_enemy_bullet_group, pl, dt, flying_enemies_group):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
         # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
@@ -34,6 +37,12 @@ class Specter(pygame.sprite.Sprite):
         self.rotate_sprite(pl)
 
         self.shoot(specter_enemy_bullet_group, pl)
+
+        
+        self.image.set_alpha(self.opacity)
+        if self.allow_increase:
+            self.opacity += 2 if self.opacity <= 253 else 0
+
 
         self.seek_force = self.seek(pl)
         self.avoid_force = self.flee(flying_enemies_group)
@@ -83,11 +92,14 @@ class Specter(pygame.sprite.Sprite):
 
                 self.speed = 20
                 self.previous_time_slowing_down = current_time
+                self.allow_increase = True
 
     def slow_down(self):
         current_time = pygame.time.get_ticks()
         if current_time - self.previous_time_slowing_down > 1500:
             self.speed -= .5
+            self.opacity -= 2
+            self.allow_increase = False
 
     def seek(self, player):
         desired = (player.pos - self.pos).normalize() * 5
