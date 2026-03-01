@@ -61,7 +61,7 @@ class Game:
         # Enemy Bullet group---------------------------------------------------------------------------------------
         self.enemy_bullet_group = CustomGroup()
 
-        # Specter Enemy Bullet group---------------------------------------------------------------------------------------
+        # Specter Enemy Bullet group-------------------------------------------------------------------------------
         self.specter_enemy_bullet_group = CustomGroup()
 
 
@@ -128,6 +128,9 @@ class Game:
 
         # For jump particles----------------------------------------------------------------------------------------
         self.jump_particles = []
+
+        # For wand particles (residues)-----------------------------------------------------------------------------
+        self.wand_residues = []
 
 
         ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------- ###
@@ -621,5 +624,11 @@ class Game:
                 particle[2] -= .2
                 particle[0][0] += particle[1][0]
                 particle[0][1] += particle[1][1]
+
+                
+                pygame.draw.circle(display,
+                                (10, 43, 12),
+                                (particle[0][0]-self.scroll[0] + 3, particle[0][1]-self.scroll[1] + 3),
+                                int(particle[2]))
 
                 pygame.draw.circle(display, (178, 235, 23), (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]), particle[2])
