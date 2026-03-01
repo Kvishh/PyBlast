@@ -52,8 +52,8 @@ class Burst(pygame.sprite.Sprite):
 
         if self.rect.left < 0:
             self.rect.left = 0
-        elif self.rect.left > WINDOW_WIDTH - PLAYER_WIDTH:
-            self.rect.left = WINDOW_WIDTH - PLAYER_WIDTH
+        elif self.rect.left > WINDOW_WIDTH - BURST_ENEMY_WIDTH:
+            self.rect.left = WINDOW_WIDTH - BURST_ENEMY_WIDTH
         
         if self.rect.y > WINDOW_HEIGHT:
             self.rect.y = WINDOW_HEIGHT
