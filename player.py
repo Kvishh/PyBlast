@@ -1,4 +1,4 @@
-import pygame
+import pygame, random
 from configs import *
 from game_map import tiles
 
@@ -14,9 +14,9 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.x_direction = 1
 
-    def update(self, keys, dt):
+    def update(self, keys, dt, jump_particles):
         self.image = self.orientation[self.x_direction]
-        self._move(keys)
+        self._move(keys, jump_particles)
 
         # this is for checking whether enemy is stuck below or above
         self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
@@ -59,10 +59,14 @@ class Player(pygame.sprite.Sprite):
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
     
-    def _move(self, keys_hold):
+    def _move(self, keys_hold, jump_particles):
         if keys_hold[pygame.K_SPACE] and not self.jumping:
             self.y_velocity = -1170 # ORIGINAL 1050
             self.jumping = True
+            for _ in range(3): # location, y_velocity, radius
+                jump_particles.append([[random.randrange(self.rect.midbottom[0]-5, self.rect.midbottom[0]+5), self.rect.midbottom[1]],
+                                       [random.randrange(-2, 2), 2],
+                                       random.randrange(5, 8)]) 
         elif keys_hold[pygame.K_d]:
             self.x_velocity = 350
             self.x_direction = 1

@@ -126,6 +126,9 @@ class Game:
         # For debris-----------------------------------------------------------------------------------------------
         self.debris = []
 
+        # For jump particle-----------------------------------------------------------------------------------------------
+        self.jump_particles = []
+
 
         ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------- ###
         # Function for creating tile-------------------------------------------------------------------------------
@@ -232,8 +235,11 @@ class Game:
             # Player and Wand update and draw methods
             self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
             self.wand.render(self.scroll)
-            self.player.update(pygame.key.get_pressed(), dt)
+            self.player.update(pygame.key.get_pressed(), dt, self.jump_particles)
             self.player.render(self.scroll)
+
+            # Draw jump particles
+            self.draw_jump_particles()
 
             # # Enemy update and render
             # self.light_enemy_group.update(dt, self.player)
@@ -340,29 +346,6 @@ class Game:
                                         random.randrange(2, 4),
                                         [random.choice([.5, -.5]), random.choice([.5, -.5])]])
 
-    def draw_background_particles(self):
-        if self.background_particles:
-            self.background_particles = [background_particle for background_particle in self.background_particles
-                                    if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
-                                    (background_particle[0][0] > 0 and background_particle[0][0] < WINDOW_WIDTH)]            
-            
-            # loc, radius, direction
-            for bg_particle in self.background_particles:
-                # bg_particle[0][1] += -.5
-                bg_particle[0][0] += bg_particle[2][0]
-                bg_particle[0][1] += bg_particle[2][1]
-                pygame.draw.circle(display, (255, 255, 255), [int(bg_particle[0][0])-self.scroll[0], int(bg_particle[0][1])-self.scroll[1]], bg_particle[1])
-
-                # change the multiplier if you want to make the glow particle (circle) to be bigger
-                bg_particle_radius = bg_particle[1]*3
-
-                particle_surface = pygame.Surface((bg_particle_radius * 2, bg_particle_radius * 2))
-                pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius, bg_particle_radius), bg_particle_radius)
-                # pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius-scroll[0], bg_particle_radius-scroll[1]), bg_particle_radius) # ORIGINAL!!
-                particle_surface.set_colorkey((0,0,0))
-
-                display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-self.scroll[0], int(bg_particle[0][1] - bg_particle_radius)-self.scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
-
     def create_impact_and_floating_particles(self):
         hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_sprites_group, False, False)
 
@@ -392,13 +375,6 @@ class Game:
 
             for _ in range(6):
                 self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
-
-    def draw_impact(self):
-        for i, spark in sorted(enumerate(self.sparks), reverse=True):
-            spark.move(1)
-            spark.draw(display, self.scroll)
-            if not spark.alive:
-                self.sparks.pop(i)
 
     def create_floating_particles(self, pos):
         pos = list(pos)
@@ -495,6 +471,36 @@ class Game:
                             [random.randrange(-3, 3), random.randrange(-3, 3)], 
                             random.randrange(10, 16),
                             (r, g, 125)])
+
+    def draw_impact(self):
+        for i, spark in sorted(enumerate(self.sparks), reverse=True):
+            spark.move(1)
+            spark.draw(display, self.scroll)
+            if not spark.alive:
+                self.sparks.pop(i)
+
+    def draw_background_particles(self):
+        if self.background_particles:
+            self.background_particles = [background_particle for background_particle in self.background_particles
+                                    if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
+                                    (background_particle[0][0] > 0 and background_particle[0][0] < WINDOW_WIDTH)]            
+            
+            # loc, radius, direction
+            for bg_particle in self.background_particles:
+                # bg_particle[0][1] += -.5
+                bg_particle[0][0] += bg_particle[2][0]
+                bg_particle[0][1] += bg_particle[2][1]
+                pygame.draw.circle(display, (255, 255, 255), [int(bg_particle[0][0])-self.scroll[0], int(bg_particle[0][1])-self.scroll[1]], bg_particle[1])
+
+                # change the multiplier if you want to make the glow particle (circle) to be bigger
+                bg_particle_radius = bg_particle[1]*3
+
+                particle_surface = pygame.Surface((bg_particle_radius * 2, bg_particle_radius * 2))
+                pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius, bg_particle_radius), bg_particle_radius)
+                # pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius-scroll[0], bg_particle_radius-scroll[1]), bg_particle_radius) # ORIGINAL!!
+                particle_surface.set_colorkey((0,0,0))
+
+                display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-self.scroll[0], int(bg_particle[0][1] - bg_particle_radius)-self.scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
 
     def draw_floating_particles(self):
         if self.particles:
@@ -606,3 +612,14 @@ class Game:
                                    debris[3],
                                    (debris[0][0] - self.scroll[0], debris[0][1] - self.scroll[1]),
                                    debris[2])
+
+    def draw_jump_particles(self):
+        if self.jump_particles:
+            self.jump_particles = [p for p in self.jump_particles if p[2] > 0]
+
+            for particle in self.jump_particles:
+                particle[2] -= .2
+                particle[0][0] += particle[1][0]
+                particle[0][1] += particle[1][1]
+
+                pygame.draw.circle(display, (178, 235, 23), (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]), particle[2])
