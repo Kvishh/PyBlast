@@ -14,14 +14,19 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.x_direction = 1
 
-    def update(self, keys, dt, jump_particles):
+        self.dust_particles = []
+
+    def update(self, keys, dt, jump_particles, scroll):
         self.image = self.orientation[self.x_direction]
         self._move(keys, jump_particles)
 
         # this is for checking whether enemy is stuck below or above
         self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
         # pygame.draw.rect(display, (255, 0, 0), self.vertical_rect, 2) # original
-        
+
+        self.create_dust_particles()
+        self.draw_dust_particles(scroll)
+
         if self.y_velocity > 3000: self.y_velocity = 3000
 
         # Border limit x
@@ -73,6 +78,26 @@ class Player(pygame.sprite.Sprite):
         elif keys_hold[pygame.K_a]:
             self.x_velocity = -350
             self.x_direction = -1
+
+    def create_dust_particles(self):
+        if self.x_velocity != 0 and not self.jumping and self.y_velocity < 500:
+                if len(self.dust_particles) < 30:# loc, radius, velocity
+                    self.dust_particles.append([[self.rect.midbottom[0], self.rect.midbottom[1]],
+                                5,
+                                [random.randint(-2, 2), random.randint(-15, 0)*.1]])
+
+    def draw_dust_particles(self, scroll):
+        if self.dust_particles:# loc, radius, velocity
+            self.dust_particles = [dust for dust in self.dust_particles if dust[1] > 0]
+
+            for dust in self.dust_particles:
+                dust[0][0] -= dust[2][0]
+                dust[0][1] += dust[2][1]
+                dust[1] -= .2
+                pygame.draw.circle(display,
+                                (random.randrange(160, 180), random.randint(175, 185), 204),
+                                (dust[0][0]-scroll[0], dust[0][1]-scroll[1]),
+                                int(dust[1]))
 
     def _get_tile_collision(self):
         for tile in tiles:

@@ -123,10 +123,10 @@ class Game:
         # For radiation--------------------------------------------------------------------------------------------
         self.radiations = []
 
-        # For debris-----------------------------------------------------------------------------------------------
+        # For debris------------------------------------------------------------------------------------------------
         self.debris = []
 
-        # For jump particle-----------------------------------------------------------------------------------------------
+        # For jump particles----------------------------------------------------------------------------------------
         self.jump_particles = []
 
 
@@ -235,7 +235,7 @@ class Game:
             # Player and Wand update and draw methods
             self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
             self.wand.render(self.scroll)
-            self.player.update(pygame.key.get_pressed(), dt, self.jump_particles)
+            self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.scroll)
             self.player.render(self.scroll)
 
             # Draw jump particles
