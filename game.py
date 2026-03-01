@@ -242,17 +242,17 @@ class Game:
             # # Avoid overlapping between ground enemies
             # self.avoid_overlap()
 
-            # # # Heave Enemy update and render
+            # # Heavy Enemy update and render
             # self.tank_enemy_group.update(dt, self.player)
             # self.tank_enemy_group.draw(display, self.scroll)
 
-            # Flight Enemy update and render
-            self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
-            self.flight_enemy_group.draw(display, self.scroll)
+            # # Flight Enemy update and render
+            # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            # self.flight_enemy_group.draw(display, self.scroll)
 
-            # Soar Enemy update and render
-            self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
-            self.soar_enemy_group.draw(display, self.scroll)
+            # # Soar Enemy update and render
+            # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
+            # self.soar_enemy_group.draw(display, self.scroll)
 
             # Shooting Enemy update and render
             self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
@@ -436,10 +436,10 @@ class Game:
             for enemy in flying_enemies: # location, radius, width, id, color (main and shadow)
                 if isinstance(enemy, Soar):
                     self.radiations.append([[pos[0], pos[1]],
-                                                        25,
-                                                        8,
-                                                        1,
-                                                        (145, 47, 47)])
+                                            25,
+                                            8,
+                                            1,
+                                            (145, 47, 47)])
 
                     self.radiations.append([[pos[0], pos[1]],
                                             15,
@@ -451,7 +451,37 @@ class Game:
                                             15,
                                             8,
                                             0,
-                                            [(81, 143, 85), (35, 61, 37)]])
+                                            [(199, 48, 115), (105, 41, 71)]])
+                elif isinstance(enemy, Shoot):
+                    self.radiations.append([[pos[0], pos[1]],
+                                            15,
+                                            8,
+                                            0,
+                                            [(158, 0, 191), (71, 36, 82)]])
+                elif isinstance(enemy, Burst):
+                    self.radiations.append([[pos[0], pos[1]],
+                                            25,
+                                            8,
+                                            1,
+                                            (136, 0, 255)])
+
+                    self.radiations.append([[pos[0], pos[1]],
+                                            15,
+                                            8,
+                                            0,
+                                            [(136, 0, 255), (71, 36, 82)]])
+                elif isinstance(enemy, Specter):
+                    self.radiations.append([[pos[0], pos[1]],
+                                            25,
+                                            8,
+                                            1,
+                                            ((89, 0, 255))])
+
+                    self.radiations.append([[pos[0], pos[1]],
+                                            15,
+                                            8,
+                                            0,
+                                            [(89, 0, 255), (71, 36, 82)]])
 
     def create_debris(self):
         hits = pygame.sprite.groupcollide(self.all_bullets_group, tiles_group, False, False)
