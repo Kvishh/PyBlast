@@ -10,6 +10,7 @@ from spark import Spark
 from flight import Flight
 from soar import Soar
 from shoot import Shoot
+from burst import Burst
 from tank import Tank
 
 
@@ -42,6 +43,9 @@ class Game:
         # Shooting enemy group-------------------------------------------------------------------------------------
         self.shoot_enemy_group = ShootCustomGroup()
 
+        # Burst enemy group-------------------------------------------------------------------------------------
+        self.burst_enemy_group = ShootCustomGroup()
+
         # Player Bullet group--------------------------------------------------------------------------------------
         self.player_bullet_group = CustomGroup()
 
@@ -54,7 +58,7 @@ class Game:
         self.all_ground_enemies = CustomGroup(self.light_enemy_group, self.tank_enemy_group)
 
         # For flying enemies---------------------------------------------------------------------------------------
-        self.all_flying_enemies = CustomGroup(self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group)
+        self.all_flying_enemies = CustomGroup(self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group, self.burst_enemy_group)
 
 
         ### INDIVIDUAL COMPONENTS --------------------------------------------------------------------------------------------- ###
@@ -83,6 +87,9 @@ class Game:
 
         # Shooting Enemy-------------------------------------------------------------------------------------------
         self.shoot_enemy = Shoot(250, 0, self.shoot_enemy_group, self.all_flying_enemies)
+
+        # Burst Shooting Enemy-------------------------------------------------------------------------------------------
+        self.burst_enemy = Burst(350, 0, self.burst_enemy_group, self.all_flying_enemies)
 
 
         ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
@@ -118,7 +125,7 @@ class Game:
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
         # For every sprite when collided with bullet it will create spark------------------------------------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group)
+        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group, self.burst_enemy_group)
 
         # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
         self.enemy_hits = pygame.sprite.Group(tiles_group, self.player_group)
@@ -227,8 +234,8 @@ class Game:
             # self.soar_enemy_group.draw(display, self.scroll)
 
             # Shooting Enemy update and render
-            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
-            self.shoot_enemy_group.draw(display, self.scroll)
+            # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
+            # self.shoot_enemy_group.draw(display, self.scroll)
             # pygame.draw.rect(display,
             #                  (255, 0, 0),
             #                  (self.shoot_enemy.hit_rect.x - self.scroll[0], self.shoot_enemy.hit_rect.y - self.scroll[1],
@@ -239,6 +246,10 @@ class Game:
             #                  (self.shoot_enemy.rect.x - self.scroll[0], self.shoot_enemy.rect.y - self.scroll[1],
             #                   self.shoot_enemy.rect.w, self.shoot_enemy.rect.h),
             #                   2) # for blitting the hitbox_rect used for tiles collision
+
+            # Shooting Enemy update and render
+            self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
+            self.burst_enemy_group.draw(display, self.scroll)            
 
             # Drawing particles
             self.draw_floating_particles()
