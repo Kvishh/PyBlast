@@ -1,7 +1,7 @@
 import pygame, math
 from configs import *
 from game_map import tiles
-from enemy_bullet import EnemyBullet
+from enemy_bullet import SpecterEnemyBullet
 
 class Specter(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
@@ -82,7 +82,7 @@ class Specter(pygame.sprite.Sprite):
                 target_x = player.rect.centerx
                 target_y = player.rect.centery
 
-                bullet = EnemyBullet(self.rect.centerx, 
+                bullet = SpecterEnemyBullet(self.rect.centerx, 
                                 self.rect.centery, 
                                 1, 
                                 target_x,
