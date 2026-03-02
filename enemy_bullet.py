@@ -94,7 +94,7 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
         self._draw_particles(scroll)
 
         if self.turn == 1:
-            if self.opacity < 210:
+            if self.opacity < 220:
                 self.opacity += 3
             else:
                 self.opacity += 0
