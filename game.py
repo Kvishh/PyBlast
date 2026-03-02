@@ -381,9 +381,9 @@ class Game:
 
     def create_floating_particles(self, pos):
         pos = list(pos)
-        for _ in range(15): # location, velocity, radius, color
+        for _ in range(12): # location, velocity, radius, color
             self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
-                                    [random.randrange(-3, 3), -3], 
+                                    [random.randrange(-3, 3), -4], 
                                     random.randrange(24, 30),
                                     255])
     
@@ -467,7 +467,7 @@ class Game:
 
         for bullet, tiles_hit_list in hits.items():
             pos = list(bullet.rect.center) # location, velocity, radius, color
-            for _ in range(20):
+            for _ in range(13):
                 r = random.randrange(60, 80)
                 g = r
                 self.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
@@ -511,7 +511,7 @@ class Game:
 
             for particle in self.particles:
                 # radius decrement
-                particle[2] -= .4
+                particle[2] -= .8
 
                 # change position over time
                 particle[0][0] += particle[1][0]
@@ -568,8 +568,11 @@ class Game:
                                     (radiation[0][0] - self.scroll[0], radiation[0][1] - self.scroll[1]), int(radiation[1]),
                                     int(radiation[2]))
                 else:
-                    radiation[1] += 6 # radius
-                    radiation[2] -= .1 # width
+                    radiation[1] += 7 # radius
+                    radiation[2] -= .2 # width
+
+                    if radiation[2] < 1: radiation[2] = 1
+
                     pygame.draw.circle(display,
                                     radiation[4][1],
                                     (radiation[0][0] + 6 - self.scroll[0], radiation[0][1] + 3 - self.scroll[1]), int(radiation[1]),
@@ -586,7 +589,7 @@ class Game:
 
             for debris in self.debris:
                 # radius decrement
-                debris[2] -= .1
+                debris[2] -= .2
 
                 # change position over time
                 debris[0][0] += debris[1][0]
