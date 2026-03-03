@@ -381,9 +381,9 @@ class Game:
 
     def create_floating_particles(self, pos):
         pos = list(pos)
-        for _ in range(12): # location, velocity, radius, color
+        for _ in range(15): # location, velocity, radius, color
             self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
-                                    [random.randrange(-3, 3), -4], 
+                                    [random.randrange(-3, 3), -3], 
                                     random.randrange(24, 30),
                                     255])
     
@@ -415,7 +415,7 @@ class Game:
             for enemy in flying_enemies: # location, radius, width, id, color (main and shadow)
                 if isinstance(enemy, Soar):
                     self.radiations.append([[pos[0], pos[1]],
-                                            25,
+                                            15,
                                             8,
                                             1,
                                             (145, 47, 47)])
@@ -439,7 +439,7 @@ class Game:
                                             [(158, 0, 191), (71, 36, 82)]])
                 elif isinstance(enemy, Burst):
                     self.radiations.append([[pos[0], pos[1]],
-                                            25,
+                                            15,
                                             8,
                                             1,
                                             (136, 0, 255)])
@@ -451,7 +451,7 @@ class Game:
                                             [(136, 0, 255), (71, 36, 82)]])
                 elif isinstance(enemy, Specter):
                     self.radiations.append([[pos[0], pos[1]],
-                                            25,
+                                            15,
                                             8,
                                             1,
                                             ((89, 0, 255))])
@@ -467,7 +467,7 @@ class Game:
 
         for bullet, tiles_hit_list in hits.items():
             pos = list(bullet.rect.center) # location, velocity, radius, color
-            for _ in range(13):
+            for _ in range(20):
                 r = random.randrange(60, 80)
                 g = r
                 self.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
