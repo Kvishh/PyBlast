@@ -136,6 +136,6 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
             radius = i//3+2
             circle = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
 
-            pygame.draw.circle(circle, (particle[2][0], particle[2][1], particle[2][2], self.opacity), (radius, radius), radius)
+            pygame.draw.circle(circle, (particle[2][0], particle[2][1], particle[2][2], self.opacity), (radius, radius), i//3+2)
 
-            display.blit(circle, (particle[0][0]-scroll[0], particle[0][1]-scroll[1]))
+            display.blit(circle, (particle[0][0]-scroll[0], particle[0][1]-scroll[1]-5))
