@@ -5,7 +5,7 @@ from game_map import tiles
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, image, x, y, direction, mouse_target_x, mouse_target_y):
         super().__init__()
-        self.image = pygame.transform.scale(pygame.image.load(image), (BULLET_SIZE, BULLET_SIZE))
+        self.image = pygame.transform.scale(pygame.image.load(image).convert_alpha(), (BULLET_SIZE, BULLET_SIZE))
         self.rect = self.image.get_rect(center=(x, y+10))
         self.speed = 450
         self.direction = direction
