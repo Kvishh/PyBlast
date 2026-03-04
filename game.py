@@ -251,9 +251,9 @@ class Game:
             # # Avoid overlapping between ground enemies
             # self.avoid_overlap()
 
-            # # Heavy Enemy update and render
-            # self.tank_enemy_group.update(dt, self.player)
-            # self.tank_enemy_group.draw(display, self.scroll)
+            # Heavy Enemy update and render
+            self.tank_enemy_group.update(dt, self.player)
+            self.tank_enemy_group.draw(display, self.scroll)
 
             # # Flight Enemy update and render
             # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies)
@@ -263,17 +263,17 @@ class Game:
             # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies)
             # self.soar_enemy_group.draw(display, self.scroll)
 
-            # Shooting Enemy update and render
-            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
-            self.shoot_enemy_group.draw(display, self.scroll)
+            # # Shooting Enemy update and render
+            # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
+            # self.shoot_enemy_group.draw(display, self.scroll)
 
-            # Burst Enemy update and render
-            self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
-            self.burst_enemy_group.draw(display, self.scroll)
+            # # Burst Enemy update and render
+            # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies)
+            # self.burst_enemy_group.draw(display, self.scroll)
 
-            # Specter Enemy update and render
-            self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
-            self.specter_enemy_group.draw(display, self.scroll)
+            # # Specter Enemy update and render
+            # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
+            # self.specter_enemy_group.draw(display, self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
@@ -404,7 +404,7 @@ class Game:
                         self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
                                                 [random.randrange(-3, 3), -2], 
                                                 random.randrange(10, 14),
-                                                (135, 152, 173)])
+                                                (155, 86, 186)])
 
     def create_radiation(self):
         hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, True, False)
