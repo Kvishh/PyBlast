@@ -94,6 +94,12 @@ class Player(pygame.sprite.Sprite):
                 dust[0][0] -= dust[2][0]
                 dust[0][1] += dust[2][1]
                 dust[1] -= .2
+
+                pygame.draw.circle(display,
+                                (23, 14, 71),
+                                (dust[0][0]-scroll[0]+4, dust[0][1]-scroll[1]+4),
+                                int(dust[1]))
+
                 pygame.draw.circle(display,
                                 (random.randrange(160, 180), random.randint(175, 185), 204),
                                 (dust[0][0]-scroll[0], dust[0][1]-scroll[1]),
