@@ -63,6 +63,8 @@ class EnemyBullet(pygame.sprite.Sprite):
 
     def _draw_particles(self, scroll):
         for i, particle in enumerate(self.particles):
+            pygame.draw.circle(display, (48, 18, 56), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (i//3+2))
+
             pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
     
     def draw_line(self, scroll):
@@ -211,7 +213,11 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
         for i, particle in enumerate(self.particles):
             radius = i//3+2
             circle = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+            shadow = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+
+            pygame.draw.circle(shadow, (48, 18, 56, self.opacity), (radius, radius), i//3+2)
 
             pygame.draw.circle(circle, (particle[2][0], particle[2][1], particle[2][2], self.opacity), (radius, radius), i//3+2)
 
             display.blit(circle, (particle[0][0]-scroll[0], particle[0][1]-scroll[1]-5))
+            display.blit(shadow, (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]-5+4))
