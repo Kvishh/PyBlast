@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, random
 from configs import *
 from game_map import tiles
 from enemy_bullet import EnemyBullet
@@ -27,9 +27,14 @@ class Shoot(pygame.sprite.Sprite):
 
         self.flee_rad = 60
 
-    def update(self, enemy_bullet_group, all_bullets_group, pl, dt, flying_enemies_group):
+        self.particles = []
+        self.angle_direction = 1
+
+    def update(self, enemy_bullet_group, all_bullets_group, pl, dt, flying_enemies_group, scroll):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
         # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
+
+        self._draw_particles(scroll)
 
         self.rotate_sprite(pl)
 
@@ -64,6 +69,11 @@ class Shoot(pygame.sprite.Sprite):
         self._detect_tiles_collision_y()
 
         self.rect.center = self.hit_rect.center
+
+    def _draw_particles(self, scroll):
+        for i, particle in enumerate(self.particles):
+            pygame.draw.circle(display, (23, 4, 23), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (i//3+2))
+            pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
 
     def shoot(self, enemy_bullet_group, all_bullets_group, player):
         current_time = pygame.time.get_ticks()
@@ -122,6 +132,32 @@ class Shoot(pygame.sprite.Sprite):
         dx = target_x - self.pos.x
         dy = target_y - self.pos.y
         angle = math.degrees(math.atan2(dy, dx))
+
+
+        dir = angle%360
+
+        if dir > -90 and dir < 90:
+            self.angle_direction = 1
+        elif dir >= -180 and dir <= 180:
+            self.angle_direction = -1
+
+        ########## TRAIL PARTICLE ##########
+        for particle in self.particles:
+            particle[0][0] -= particle[1][0]
+            particle[0][1] += particle[1][1]
+        
+        vx = -math.cos(math.radians(angle)) * random.uniform(-3,3) + random.uniform(-0.5,0.5)
+        vy = -math.sin(math.radians(angle)) * random.uniform(-3,3) + random.uniform(-0.5,0.5)
+
+        if self.angle_direction > 0: particle = [[self.rect.center[0], self.rect.center[1]], [vx, vy], (122, random.randrange(37, 67), 120)]
+        if self.angle_direction < 0: particle = [[self.rect.center[0]+1, self.rect.center[1]], [vx, vy], (122, random.randrange(37, 67), 120)]
+
+        self.particles.append(particle)
+        if len(self.particles) > 20:
+            self.particles.pop(0)
+        ########## TRAIL PARTICLE ##########
+
+
         self.image = pygame.transform.rotate(self.orig_image, -angle)
         self.rect = self.image.get_rect(center = (self.rect.centerx, self.rect.centery))
 

@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, random
 from configs import *
 from game_map import tiles
 
@@ -21,9 +21,26 @@ class Flight(pygame.sprite.Sprite):
 
         self.flee_rad = 60
 
-    def update(self, pl, dt, flying_enemies_group):
+        self.particles = []
+
+    def update(self, pl, dt, flying_enemies_group, scroll):
         self.switch_orientation()
         self.image = self.orientation[self.x_direction]
+
+        ########## TRAIL PARTICLE ##########
+        for particle in self.particles:
+            particle[0][0] -= 1
+            particle[0][1] += particle[1]
+
+        if self.x_direction > 0: particle = [list(self.rect.center), random.uniform(-2, 2), (122, random.randrange(37, 67), 120)]
+        if self.x_direction < 0: particle = [[self.rect.centerx+5, self.rect.centery], random.uniform(-2, 2), (122, random.randrange(37, 67), 120)]
+
+        self.particles.append(particle)
+        if len(self.particles) > 20:
+            self.particles.pop(0)
+        ########## TRAIL PARTICLE ##########
+        self._draw_particles(scroll)
+
 
         # pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)
         self.seek_force = self.seek(pl)
@@ -53,6 +70,12 @@ class Flight(pygame.sprite.Sprite):
 
         self.rect.centery = int(self.pos.y)
         self._detect_tiles_collision_y()
+
+    def _draw_particles(self, scroll):
+        for i, particle in enumerate(self.particles):
+            pygame.draw.circle(display, (48, 18, 56), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (i//3+2))
+
+            pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))        
