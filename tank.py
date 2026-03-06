@@ -1,4 +1,4 @@
-import pygame
+import pygame, random
 from configs import *
 from game_map import tiles
 
@@ -14,8 +14,9 @@ class Tank(pygame.sprite.Sprite):
         self.jumping = False
         self.x_direction = -1
 
+        self.dust_particles = []
 
-    def update(self, dt, player):
+    def update(self, dt, player, scroll):
         self.image = self.orientation[self.x_direction]
         # Border limit x
         if self.pos.x < 0:
@@ -29,6 +30,9 @@ class Tank(pygame.sprite.Sprite):
         elif self.pos.y > WINDOW_HEIGHT - HEAVY_ENEMY_HEIGHT:
             self.y_velocity = 0
             self.pos.y = FLOOR - HEAVY_ENEMY_HEIGHT
+
+        self.create_dust_particles()
+        self.draw_dust_particles(scroll)
 
         # Follow player
         ##################################
@@ -54,6 +58,35 @@ class Tank(pygame.sprite.Sprite):
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
+
+    def create_dust_particles(self):
+        if self.x_velocity != 0 and not self.jumping and self.y_velocity < 500:
+                if len(self.dust_particles) < 15: # loc, radius, velocity, color
+                    colors = random.choice([(random.randrange(160, 180), random.randint(175, 185), 204),
+                                            (random.randrange(224, 232), random.randint(38, 68), 255)])
+                    self.dust_particles.append([[self.rect.midbottom[0], self.rect.midbottom[1]-6],
+                                5,
+                                [random.randint(-2, 2), random.randint(-10, 0)*.1],
+                                colors])
+
+    def draw_dust_particles(self, scroll):
+        if self.dust_particles:# loc, radius, velocity, color
+            self.dust_particles = [dust for dust in self.dust_particles if dust[1] > 0]
+
+            for dust in self.dust_particles:
+                dust[0][0] -= dust[2][0]
+                dust[0][1] += dust[2][1]
+                dust[1] -= .1
+
+                pygame.draw.circle(display,
+                                (23, 14, 71),
+                                (dust[0][0]-scroll[0]+4, dust[0][1]-scroll[1]+4),
+                                int(dust[1]))
+
+                pygame.draw.circle(display,
+                                dust[3],
+                                (dust[0][0]-scroll[0], dust[0][1]-scroll[1]),
+                                int(dust[1]))
 
     def _get_tile_collision(self):
         for tile in tiles:
