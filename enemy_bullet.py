@@ -1,6 +1,6 @@
 import pygame, math, random
 from configs import *
-from game_map import tiles
+from game_map import tiles, tile_map
 
 class EnemyBullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction, target_x, target_y):
@@ -20,6 +20,9 @@ class EnemyBullet(pygame.sprite.Sprite):
         self._y_vel = math.sin(self._angle)*self.speed
 
         self.particles = []
+
+        self.line_width = 3
+        self.end_p = self.cast_line()
     
     def update(self, dt, scroll):
         ########## TRAIL PARTICLE ##########
@@ -32,6 +35,8 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.particles.pop(0)
         ########## TRAIL PARTICLE ##########
         self._draw_particles(scroll)
+
+        self.draw_line(scroll)
 
         if self.rect.x > WINDOW_WIDTH:
             self.kill()
@@ -59,6 +64,46 @@ class EnemyBullet(pygame.sprite.Sprite):
     def _draw_particles(self, scroll):
         for i, particle in enumerate(self.particles):
             pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
+    
+    def draw_line(self, scroll):
+        start = (self.rect.centerx, self.rect.centery)
+
+        pygame.draw.line(display, (255,0,0), (start[0]-scroll[0], start[1]-scroll[1 ]), (self.end_p[0]-scroll[0], self.end_p[1]-scroll[1]), int(self.line_width))
+
+    def cast_line(self):
+        start = (self.rect.centerx, self.rect.centery)
+        end = (self.target_x, self.target_y)
+        
+        dx, dy = end[0] - start[0], end[1] - start[1]
+        dist = math.hypot(dx, dy)
+
+        if dist == 0: return start
+
+        dx /= dist
+        dy /= dist
+
+        x, y = start[0], start[1]
+
+        max_radius = math.hypot(window.width, window.height)
+
+        for i in range(int(max_radius)):
+            x += dx
+            y += dy
+
+            tile_x, tile_y = int(x // TILE_SIZE), int(y // TILE_SIZE)
+
+            if tile_y < 0 or tile_y >= len(tile_map) or tile_x < 0 or tile_x >= len(tile_map[0]):
+                return (x, y)
+
+            if tile_map[tile_y][tile_x] == 1:
+                return (x, y)
+
+        final_x = start[0] + dx * max_radius
+        final_y = start[1] + dy * max_radius
+
+        end = (final_x, final_y)
+            
+        return end
 
 class SpecterEnemyBullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction, target_x, target_y):
@@ -80,6 +125,9 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
         self.particles = []
         self.opacity = 210
         self.turn = 1
+
+        self.line_width = 3
+        self.end_p = self.cast_line()
     
     def update(self, dt, scroll):
         ########## TRAIL PARTICLE ##########
@@ -92,6 +140,8 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
             self.particles.pop(0)
         ########## TRAIL PARTICLE ##########
         self._draw_particles(scroll)
+
+        self.draw_line(scroll)
 
         if self.turn == 1:
             if self.opacity < 220:
@@ -124,6 +174,32 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
             self.speed = -400
 
         self._move(dt)
+
+    def draw_line(self, scroll):
+        start = (self.rect.centerx, self.rect.centery)
+
+        pygame.draw.line(display, (255,0,0), (start[0]-scroll[0], start[1]-scroll[1 ]), (self.end_p[0]-scroll[0], self.end_p[1]-scroll[1]), int(self.line_width))
+
+    def cast_line(self):
+        start = (self.rect.centerx, self.rect.centery)
+        end = (self.target_x, self.target_y)
+        
+        dx, dy = end[0] - start[0], end[1] - start[1]
+        dist = math.hypot(dx, dy)
+
+        if dist == 0: return start
+
+        dx /= dist
+        dy /= dist
+
+        max_radius = math.hypot(window.width, window.height)
+
+        final_x = start[0] + dx * max_radius
+        final_y = start[1] + dy * max_radius
+
+        end = (final_x, final_y)
+            
+        return end
 
     def _move(self, dt):
         self.pos.x += self._x_vel * dt
