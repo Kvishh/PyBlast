@@ -16,8 +16,14 @@ class Tank(pygame.sprite.Sprite):
 
         self.dust_particles = []
 
+        self.animation_count = 0
+        self.animation_update = pygame.time.get_ticks()
+        self.animations_frames_list = self.load_animation("assets/images/tank_animation.png", 1, 3, 28, 32)
+        self.animations_frames_list_right = [pygame.transform.flip(frame, True, False) for frame in self.animations_frames_list]
+
     def update(self, dt, player, scroll):
         self.image = self.orientation[self.x_direction]
+        self.update_image()
         # Border limit x
         if self.pos.x < 0:
             self.pos.x = 0
@@ -58,6 +64,34 @@ class Tank(pygame.sprite.Sprite):
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
+
+    def update_image(self):
+        if self.x_direction > 0:
+            self.image = self.animations_frames_list[self.animation_count]
+        else:
+            self.image = self.animations_frames_list_right[self.animation_count]
+        self.update_animation()
+
+    def update_animation(self):
+        now = pygame.time.get_ticks()
+        if now - self.animation_update > 250:
+            self.animation_update = now
+            self.animation_count = (self.animation_count + 1) % len(self.animations_frames_list)
+
+    def load_animation(self, file, row, col, width, height):
+        idle_pictures = []
+
+        idle_spritesheet = pygame.image.load(file).convert_alpha()
+
+        for i in range(row):
+            for j in range(col):
+                x = j * width # 21 is frame width for player idle
+                y = i * height # 24 is frame height for player idle
+                frame = idle_spritesheet.subsurface((x, y, width, height))
+                frame = pygame.transform.scale(frame, (HEAVY_ENEMY_WIDTH, HEAVY_ENEMY_HEIGHT))
+                idle_pictures.append(frame)
+        
+        return idle_pictures
 
     def create_dust_particles(self):
         if self.x_velocity != 0 and not self.jumping and self.y_velocity < 500:
