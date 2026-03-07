@@ -12,6 +12,7 @@ class Player(pygame.sprite.Sprite):
         self.x_velocity = 0
         self.y_velocity = 0
         self.jumping = False
+        self.on_ground = False
         self.x_direction = 1
 
         self.dust_particles = []
@@ -27,6 +28,12 @@ class Player(pygame.sprite.Sprite):
         self.run_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.run_animations_frames_list]
 
     def update(self, keys, dt, jump_particles, scroll):
+        self.on_ground = False
+        self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
+
+        # checks if ground_test_rect is touching any tiles
+        self.check_if_on_ground()
+
         self.update_image()
         self._move(keys, jump_particles)
 
@@ -121,8 +128,13 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.run_animations_frames_list_left[self.run_count]
             self.update_run_animation()
 
+    def check_if_on_ground(self):
+        for tile in tiles:
+            if tile.rect.colliderect(self.ground_test_rect):
+                self.on_ground = True
+
     def _move(self, keys_hold, jump_particles):
-        if keys_hold[pygame.K_SPACE] and not self.jumping:
+        if keys_hold[pygame.K_SPACE] and not self.jumping and self.on_ground:
             self.y_velocity = -1170 # ORIGINAL 1050
             self.jumping = True
             for _ in range(3): # location, y_velocity, radius
