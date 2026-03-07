@@ -16,8 +16,18 @@ class Player(pygame.sprite.Sprite):
 
         self.dust_particles = []
 
+        self.idle_count = 0
+        self.idle_animation_update = 0
+        self.idle_animations_frames_list = self.load_animation("assets/images/player_animation_idle.png", 1, 2, 21, 24)
+        self.idle_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.idle_animations_frames_list]
+
+        self.run_count = 0
+        self.run_animation_update = 0
+        self.run_animations_frames_list = self.load_animation("assets/images/player_animation_run.png", 1, 3, 21, 24)
+        self.run_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.run_animations_frames_list]
+
     def update(self, keys, dt, jump_particles, scroll):
-        self.image = self.orientation[self.x_direction]
+        self.update_image()
         self._move(keys, jump_particles)
 
         # this is for checking whether enemy is stuck below or above
@@ -28,6 +38,9 @@ class Player(pygame.sprite.Sprite):
         self.draw_dust_particles(scroll)
 
         if self.y_velocity > 3000: self.y_velocity = 3000
+
+        # display.blit(self.idle_animations_frames_list[0], (60-scroll[0], 60-scroll[1], self.idle_animations_frames_list[0].get_rect().w, self.idle_animations_frames_list[0].get_rect().h))
+        # display.blit(self.idle_animations_frames_list[1], (100-scroll[0], 60-scroll[1], self.idle_animations_frames_list[1].get_rect().w, self.idle_animations_frames_list[1].get_rect().h))
 
         # Border limit x
         if self.pos.x < 0:
@@ -64,6 +77,50 @@ class Player(pygame.sprite.Sprite):
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
     
+    def update_idle_animation(self):
+        now = pygame.time.get_ticks()
+        if now - self.idle_animation_update > 250:
+            self.idle_animation_update = now
+            self.idle_count = (self.idle_count + 1) % len(self.idle_animations_frames_list)
+
+    def update_run_animation(self):
+        now = pygame.time.get_ticks()
+        if now - self.run_animation_update > 150:
+            self.run_animation_update = now
+            self.run_count = (self.run_count + 1) % len(self.run_animations_frames_list)
+
+    def load_animation(self, file, row, col, width, height):
+        idle_pictures = []
+
+        idle_spritesheet = pygame.image.load(file).convert_alpha()
+
+        for i in range(row):
+            for j in range(col):
+                x = j * width # 21 is frame width for player idle
+                y = i * height # 24 is frame height for player idle
+                frame = idle_spritesheet.subsurface((x, y, width, height))
+                frame = pygame.transform.scale(frame, (PLAYER_WIDTH, PLAYER_HEIGHT))
+                idle_pictures.append(frame)
+        
+        return idle_pictures
+
+    def update_image(self):
+        self.image = self.orientation[self.x_direction]
+        if self.x_velocity == 0:
+            if self.x_direction > 0:
+                self.image = self.idle_animations_frames_list[self.idle_count]
+            else: 
+                self.image = self.idle_animations_frames_list_left[self.idle_count]
+            self.update_idle_animation()
+
+
+        elif self.x_velocity != 0:
+            if self.x_direction > 0:
+                self.image = self.run_animations_frames_list[self.run_count]
+            elif self.x_direction < 0:
+                self.image = self.run_animations_frames_list_left[self.run_count]
+            self.update_run_animation()
+
     def _move(self, keys_hold, jump_particles):
         if keys_hold[pygame.K_SPACE] and not self.jumping:
             self.y_velocity = -1170 # ORIGINAL 1050
