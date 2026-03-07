@@ -23,9 +23,15 @@ class Flight(pygame.sprite.Sprite):
 
         self.particles = []
 
+        self.animation_count = 0
+        self.animation_update = pygame.time.get_ticks()
+        self.animations_frames_list = self.load_animation("assets/images/flight_animation.png", 1, 3, 18, 20)
+        self.animations_frames_list_right = [pygame.transform.flip(frame, True, False) for frame in self.animations_frames_list]
+
     def update(self, pl, dt, flying_enemies_group, scroll):
         self.switch_orientation()
         self.image = self.orientation[self.x_direction]
+        self.update_image()
 
         ########## TRAIL PARTICLE ##########
         for particle in self.particles:
@@ -70,6 +76,34 @@ class Flight(pygame.sprite.Sprite):
 
         self.rect.centery = int(self.pos.y)
         self._detect_tiles_collision_y()
+
+    def update_image(self):
+        if self.x_direction > 0:
+            self.image = self.animations_frames_list[self.animation_count]
+        else:
+            self.image = self.animations_frames_list_right[self.animation_count]
+        self.update_animation()
+
+    def update_animation(self):
+        now = pygame.time.get_ticks()
+        if now - self.animation_update > 250:
+            self.animation_update = now
+            self.animation_count = (self.animation_count + 1) % len(self.animations_frames_list)
+
+    def load_animation(self, file, row, col, width, height):
+        idle_pictures = []
+
+        idle_spritesheet = pygame.image.load(file).convert_alpha()
+
+        for i in range(row):
+            for j in range(col):
+                x = j * width # 21 is frame width for player idle
+                y = i * height # 24 is frame height for player idle
+                frame = idle_spritesheet.subsurface((x, y, width, height))
+                frame = pygame.transform.scale(frame, (FLIGHT_ENEMY_WIDTH, FLIGHT_ENEMY_HEIGHT))
+                idle_pictures.append(frame)
+        
+        return idle_pictures
 
     def _draw_particles(self, scroll):
         for i, particle in enumerate(self.particles):
