@@ -18,12 +18,12 @@ class Player(pygame.sprite.Sprite):
         self.dust_particles = []
 
         self.idle_count = 0
-        self.idle_animation_update = 0
+        self.idle_animation_update = pygame.time.get_ticks()
         self.idle_animations_frames_list = self.load_animation("assets/images/player_animation_idle.png", 1, 2, 21, 24)
         self.idle_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.idle_animations_frames_list]
 
         self.run_count = 0
-        self.run_animation_update = 0
+        self.run_animation_update = pygame.time.get_ticks()
         self.run_animations_frames_list = self.load_animation("assets/images/player_animation_run.png", 1, 3, 21, 24)
         self.run_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.run_animations_frames_list]
 
