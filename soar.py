@@ -27,18 +27,7 @@ class Soar(pygame.sprite.Sprite):
         self.switch_orientation()
         self.image = self.orientation[self.x_direction]
 
-        ########## TRAIL PARTICLE ##########
-        for particle in self.particles:
-            particle[0][0] += particle[1][0]
-            particle[0][1] += particle[1][1]
-
-        if self.x_direction > 0: particle = [list(self.rect.center), [-1, random.uniform(-2, 2)], (122, random.randrange(37, 67), 120)]
-        if self.x_direction < 0: particle = [[self.rect.centerx+5, self.rect.centery], [2, random.uniform(-2, 2)], (122, random.randrange(37, 67), 120)]
-
-        self.particles.append(particle)
-        if len(self.particles) > 20:
-            self.particles.pop(0)
-        ########## TRAIL PARTICLE ##########
+        self.create_particles()
         self._draw_particles(scroll)
 
         # pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)
@@ -97,11 +86,25 @@ class Soar(pygame.sprite.Sprite):
 
         return steer
 
-    def _draw_particles(self, scroll):
-        for i, particle in enumerate(self.particles):
-            pygame.draw.circle(display, (48, 18, 56), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (i//3+2))
+    def create_particles(self):
+        if len(self.particles) < 20: # loc, velocity, radius, color
+            self.particles.append([[self.rect.centerx, self.rect.centery],
+                                   [random.randint(1, 3), random.uniform(-2, 2)],
+                                   10,
+                                   (122, random.randrange(37, 67), 120)])
 
-            pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
+    def _draw_particles(self, scroll):
+        if self.particles:
+            self.particles = [particle for particle in self.particles if particle[2] > 4]
+
+            for particle in self.particles:
+                if self.x_direction > 0: particle[0][0] -= particle[1][0]
+                if self.x_direction < 0: particle[0][0] += particle[1][0]
+                particle[0][1] += particle[1][1]
+
+                particle[2] -= .2
+                pygame.draw.circle(display, (48, 18, 56), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), particle[2])
+                pygame.draw.circle(display, particle[3], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), particle[2])
 
     def switch_orientation(self):
         if self.x_vel < 0:
