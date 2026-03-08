@@ -27,6 +27,10 @@ class Player(pygame.sprite.Sprite):
         self.run_animations_frames_list = self.load_animation("assets/images/player_animation_run.png", 1, 3, 21, 24)
         self.run_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.run_animations_frames_list]
 
+        self.max_hp = 4
+        self.current_hp = 3
+        self.shield = 2
+
     def update(self, keys, dt, jump_particles, scroll):
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
