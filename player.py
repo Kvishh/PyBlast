@@ -17,6 +17,10 @@ class Player(pygame.sprite.Sprite):
 
         self.dust_particles = []
 
+        self.gradient_image = pygame.transform.scale(pygame.image.load("assets/images/radial_gradient.png").convert(), (270, 270))
+        self.gradient_layers = pygame.Surface((155,155))
+        self.gradient_layers.set_colorkey((0,0,0))
+
         self.idle_count = 0
         self.idle_animation_update = pygame.time.get_ticks()
         self.idle_animations_frames_list = self.load_animation("assets/images/player_animation_idle.png", 1, 2, 21, 24)
@@ -31,9 +35,12 @@ class Player(pygame.sprite.Sprite):
         self.current_hp = 3
         self.shield = 2
 
-    def update(self, keys, dt, jump_particles, scroll):
+
+    def update(self, keys, dt, jump_particles, dark_overlay, scroll):
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
+
+        self.draw_glow(dark_overlay, scroll)
 
         # checks if ground_test_rect is touching any tiles
         self.check_if_on_ground()
@@ -87,7 +94,25 @@ class Player(pygame.sprite.Sprite):
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
-    
+
+    def draw_glow(self, dark_overlay, scroll):
+        # pygame.draw.rect(display,(255,0,0),(self.rect.x-scroll[0],self.rect.y-scroll[1],self.rect.w,self.rect.h),2)
+        dark_overlay.blit(self.gradient_image,
+                                (self.rect.x - scroll[0] - ((self.rect.w*2) + 32),
+                                self.rect.y - scroll[1] - (self.rect.h*2)),
+                                special_flags=pygame.BLEND_RGBA_ADD)
+        
+        for i in range(2, 0, -1):
+            c = 35 - (i*15)
+            c = pygame.math.clamp(c, 5, 255)
+            r = 30 + (i*20) + 8
+            pygame.draw.circle(self.gradient_layers, (c,c,c), self.gradient_layers.get_rect().center, r)
+
+        display.blit(self.gradient_layers,
+                        ((self.rect.x - scroll[0]) - ((self.gradient_layers.get_rect().w//2) - 19),
+                        (self.rect.y - scroll[1]) - ((self.gradient_layers.get_rect().h//2)) + 25),
+                        special_flags=pygame.BLEND_RGBA_ADD)
+
     def update_idle_animation(self):
         now = pygame.time.get_ticks()
         if now - self.idle_animation_update > 250:

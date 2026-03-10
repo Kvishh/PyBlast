@@ -180,6 +180,7 @@ class Game:
 
             dt = clock.tick(FPS) / 1000
             display.fill((42, 59, 95))
+            self.dark_overlay.fill((190,190,190,100))
 
             # Changing the scroll (camera) value
             self.true_scroll[0] += (self.player.rect.x - self.true_scroll[0] - (DISPLAY_WIDTH//2 - PLAYER_WIDTH//2))/20
@@ -254,7 +255,7 @@ class Game:
             # Player and Wand update and draw methods
             self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
             self.wand.render(self.scroll)
-            self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.scroll)
+            self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.dark_overlay, self.scroll)
             self.player.render(self.scroll)
 
             # Draw jump particles
@@ -305,6 +306,7 @@ class Game:
 
             # Drawing background particles
             self.draw_background_particles()
+            display.blit(self.dark_overlay, (0,0), special_flags=pygame.BLEND_RGB_MULT)
 
             # Rendering of front objects (long rocks)
             draw_front_long_rocks(self.scroll)
@@ -519,8 +521,6 @@ class Game:
                 self.sparks.pop(i)
 
     def draw_background_particles(self):
-        self.dark_overlay.fill((190,190,190,100))
-
         if self.background_particles:
             self.background_particles = [background_particle for background_particle in self.background_particles
                                     if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
@@ -562,8 +562,6 @@ class Game:
                              ((bg_particle[0][0]-self.scroll[0]) - (layer1.get_rect().w//2),
                               (bg_particle[0][1]-self.scroll[1]) - (layer1.get_rect().h//2)),
                               special_flags=pygame.BLEND_RGBA_ADD)
-
-        display.blit(self.dark_overlay, (0,0), special_flags=pygame.BLEND_RGB_MULT)
 
 
     def draw_floating_particles(self):
