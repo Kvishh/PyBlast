@@ -155,7 +155,19 @@ class Game:
         # Group for all projectiles---------------------------------------------------------------------------------
         self.all_bullets_group = CustomGroup(self.player_bullet_group, self.enemy_bullet_group)
 
+
+        ### Overlay and HUD -------------------------------------------------------------------------------------------------- ###
+        # For HUD and Font object ----------------------------------------------------------------------------------
         self.hud = HUD(self.player)
+        self.font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 30)
+
+        # Gradient image/s -----------------------------------------------------------------------------------------
+        self.gradient_image = pygame.image.load("assets/images/radial_gradient.png").convert()
+        self.gradient_image_list = [pygame.transform.scale(self.gradient_image, (70, 70)), pygame.transform.scale(self.gradient_image, (90, 90))]
+
+        # Black Overlay -------------------------------------------------------------------------------------------
+        self.dark_overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        self.dark_overlay.fill((190,190,190,100))
 
 
     def game_run(self):
@@ -267,19 +279,17 @@ class Game:
             # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
             # self.soar_enemy_group.draw(display, self.scroll)
 
-            # Shooting Enemy update and render
-            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
-            self.shoot_enemy_group.draw(display, self.scroll)
+            # # Shooting Enemy update and render
+            # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
+            # self.shoot_enemy_group.draw(display, self.scroll)
 
-            # Burst Enemy update and render
-            self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
-            self.burst_enemy_group.draw(display, self.scroll)
+            # # Burst Enemy update and render
+            # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
+            # self.burst_enemy_group.draw(display, self.scroll)
 
-            # Specter Enemy update and render
-            self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
-            self.specter_enemy_group.draw(display, self.scroll)
-
-            self.hud.update()
+            # # Specter Enemy update and render
+            # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
+            # self.specter_enemy_group.draw(display, self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()
@@ -293,15 +303,22 @@ class Game:
             # Drawing debris
             self.draw_debris()
 
-            # Rendering of front objects (long rocks)
-            draw_front_long_rocks(self.scroll)
-
             # Drawing background particles
             self.draw_background_particles()
+
+            # Rendering of front objects (long rocks)
+            draw_front_long_rocks(self.scroll)
 
             # Shake timer decrement
             if self.shake_timer > 0:
                 self.shake_timer -= 1
+            
+            # HUD update
+            self.hud.update()
+
+            # Blitting of the FPS text
+            text = self.render_outlined(self.font, (f"FPS: {clock.get_fps():.0f}"), (255,255,255), (0,0,0), 2)
+            display.blit(text, (DISPLAY_WIDTH-100,0))
 
             # last methods to be called
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
@@ -309,6 +326,18 @@ class Game:
         
         # Quit the window
         pygame.quit()
+
+    def render_outlined(self, font: pygame.Font, text: str, text_color: pygame.typing.ColorLike, outline_color: pygame.typing.ColorLike, outline_width: int,) -> pygame.Surface:
+        old_outline = font.outline
+        if old_outline != 0:
+            font.outline = 0
+        base_text_surf = font.render(text, False, text_color)
+        font.outline = outline_width
+        outlined_text_surf = font.render(text, True, outline_color)
+
+        outlined_text_surf.blit(base_text_surf, (outline_width, outline_width))
+        font.outline = old_outline
+        return outlined_text_surf
 
     def avoid_overlap(self):
         for x in self.all_ground_enemies:
@@ -350,10 +379,11 @@ class Game:
                 previous_time[0] = current_time
 
     def create_background_particles(self):
-        if len(self.background_particles) < 7: # loc, radius, direction
+        if len(self.background_particles) < 10: # loc, radius, direction
             self.background_particles.append([[random.randrange(WINDOW_WIDTH), random.randrange(WINDOW_HEIGHT)],
-                                        random.randrange(2, 4),
-                                        [random.choice([.5, -.5]), random.choice([.5, -.5])]])
+                                        2,
+                                        [random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)]), random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)])],
+                                        random.choice(self.gradient_image_list)])
 
     def create_impact_and_floating_particles(self):
         hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_sprites_group, False, False)
@@ -489,6 +519,8 @@ class Game:
                 self.sparks.pop(i)
 
     def draw_background_particles(self):
+        self.dark_overlay.fill((190,190,190,100))
+
         if self.background_particles:
             self.background_particles = [background_particle for background_particle in self.background_particles
                                     if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
@@ -496,20 +528,43 @@ class Game:
             
             # loc, radius, direction
             for bg_particle in self.background_particles:
-                # bg_particle[0][1] += -.5
                 bg_particle[0][0] += bg_particle[2][0]
                 bg_particle[0][1] += bg_particle[2][1]
+                """Movement of particle"""
+
+                gradient_copy = bg_particle[3]
+                self.dark_overlay.blit(gradient_copy,
+                                       (bg_particle[0][0]-self.scroll[0] - (gradient_copy.get_rect().w//2),
+                                        bg_particle[0][1]-self.scroll[1] - (gradient_copy.get_rect().h//2)),
+                                        special_flags=pygame.BLEND_RGBA_ADD)
+                """The two lines above are responsible for the gradient image"""
+
                 pygame.draw.circle(display, (255, 255, 255), [int(bg_particle[0][0])-self.scroll[0], int(bg_particle[0][1])-self.scroll[1]], bg_particle[1])
+                """The line above is for the white opaque circle"""
 
-                # change the multiplier if you want to make the glow particle (circle) to be bigger
-                bg_particle_radius = bg_particle[1]*3
+                radius = 35 # if gradient_image w and h is 70
+                r_increment = -1 # if gradient_image w and h is 70
+                gradient_image_w = gradient_copy.get_rect().w
+                if gradient_image_w == 90:
+                    radius = 45
+                    r_increment = 5
 
-                particle_surface = pygame.Surface((bg_particle_radius * 2, bg_particle_radius * 2))
-                pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius, bg_particle_radius), bg_particle_radius)
-                # pygame.draw.circle(particle_surface, (20, 20, 20), (bg_particle_radius-scroll[0], bg_particle_radius-scroll[1]), bg_particle_radius) # ORIGINAL!!
-                particle_surface.set_colorkey((0,0,0))
+                layer1 = pygame.Surface((radius,radius))
+                layer1.set_colorkey((0,0,0))
 
-                display.blit(particle_surface, [int(bg_particle[0][0] - bg_particle_radius)-self.scroll[0], int(bg_particle[0][1] - bg_particle_radius)-self.scroll[1]], special_flags=pygame.BLEND_RGB_ADD)
+                for i in range(2, -1, -1):
+                    c = 30 - i*10 * 4
+                    c = pygame.math.clamp(c, 5, 255)
+                    r = r_increment + (i*5) + 8
+                    pygame.draw.circle(layer1, (c,c,c), layer1.get_rect().center, r)
+
+                display.blit(layer1,
+                             ((bg_particle[0][0]-self.scroll[0]) - (layer1.get_rect().w//2),
+                              (bg_particle[0][1]-self.scroll[1]) - (layer1.get_rect().h//2)),
+                              special_flags=pygame.BLEND_RGBA_ADD)
+
+        display.blit(self.dark_overlay, (0,0), special_flags=pygame.BLEND_RGB_MULT)
+
 
     def draw_floating_particles(self):
         if self.particles:
