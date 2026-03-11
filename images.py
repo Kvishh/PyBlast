@@ -46,3 +46,16 @@ class EnemyBulletImage:
 class SpecterEnemyBulletImage:
     specter_enemy_bullet_image = pygame.image.load("assets/images/enemy_projectile.png").convert_alpha()
     specter_enemy_bullet_image_scaled = pygame.transform.scale(specter_enemy_bullet_image, (BULLET_SIZE, BULLET_SIZE))
+
+class LightImage:
+    light_image = pygame.transform.flip(pygame.image.load("assets/images/slime.png").convert_alpha(), True, False) # original image facing left, flipped to face right
+    light_image_scaled = pygame.transform.scale(light_image, (LIGHT_ENEMY_WIDTH, LIGHT_ENEMY_HEIGHT))
+    light_image_scaled_flipped = pygame.transform.flip(light_image_scaled, True, False)
+
+class TankImages:
+    tank_image = pygame.image.load("assets/images/tank.png").convert_alpha()
+    tank_image_scaled = pygame.transform.scale(tank_image, (HEAVY_ENEMY_WIDTH, HEAVY_ENEMY_HEIGHT))
+    tank_image_scaled_flipped = pygame.transform.flip(tank_image_scaled, True, False)
+
+    tank_run_animations_frames_list = load_animation("assets/images/tank_animation.png", 1, 3, 28, 32, HEAVY_ENEMY_WIDTH, HEAVY_ENEMY_HEIGHT)
+    tank_run_animations_frames_flipped_list = [pygame.transform.flip(frame, True, False) for frame in tank_run_animations_frames_list]

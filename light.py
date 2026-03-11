@@ -1,13 +1,14 @@
 import pygame, random
 from configs import *
 from game_map import tiles
+from images import LightImage
 
 class Light(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("assets/images/slime.png").convert_alpha(), (LIGHT_ENEMY_WIDTH, LIGHT_ENEMY_HEIGHT)), True, False)
-        self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}        
+        self.image = LightImage.light_image_scaled
+        self.orientation = {1: self.image, -1: LightImage.light_image_scaled_flipped}
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
         self.x_velocity = 120
         self.y_velocity = 0
