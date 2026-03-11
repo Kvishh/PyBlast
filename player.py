@@ -1,13 +1,14 @@
 import pygame, random
 from configs import *
 from game_map import tiles
+from images import PlayerImages, GradientImage
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/main_sorcerer.png").convert_alpha(), (PLAYER_WIDTH, PLAYER_HEIGHT))
-        self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}
+        self.image = PlayerImages.player_image_scaled
+        self.orientation = {1: self.image, -1: PlayerImages.player_image_scaled_flipped}
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
         self.x_velocity = 0
         self.y_velocity = 0
@@ -17,19 +18,19 @@ class Player(pygame.sprite.Sprite):
 
         self.dust_particles = []
 
-        self.gradient_image = pygame.transform.scale(pygame.image.load("assets/images/radial_gradient.png").convert(), (270, 270))
+        self.gradient_image = GradientImage.gradient_player_image_scaled
         self.gradient_layers = pygame.Surface((155,155))
         self.gradient_layers.set_colorkey((0,0,0))
 
         self.idle_count = 0
         self.idle_animation_update = pygame.time.get_ticks()
-        self.idle_animations_frames_list = self.load_animation("assets/images/player_animation_idle.png", 1, 2, 21, 24)
-        self.idle_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.idle_animations_frames_list]
+        self.idle_animations_frames_list = PlayerImages.player_idle_animations_frames_list
+        self.idle_animations_frames_list_left = PlayerImages.player_idle_animations_frames_flipped_list
 
         self.run_count = 0
         self.run_animation_update = pygame.time.get_ticks()
-        self.run_animations_frames_list = self.load_animation("assets/images/player_animation_run.png", 1, 3, 21, 24)
-        self.run_animations_frames_list_left = [pygame.transform.flip(frame, True, False) for frame in self.run_animations_frames_list]
+        self.run_animations_frames_list = PlayerImages.player_run_animations_frames_list
+        self.run_animations_frames_list_left = PlayerImages.player_run_animations_frames_flipped_list
 
         self.max_hp = 4
         self.current_hp = 3
@@ -124,21 +125,6 @@ class Player(pygame.sprite.Sprite):
         if now - self.run_animation_update > 150:
             self.run_animation_update = now
             self.run_count = (self.run_count + 1) % len(self.run_animations_frames_list)
-
-    def load_animation(self, file, row, col, width, height):
-        idle_pictures = []
-
-        idle_spritesheet = pygame.image.load(file).convert_alpha()
-
-        for i in range(row):
-            for j in range(col):
-                x = j * width # 21 is frame width for player idle
-                y = i * height # 24 is frame height for player idle
-                frame = idle_spritesheet.subsurface((x, y, width, height))
-                frame = pygame.transform.scale(frame, (PLAYER_WIDTH, PLAYER_HEIGHT))
-                idle_pictures.append(frame)
-        
-        return idle_pictures
 
     def update_image(self):
         self.image = self.orientation[self.x_direction]
