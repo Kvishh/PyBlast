@@ -2,12 +2,13 @@ import pygame, math, random
 from configs import *
 from game_map import tiles
 from enemy_bullet import EnemyBullet
+from images import BurstImage
 
 class Burst(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/burst.png").convert_alpha(), (BURST_ENEMY_WIDTH, BURST_ENEMY_HEIGHT))
+        self.image = BurstImage.burst_image_scaled
         self.rect = self.image.get_rect()
         self.orig_image = self.image
         self.x_vel = 0

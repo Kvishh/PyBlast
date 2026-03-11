@@ -2,12 +2,13 @@ import pygame, math, random
 from configs import *
 from game_map import tiles
 from enemy_bullet import EnemyBullet
+from images import ShootImage
 
 class Shoot(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/shoot.png").convert_alpha(), (SHOOTING_ENEMY_WIDTH, SHOOTING_ENEMY_HEIGHT))
+        self.image = ShootImage.shoot_image_scaled
         self.rect = self.image.get_rect()
         self.orig_image = self.image
         self.x_vel = 0

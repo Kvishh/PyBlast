@@ -2,12 +2,13 @@ import pygame, math
 from configs import *
 from game_map import tiles
 from enemy_bullet import SpecterEnemyBullet
+from images import SpecterImage
 
 class Specter(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/specter.png").convert_alpha(), (SPECTER_ENEMY_WIDTH, SPECTER_ENEMY_HEIGHT))
+        self.image = SpecterImage.specter_image_scaled
         self.rect = self.image.get_rect()
         self.orig_image = self.image
         self.x_vel = 0

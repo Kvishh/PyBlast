@@ -272,25 +272,25 @@ class Game:
             self.tank_enemy_group.update(dt, self.player, self.scroll)
             self.tank_enemy_group.draw(display, self.scroll)
 
-            # Flight Enemy update and render
-            self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-            self.flight_enemy_group.draw(display, self.scroll)
+            # # Flight Enemy update and render
+            # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+            # self.flight_enemy_group.draw(display, self.scroll)
 
-            # Soar Enemy update and render
-            self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-            self.soar_enemy_group.draw(display, self.scroll)
+            # # Soar Enemy update and render
+            # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+            # self.soar_enemy_group.draw(display, self.scroll)
 
-            # # Shooting Enemy update and render
-            # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
-            # self.shoot_enemy_group.draw(display, self.scroll)
+            # Shooting Enemy update and render
+            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
+            self.shoot_enemy_group.draw(display, self.scroll)
 
-            # # Burst Enemy update and render
-            # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
-            # self.burst_enemy_group.draw(display, self.scroll)
+            # Burst Enemy update and render
+            self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
+            self.burst_enemy_group.draw(display, self.scroll)
 
-            # # Specter Enemy update and render
-            # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
-            # self.specter_enemy_group.draw(display, self.scroll)
+            # Specter Enemy update and render
+            self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
+            self.specter_enemy_group.draw(display, self.scroll)
 
             # Drawing particles
             self.draw_floating_particles()

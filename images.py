@@ -72,3 +72,15 @@ class SoarImage:
     soar_image = pygame.image.load("assets/images/soar.png").convert_alpha()
     soar_image_scaled = pygame.transform.scale(soar_image, (SOAR_ENEMY_WIDTH, SOAR_ENEMY_HEIGHT))
     soar_image_scaled_flipped = pygame.transform.flip(soar_image_scaled, True, False)
+
+class ShootImage:
+    shoot_image = pygame.image.load("assets/images/shoot.png").convert_alpha()
+    shoot_image_scaled = pygame.transform.scale(shoot_image, (SHOOTING_ENEMY_WIDTH, SHOOTING_ENEMY_HEIGHT))
+
+class BurstImage:
+    burst_image = pygame.image.load("assets/images/burst.png").convert_alpha()
+    burst_image_scaled = pygame.transform.scale(burst_image, (BURST_ENEMY_WIDTH, BURST_ENEMY_HEIGHT))
+
+class SpecterImage:
+    specter_image = pygame.image.load("assets/images/specter.png").convert_alpha()
+    specter_image_scaled = pygame.transform.scale(specter_image, (SPECTER_ENEMY_WIDTH, SPECTER_ENEMY_HEIGHT))
