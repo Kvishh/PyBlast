@@ -272,9 +272,9 @@ class Game:
             self.tank_enemy_group.update(dt, self.player, self.scroll)
             self.tank_enemy_group.draw(display, self.scroll)
 
-            # # Flight Enemy update and render
-            # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-            # self.flight_enemy_group.draw(display, self.scroll)
+            # Flight Enemy update and render
+            self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+            self.flight_enemy_group.draw(display, self.scroll)
 
             # # Soar Enemy update and render
             # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)

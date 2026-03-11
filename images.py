@@ -59,3 +59,11 @@ class TankImages:
 
     tank_run_animations_frames_list = load_animation("assets/images/tank_animation.png", 1, 3, 28, 32, HEAVY_ENEMY_WIDTH, HEAVY_ENEMY_HEIGHT)
     tank_run_animations_frames_flipped_list = [pygame.transform.flip(frame, True, False) for frame in tank_run_animations_frames_list]
+
+class FlightImage:
+    flight_image = pygame.image.load("assets/images/flight.png").convert_alpha()
+    flight_image_scaled = pygame.transform.scale(flight_image, (FLIGHT_ENEMY_WIDTH, FLIGHT_ENEMY_HEIGHT))
+    flight_image_scaled_flipped = pygame.transform.flip(flight_image_scaled, True, False)
+
+    flight_run_animations_frames_list = load_animation("assets/images/flight_animation.png", 1, 3, 18, 20, FLIGHT_ENEMY_WIDTH, FLIGHT_ENEMY_HEIGHT)
+    flight_run_animations_frames_flipped_list = [pygame.transform.flip(frame, True, False) for frame in flight_run_animations_frames_list]
