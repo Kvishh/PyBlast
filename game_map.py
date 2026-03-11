@@ -1,17 +1,18 @@
 import pygame
 from configs import *
 from customgroup import CustomGroup
+from images import TileImage, BackgroundImages, LongRocksImages
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/tile1.png").convert_alpha(), (TILE_SIZE, TILE_SIZE)).convert()
+        self.image = TileImage.tile_image_scaled
         self.rect = self.image.get_rect(topleft=(x, y))
 
 tiles: list[Tile] = []
 tiles_group = pygame.sprite.Group()
-bg_images = []
-long_rocks = []
+bg_images = BackgroundImages.bg_images_list
+long_rocks = LongRocksImages.long_rocks_list
 tiles_blocks = set([])
 
 # 1300/32 = 40.625 round up 41
@@ -59,35 +60,11 @@ def draw_tiles(scroll):
     for tile in tiles:
         display.blit(tile.image, (tile.rect.x-scroll[0], tile.rect.y-scroll[1]))
 
-def load_bg_images():
-    for i in range(1, 5):
-        image = pygame.image.load(f"assets/images/bg_{i}.png").convert_alpha()
-        bg_images.append(image)
-
-
 def draw_background(scroll):
     speed = .4
     for bg_image in bg_images:
         display.blit(bg_image, (0 - scroll[0] * speed, 0-scroll[1]))
         speed+=.2
-
-def load_long_rocks():
-    i = 1
-    while i < 5:
-        if i == 3:
-            long_rock = pygame.image.load("assets/images/long_rock1.png").convert_alpha()
-            long_rocks.append(long_rock)
-            i+=1
-            continue
-        elif i == 4:
-            long_rock = pygame.transform.rotate(pygame.transform.flip(pygame.image.load("assets/images/long_rock2.png").convert_alpha(), True, False), 10)
-            long_rocks.append(long_rock)
-            i+=1
-            continue
-
-        long_rock = pygame.image.load(f"assets/images/long_rock{i}.png").convert_alpha()
-        long_rocks.append(long_rock)
-        i+=1
 
 def draw_behind_long_rocks(scroll):
     long_rocks[1].set_alpha(220)

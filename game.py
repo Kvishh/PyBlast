@@ -1,6 +1,6 @@
 import pygame, random, math
 from configs import *
-from game_map import tiles_group, tiles_blocks, draw_background, create_tiles, load_bg_images, load_long_rocks, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from game_map import tiles_group, tiles_blocks, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
 from bullet import PlayerBullet
@@ -137,12 +137,6 @@ class Game:
         ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------- ###
         # Function for creating tile-------------------------------------------------------------------------------
         create_tiles()
-
-        # Function for creating background-------------------------------------------------------------------------
-        load_bg_images()
-
-        # Function for loading background images-------------------------------------------------------------------
-        load_long_rocks()
 
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###

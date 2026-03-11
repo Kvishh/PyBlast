@@ -20,6 +20,20 @@ class GradientImage:
     gradient_image = pygame.image.load("assets/images/radial_gradient.png").convert()
     gradient_player_image_scaled = pygame.transform.scale(pygame.image.load("assets/images/radial_gradient.png").convert(), (270, 270))
 
+class TileImage:
+    tile_image = pygame.image.load("assets/images/tile1.png").convert_alpha()
+    tile_image_scaled = pygame.transform.scale(tile_image, (TILE_SIZE, TILE_SIZE))
+
+class BackgroundImages:
+    bg_images_list = [pygame.image.load(f"assets/images/bg_{i}.png").convert_alpha() for i in range(1, 5)]
+
+class LongRocksImages:
+    long_rock_1_image = pygame.image.load("assets/images/long_rock1.png").convert_alpha() # for 1 and 3
+    long_rock_2_image = pygame.image.load("assets/images/long_rock2.png").convert_alpha()
+    long_rock_4_image = pygame.transform.rotate(pygame.transform.flip(pygame.image.load("assets/images/long_rock2.png").convert_alpha(), True, False), 10)
+
+    long_rocks_list = [long_rock_1_image,long_rock_2_image,long_rock_1_image,long_rock_4_image]
+
 class PlayerImages:
     player_image = pygame.image.load("assets/images/main_sorcerer.png").convert_alpha()
     player_image_scaled = pygame.transform.scale(player_image, (PLAYER_WIDTH, PLAYER_HEIGHT))
