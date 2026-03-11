@@ -157,9 +157,8 @@ class Game:
 
 
         ### Overlay and HUD -------------------------------------------------------------------------------------------------- ###
-        # For HUD and Font object ----------------------------------------------------------------------------------
+        # For HUD --------------------------------------------------------------------------------------------------
         self.hud = HUD(self.player)
-        self.font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 30)
 
         # Gradient image/s -----------------------------------------------------------------------------------------
         self.gradient_image = pygame.image.load("assets/images/radial_gradient.png").convert()
@@ -318,28 +317,12 @@ class Game:
             # HUD update
             self.hud.update()
 
-            # Blitting of the FPS text
-            text = self.render_outlined(self.font, (f"FPS: {clock.get_fps():.0f}"), (255,255,255), (0,0,0), 2)
-            display.blit(text, (DISPLAY_WIDTH-100,0))
-
             # last methods to be called
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
             pygame.display.flip()
         
         # Quit the window
         pygame.quit()
-
-    def render_outlined(self, font: pygame.Font, text: str, text_color: pygame.typing.ColorLike, outline_color: pygame.typing.ColorLike, outline_width: int,) -> pygame.Surface:
-        old_outline = font.outline
-        if old_outline != 0:
-            font.outline = 0
-        base_text_surf = font.render(text, False, text_color)
-        font.outline = outline_width
-        outlined_text_surf = font.render(text, True, outline_color)
-
-        outlined_text_surf.blit(base_text_surf, (outline_width, outline_width))
-        font.outline = old_outline
-        return outlined_text_surf
 
     def avoid_overlap(self):
         for x in self.all_ground_enemies:
@@ -561,7 +544,6 @@ class Game:
                              ((bg_particle[0][0]-self.scroll[0]) - (layer1.get_rect().w//2),
                               (bg_particle[0][1]-self.scroll[1]) - (layer1.get_rect().h//2)),
                               special_flags=pygame.BLEND_RGBA_ADD)
-
 
     def draw_floating_particles(self):
         if self.particles:
