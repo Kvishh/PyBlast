@@ -276,9 +276,9 @@ class Game:
             self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
             self.flight_enemy_group.draw(display, self.scroll)
 
-            # # Soar Enemy update and render
-            # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-            # self.soar_enemy_group.draw(display, self.scroll)
+            # Soar Enemy update and render
+            self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+            self.soar_enemy_group.draw(display, self.scroll)
 
             # # Shooting Enemy update and render
             # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)

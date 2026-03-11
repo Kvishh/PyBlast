@@ -1,13 +1,14 @@
 import pygame, math, random
 from configs import *
 from game_map import tiles
+from images import SoarImage
 
 class Soar(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(*groups)
         self.pos = pygame.Vector2(x, y)
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/soar.png").convert_alpha(), (SOAR_ENEMY_WIDTH, SOAR_ENEMY_HEIGHT))
-        self.orientation = {1: self.image, -1: pygame.transform.flip(self.image, True, False)}
+        self.image = SoarImage.soar_image_scaled
+        self.orientation = {1: self.image, -1: SoarImage.soar_image_scaled_flipped}
         self.rect = self.image.get_rect()
         self.x_vel = 0
         self.y_vel = 0
