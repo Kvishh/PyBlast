@@ -1,11 +1,12 @@
 import pygame, math, random
 from configs import *
 from game_map import tiles, tile_map
+from images import EnemyBulletImage, SpecterEnemyBulletImage
 
 class EnemyBullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction, target_x, target_y):
         super().__init__()
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/enemy_projectile.png"), (BULLET_SIZE, BULLET_SIZE))
+        self.image = EnemyBulletImage.enemy_bullet_image_scaled
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 450
         self.direction = direction
@@ -110,7 +111,7 @@ class EnemyBullet(pygame.sprite.Sprite):
 class SpecterEnemyBullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction, target_x, target_y):
         super().__init__()
-        self.image = pygame.transform.scale(pygame.image.load("assets/images/enemy_projectile.png"), (BULLET_SIZE, BULLET_SIZE))
+        self.image = SpecterEnemyBulletImage.specter_enemy_bullet_image_scaled
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 450
         self.direction = direction
