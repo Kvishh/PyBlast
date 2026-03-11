@@ -30,3 +30,11 @@ class PlayerImages:
 
     player_run_animations_frames_list = load_animation("assets/images/player_animation_run.png", 1, 3, 21, 24, PLAYER_WIDTH, PLAYER_HEIGHT)
     player_run_animations_frames_flipped_list = [pygame.transform.flip(frame, True, False) for frame in player_run_animations_frames_list]
+
+class WandImage:
+    wand_image = pygame.image.load("assets/images/player_wand.png").convert_alpha()
+    wand_image_rotated = pygame.transform.rotate(wand_image, -90)
+
+class BulletImage:
+    bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
+    bullet_image_scaled = pygame.transform.scale(bullet_image, (BULLET_SIZE, BULLET_SIZE))

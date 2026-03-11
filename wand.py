@@ -1,10 +1,11 @@
 import pygame, math
 from configs import *
+from images import WandImage
 
 class Wand(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.transform.rotate(pygame.image.load("assets/images/player_wand.png").convert_alpha(), -90)
+        self.image = WandImage.wand_image_rotated
         self.rect = self.image.get_rect(center=(x, y))
         self.orig_image = self.image
         self.pivot_point = self.rect.centerx/2, self.rect.centery/2

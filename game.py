@@ -370,8 +370,7 @@ class Game:
                 mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + self.scroll[0]
                 mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + self.scroll[1]
                 
-                bullet = PlayerBullet("assets/images/bullet.png", 
-                                player_rect_centerx, 
+                bullet = PlayerBullet(player_rect_centerx, 
                                 player_rect_centery, 
                                 self.player.x_direction, 
                                 mouse_x,
