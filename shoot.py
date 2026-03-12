@@ -1,6 +1,6 @@
 import pygame, math, random
 from configs import *
-from game_map import tiles
+from game_map import tiles, tiles_blocks
 from enemy_bullet import EnemyBullet
 from images import ShootImage
 
@@ -17,6 +17,12 @@ class Shoot(pygame.sprite.Sprite):
 
         self.hit_rect = pygame.Rect(0, 0, 50, 50)
         self.hit_rect.center = self.rect.center
+
+        self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
+                                       (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
+                                       (-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0),
+                                       (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
+                                       (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)]
 
         self.previous_time = pygame.time.get_ticks()
         self.previous_time_slowing_down = pygame.time.get_ticks()
@@ -163,25 +169,37 @@ class Shoot(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = (self.rect.centerx, self.rect.centery))
 
     def get_tile_collided(self):
-        for tile in tiles:
-            if tile.rect.colliderect(self.hit_rect):
-                return tile
-        return None
+        tiles_loc = []
+        collided_tiles = []
+
+        self_tile_loc = (int(self.hit_rect.x // TILE_SIZE), int(self.hit_rect.y // TILE_SIZE))
+
+        for offset in self.tiles_collision_offset:
+            check_loc = str(self_tile_loc[0] + offset[0]) + ";" + str(self_tile_loc[1] + offset[1])
+            if check_loc in tiles_blocks:
+                tiles_loc.append(check_loc)
+        
+        for tile in tiles_loc:
+            collided_tiles.append(tiles_blocks[tile])
+
+        return collided_tiles
 
     def _detect_tiles_collision_x(self):
-        collided_tile = self.get_tile_collided()
-        if collided_tile is not None:
-            if self.x_vel > 0:
-                self.pos.x = collided_tile.rect.left - self.hit_rect.width // 2
-            elif self.x_vel < 0:
-                self.pos.x = collided_tile.rect.right + self.hit_rect.width // 2
-            self.hit_rect.centerx = int(self.pos.x)
+        collided_tiles = self.get_tile_collided()
+        for tile in collided_tiles:
+            if tile.rect.colliderect(self.hit_rect):
+                if self.x_vel > 0:
+                    self.pos.x = tile.rect.left - self.hit_rect.width // 2
+                elif self.x_vel < 0:
+                    self.pos.x = tile.rect.right + self.hit_rect.width // 2
+                self.hit_rect.centerx = int(self.pos.x)
 
     def _detect_tiles_collision_y(self):
-        collided_tile = self.get_tile_collided()
-        if collided_tile is not None:
-            if self.y_vel > 0:
-                self.pos.y = collided_tile.rect.top - self.hit_rect.height // 2
-            elif self.y_vel < 0:
-                self.pos.y = collided_tile.rect.bottom + self.hit_rect.height // 2
-            self.hit_rect.centery = int(self.pos.y)
+        collided_tiles = self.get_tile_collided()
+        for tile in collided_tiles:
+            if tile.rect.colliderect(self.hit_rect):
+                if self.y_vel > 0:
+                    self.pos.y = tile.rect.top - self.hit_rect.height // 2
+                elif self.y_vel < 0:
+                    self.pos.y = tile.rect.bottom + self.hit_rect.height // 2
+                self.hit_rect.centery = int(self.pos.y)

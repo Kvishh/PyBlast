@@ -1,6 +1,6 @@
 import pygame, random
 from configs import *
-from game_map import tiles
+from game_map import tiles, tiles_blocks
 from images import PlayerImages, GradientImage
 
 class Player(pygame.sprite.Sprite):
@@ -15,6 +15,17 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.on_ground = False
         self.x_direction = 1
+
+        # [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2)]
+        # [(-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1)]
+        # [(-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0)]
+        # [(-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1)]
+        # [(-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)]
+        self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
+                                       (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
+                                       (-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0),
+                                       (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
+                                       (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)]
 
         self.dust_particles = []
 
@@ -144,8 +155,13 @@ class Player(pygame.sprite.Sprite):
             self.update_run_animation()
 
     def check_if_on_ground(self):
-        for tile in tiles:
-            if tile.rect.colliderect(self.ground_test_rect):
+        player_tile_loc = (int(self.rect.midleft[0] // TILE_SIZE), int(self.rect.y // TILE_SIZE)+2)
+
+        ground_offset_tiles = [(-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1)]
+
+        for offset in ground_offset_tiles:
+            check_loc = str(player_tile_loc[0] + offset[0]) + ";" + str(player_tile_loc[1])
+            if check_loc in tiles_blocks:
                 self.on_ground = True
 
     def _move(self, keys_hold, jump_particles):
@@ -190,30 +206,42 @@ class Player(pygame.sprite.Sprite):
                                 int(dust[1]))
 
     def _get_tile_collision(self):
-        for tile in tiles:
-            if tile.rect.colliderect(self.rect):
-                return tile
-        return None
+        tiles_loc = []
+        collided_tiles = []
+
+        player_tile_loc = (int(self.rect.x // TILE_SIZE), int(self.rect.y // TILE_SIZE))
+
+        for offset in self.tiles_collision_offset:
+            check_loc = str(player_tile_loc[0] + offset[0]) + ";" + str(player_tile_loc[1] + offset[1])
+            if check_loc in tiles_blocks:
+                tiles_loc.append(check_loc)
+        
+        for tile in tiles_loc:
+            collided_tiles.append(tiles_blocks[tile])
+
+        return collided_tiles
 
     def _detect_tiles_collision_x(self):
-        tile = self._get_tile_collision()
-        if tile is not None:
-            if self.x_velocity > 0:
-                self.pos.x = tile.rect.left - PLAYER_WIDTH
-                self.rect.x = int(self.pos.x)
-            elif self.x_velocity < 0:
-                self.pos.x = tile.rect.right
-                self.rect.x = int(self.pos.x)
-            self.x_velocity = 0
+        collided_tiles = self._get_tile_collision()
+        for tile in collided_tiles:
+            if tile.rect.colliderect(self.rect):
+                if self.x_velocity > 0:
+                    self.pos.x = tile.rect.left - PLAYER_WIDTH
+                    self.rect.x = int(self.pos.x)
+                elif self.x_velocity < 0:
+                    self.pos.x = tile.rect.right
+                    self.rect.x = int(self.pos.x)
+                self.x_velocity = 0
 
     def _detect_tiles_collision_y(self):
-        tile = self._get_tile_collision()
-        if tile is not None:
-            if self.y_velocity > 0:
-                self.pos.y = tile.rect.top - PLAYER_HEIGHT
-                self.rect.y = int(self.pos.y)
-                self.jumping = False
-            elif self.y_velocity < 0:
-                self.pos.y = tile.rect.bottom
-                self.rect.y = int(self.pos.y)
-            self.y_velocity = 0
+        collided_tiles = self._get_tile_collision()
+        for tile in collided_tiles:
+            if tile.rect.colliderect(self.rect):
+                if self.y_velocity > 0:
+                    self.pos.y = tile.rect.top - PLAYER_HEIGHT
+                    self.rect.y = int(self.pos.y)
+                    self.jumping = False
+                elif self.y_velocity < 0:
+                    self.pos.y = tile.rect.bottom
+                    self.rect.y = int(self.pos.y)
+                self.y_velocity = 0

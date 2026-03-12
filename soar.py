@@ -1,6 +1,6 @@
 import pygame, math, random
 from configs import *
-from game_map import tiles
+from game_map import tiles, tiles_blocks
 from images import SoarImage
 
 class Soar(pygame.sprite.Sprite):
@@ -16,6 +16,12 @@ class Soar(pygame.sprite.Sprite):
         self.x_direction = 1
 
         self.vel = pygame.Vector2(0, 0)
+
+        self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
+                                       (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
+                                       (-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0),
+                                       (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
+                                       (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)]
 
         self.seek_force = pygame.Vector2(0, 0)
         self.avoid_force = pygame.Vector2(0, 0)
@@ -114,25 +120,37 @@ class Soar(pygame.sprite.Sprite):
             self.x_direction = 1
 
     def get_tile_collided(self):
-        for tile in tiles:
-            if tile.rect.colliderect(self.rect):
-                return tile
-        return None
+        tiles_loc = []
+        collided_tiles = []
+
+        player_tile_loc = (int(self.rect.x // TILE_SIZE), int(self.rect.y // TILE_SIZE))
+
+        for offset in self.tiles_collision_offset:
+            check_loc = str(player_tile_loc[0] + offset[0]) + ";" + str(player_tile_loc[1] + offset[1])
+            if check_loc in tiles_blocks:
+                tiles_loc.append(check_loc)
+        
+        for tile in tiles_loc:
+            collided_tiles.append(tiles_blocks[tile])
+
+        return collided_tiles
 
     def _detect_tiles_collision_x(self):
-        collided_tile = self.get_tile_collided()
-        if collided_tile is not None:
-            if self.x_vel > 0:
-                self.rect.right = collided_tile.rect.left
-            elif self.x_vel < 0:
-                self.rect.left = collided_tile.rect.right
-            self.pos.x = pygame.Vector2(self.rect.center).x
+        collided_tiles = self.get_tile_collided()
+        for collided_tile in collided_tiles:
+            if collided_tile.rect.colliderect(self.rect):
+                if self.x_vel > 0:
+                    self.rect.right = collided_tile.rect.left
+                elif self.x_vel < 0:
+                    self.rect.left = collided_tile.rect.right
+                self.pos.x = pygame.Vector2(self.rect.center).x
 
     def _detect_tiles_collision_y(self):
-        collided_tile = self.get_tile_collided()
-        if collided_tile is not None:
-            if self.y_vel > 0:
-                self.rect.bottom = collided_tile.rect.top
-            elif self.y_vel < 0:
-                self.rect.top = collided_tile.rect.bottom
-            self.pos.y = pygame.Vector2(self.rect.center).y
+        collided_tiles = self.get_tile_collided()
+        for collided_tile in collided_tiles:
+            if collided_tile.rect.colliderect(self.rect):
+                if self.y_vel > 0:
+                    self.rect.bottom = collided_tile.rect.top
+                elif self.y_vel < 0:
+                    self.rect.top = collided_tile.rect.bottom
+                self.pos.y = pygame.Vector2(self.rect.center).y
