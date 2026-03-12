@@ -1,6 +1,6 @@
 import pygame, math, random
 from configs import *
-from game_map import tiles
+from game_map import tiles, tiles_blocks
 from images import BulletImage
 
 class PlayerBullet(pygame.sprite.Sprite):
@@ -61,6 +61,12 @@ class PlayerBullet(pygame.sprite.Sprite):
             pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
 
     def _kill_if_tile_collision(self):
-        for tile in tiles:
-            if self.rect.colliderect(tile.rect):
-                self.kill()
+        tile_offsets = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+
+        bullet_tile_loc = (int(self.rect.x // TILE_SIZE), int(self.rect.y // TILE_SIZE))
+
+        for offset in tile_offsets:
+            check_loc = str(bullet_tile_loc[0] + offset[0]) + ";" + str(bullet_tile_loc[1] + offset[1])
+            if check_loc in tiles_blocks:
+                if tiles_blocks[check_loc].rect.colliderect(self.rect):
+                    self.kill()
