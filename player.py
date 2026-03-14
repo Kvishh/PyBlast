@@ -32,6 +32,11 @@ class Player(pygame.sprite.Sprite):
         self.gradient_image = GradientImage.gradient_player_image_scaled
         self.gradient_layers = pygame.Surface((155,155))
         self.gradient_layers.set_colorkey((0,0,0))
+        for i in range(2, 0, -1):
+            c = 35 - (i*15)
+            c = pygame.math.clamp(c, 5, 255)
+            r = 30 + (i*20) + 8
+            pygame.draw.circle(self.gradient_layers, (c,c,c), self.gradient_layers.get_rect().center, r)
 
         self.idle_count = 0
         self.idle_animation_update = pygame.time.get_ticks()
@@ -114,12 +119,6 @@ class Player(pygame.sprite.Sprite):
                                 self.rect.y - scroll[1] - (self.rect.h*2)),
                                 special_flags=pygame.BLEND_RGBA_ADD)
         
-        for i in range(2, 0, -1):
-            c = 35 - (i*15)
-            c = pygame.math.clamp(c, 5, 255)
-            r = 30 + (i*20) + 8
-            pygame.draw.circle(self.gradient_layers, (c,c,c), self.gradient_layers.get_rect().center, r)
-
         display.blit(self.gradient_layers,
                         ((self.rect.x - scroll[0]) - ((self.gradient_layers.get_rect().w//2) - 19),
                         (self.rect.y - scroll[1]) - ((self.gradient_layers.get_rect().h//2)) + 25),
