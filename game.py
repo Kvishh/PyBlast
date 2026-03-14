@@ -1,6 +1,6 @@
 import pygame, random, math
 from configs import *
-from game_map import tiles_group, tiles_blocks, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from game_map import tiles_blocks, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
 from bullet import PlayerBullet
@@ -140,14 +140,14 @@ class Game:
 
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
-        # For every sprite when collided with bullet it will create spark------------------------------------------
-        self.all_sprites_group = pygame.sprite.Group(tiles_group, self.all_ground_enemies, self.flight_enemy_group, self.soar_enemy_group, self.shoot_enemy_group, self.burst_enemy_group, self.specter_enemy_group)
+        # Group for all enemies that can be detected as hit by player bullet----------------------------------------
+        self.all_enemies_that_can_be_hit_by_playerbullet_group = pygame.sprite.Group(*self.all_ground_enemies, *self.flight_enemy_group, *self.soar_enemy_group, *self.shoot_enemy_group, *self.burst_enemy_group, *self.specter_enemy_group)
 
-        # For shooting enemy when enemy bullet hits player and tiles-----------------------------------------------
-        self.enemy_projectiles_hit_entities = pygame.sprite.Group(self.player_group, tiles_group)
+        # Group for all projectiles that can hit tiles--------------------------------------------------------------
+        self.all_projectile_that_hit_tiles = pygame.sprite.Group(*self.player_bullet_group, *self.enemy_bullet_group)
 
-        # Group for all projectiles---------------------------------------------------------------------------------
-        self.all_bullets_group = CustomGroup(self.player_bullet_group, self.enemy_bullet_group)
+        # Group for all projectiles that can hit player--------------------------------------------------------------
+        self.all_enemy_projectiles_that_hit_player = pygame.sprite.Group(*self.enemy_bullet_group, *self.specter_enemy_bullet_group)
 
 
         ### Overlay and HUD -------------------------------------------------------------------------------------------------- ###
@@ -161,6 +161,9 @@ class Game:
         # Black Overlay -------------------------------------------------------------------------------------------
         self.dark_overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         self.dark_overlay.fill((190,190,190,100))
+
+        # Particle cache--------------------------------------------------------------------------------------------
+        self.particle_cache = {}
 
 
     def game_run(self):
@@ -226,24 +229,20 @@ class Game:
             self.specter_enemy_bullet_group.update(dt, self.scroll)
             self.specter_enemy_bullet_group.draw(display, self.scroll)
 
-            # Create debris
-            self.create_debris()
+            # Check if projectiles hit tiles
+            self.projectiles_hit_tiles()
 
-            # Enemy bullets hit player and tiles
-            self.enemy_bullets_hit_player_and_tiles()
+            # Check if projectiles hit player
+            self.projectiles_hit_player()
 
-            # Specter Enemy bullets hit player
-            self.specter_enemy_bullets_hit_player()
+            # Check if player bulllets hit every kind of enemies
+            self.player_bullet_hit_all_enemies()
 
-            # Creating and drawing sparks
-            self.create_impact_and_floating_particles()
-            self.draw_impact()
+            # Check if player bullet hit any flying enemies
+            self.player_bullet_hit_flying_enemies()
 
-            # Creating falling particles
-            self.create_falling_particles()
-
-            # Create radiations
-            self.create_radiation()
+            # Check if player bullet hit any ground enemies
+            self.player_bullet_hit_ground_enemies()
 
             # Player and Wand update and draw methods
             self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
@@ -258,12 +257,12 @@ class Game:
             self.light_enemy_group.update(dt, self.player, self.scroll)
             self.light_enemy_group.draw(display, self.scroll)
 
-            # Avoid overlapping between ground enemies
-            self.avoid_overlap()
-
             # Heavy Enemy update and render
             self.tank_enemy_group.update(dt, self.player, self.scroll)
             self.tank_enemy_group.draw(display, self.scroll)
+
+            # Avoid overlapping between ground enemies
+            self.avoid_overlap()
 
             # Flight Enemy update and render
             self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
@@ -274,16 +273,19 @@ class Game:
             self.soar_enemy_group.draw(display, self.scroll)
 
             # Shooting Enemy update and render
-            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
+            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
             self.shoot_enemy_group.draw(display, self.scroll)
 
             # Burst Enemy update and render
-            self.burst_enemy_group.update(self.enemy_bullet_group, self.all_bullets_group, self.player, dt, self.all_flying_enemies, self.scroll)
+            self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
             self.burst_enemy_group.draw(display, self.scroll)
 
             # Specter Enemy update and render
-            self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies)
+            self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
             self.specter_enemy_group.draw(display, self.scroll)
+
+            # Drawing impacts/sparks
+            self.draw_impact()
 
             # Drawing particles
             self.draw_floating_particles()
@@ -317,6 +319,18 @@ class Game:
         
         # Quit the window
         pygame.quit()
+
+    def get_cached_particle(self, radius, color):
+        radius = int(radius)
+        
+        if radius <= 0: return None
+
+        tag = (radius, color)
+        if tag not in self.particle_cache:
+            surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(surf, (color[0], color[1], color[2]), (radius, radius), radius)
+            self.particle_cache[tag] = surf.convert_alpha()
+        return self.particle_cache[tag]
 
     def avoid_overlap(self):
         for x in self.all_ground_enemies:
@@ -353,7 +367,7 @@ class Game:
                                 mouse_x,
                                 mouse_y)
                 self.player_bullet_group.add(bullet)
-                self.all_bullets_group.add(bullet)
+                self.all_projectile_that_hit_tiles.add(bullet)
                 previous_time[0] = current_time
 
     def create_background_particles(self):
@@ -363,131 +377,163 @@ class Game:
                                         [random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)]), random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)])],
                                         random.choice(self.gradient_image_list)])
 
-    def create_impact_and_floating_particles(self):
-        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_sprites_group, False, False)
+    def player_bullet_hit_flying_enemies(self):
+        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, False, False, self.collide_rect_then_mask)
 
-        for bullet, collided_sprites in hits.items():
+        for bullet, enemies in hits.items():
+            pos = list(bullet.rect.center)
+
+            for enemy in enemies:
+                self.create_radiation(enemy, pos)
+            bullet.kill()
+
+    def player_bullet_hit_ground_enemies(self):
+        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_ground_enemies, False, False, self.collide_rect_then_mask)
+
+        for bullet, enemies in hits.items():
+            pos = list(bullet.rect.center)
+
+            for enemy in enemies:
+                self.create_falling_particles(enemy, pos)
+            bullet.kill()
+
+    def player_bullet_hit_all_enemies(self):
+        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, False, False, self.collide_rect_then_mask)
+
+        for bullet, enemies in hits.items():
             self.shake_timer = 20
-            self.create_floating_particles(bullet.rect.center)
+            pos = list(bullet.rect.center)
 
-            for _ in range(6):
-                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
-    
-    def enemy_bullets_hit_player_and_tiles(self):
-        hits = pygame.sprite.groupcollide(self.enemy_bullet_group, self.enemy_projectiles_hit_entities, True, False)
+            self.create_impacts(pos)
+            self.create_floating_particles(pos)
 
-        for bullet, sprite_collided in hits.items():
-            self.shake_timer = 20
-            self.create_floating_particles(bullet.rect.center)
+    def projectiles_hit_player(self):
+        tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+        player_tile_loc = (int(self.player.rect.x // TILE_SIZE), int(self.player.rect.y // TILE_SIZE))
+        player_grid_locs = {f"{player_tile_loc[0] + offset[0]};{player_tile_loc[1] + offset[1]}" for offset in tiles_offset}
 
-            for _ in range(6):
-                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
+        for projectile in self.all_enemy_projectiles_that_hit_player:
+            projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
 
-    def specter_enemy_bullets_hit_player(self):
-        hits = pygame.sprite.groupcollide(self.specter_enemy_bullet_group, self.player_group, True, False)
+            for offset in tiles_offset:
+                check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
+                if check_loc in player_grid_locs:
+                    if projectile.rect.colliderect(self.player.rect):
+                        if pygame.sprite.collide_mask(projectile, self.player):
+                            self.shake_timer = 20
+                            pos = list(projectile.rect.center)
+                            self.create_impacts(pos)
+                            self.create_floating_particles(pos)
+                            projectile.kill()
+                            break
 
-        for bullet, sprite_collided in hits.items():
-            self.shake_timer = 20
-            self.create_floating_particles(bullet.rect.center)
+    def projectiles_hit_tiles(self):
+        # collided_tiles_loc = []
+        tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
 
-            for _ in range(6):
-                self.sparks.append(Spark([bullet.rect.centerx, bullet.rect.centery], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
+        for projectile in self.all_projectile_that_hit_tiles.sprites():
+            projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
+
+            for offset in tiles_offset:
+                check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
+                if check_loc in tiles_blocks:
+                    collided_tile = tiles_blocks[check_loc]
+                    if collided_tile.rect.colliderect(projectile.rect):
+                        self.shake_timer = 20
+                        pos = list(projectile.rect.center)
+                        self.create_debris(pos)
+                        self.create_impacts(pos)
+                        self.create_floating_particles(pos)
+                        projectile.kill()
+
+    def collide_rect_then_mask(self, sprite1, sprite2):
+        if not sprite1.rect.colliderect(sprite2.rect): return False
+
+        return True if pygame.sprite.collide_mask(sprite1, sprite2) else False
+
+    def create_radiation(self, enemy, pos):
+        if isinstance(enemy, Soar):
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    1,
+                                    (145, 47, 47)])
+
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    0,
+                                    [(145, 47, 47), (82, 27, 27)]])
+        elif isinstance(enemy, Flight):
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    0,
+                                    [(199, 48, 115), (105, 41, 71)]])
+        elif isinstance(enemy, Shoot):
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    0,
+                                    [(158, 0, 191), (71, 36, 82)]])
+        elif isinstance(enemy, Burst):
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    1,
+                                    (136, 0, 255)])
+
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    0,
+                                    [(136, 0, 255), (71, 36, 82)]])
+        elif isinstance(enemy, Specter):
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    1,
+                                    ((89, 0, 255))])
+
+            self.radiations.append([[pos[0], pos[1]],
+                                    15,
+                                    8,
+                                    0,
+                                    [(89, 0, 255), (71, 36, 82)]])
+
+    def create_falling_particles(self, enemy, pos):
+        if isinstance(enemy, Light):
+            for _ in range(20): # location, velocity, radius, color
+                self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
+                                        [random.randrange(-3, 3), -2], 
+                                        random.randrange(10, 14),
+                                        (78, 45, 145)])
+        elif isinstance(enemy, Tank):
+            for _ in range(20): # location, velocity, radius
+                self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
+                                        [random.randrange(-3, 3), -2], 
+                                        random.randrange(10, 14),
+                                        (155, 86, 186)])
 
     def create_floating_particles(self, pos):
-        pos = list(pos)
         for _ in range(15): # location, velocity, radius, color
             self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
                                     [random.randrange(-3, 3), -3], 
                                     random.randrange(24, 30),
                                     255])
-    
-    def create_falling_particles(self):
-        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_ground_enemies, True, False)
 
-        for bullet, enemies in hits.items():
-            pos = list(bullet.rect.center)
-            for enemy in enemies:
-                if isinstance(enemy, Light):
-                    for _ in range(20): # location, velocity, radius, color
-                        self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
-                                                [random.randrange(-3, 3), -2], 
-                                                random.randrange(10, 14),
-                                                (78, 45, 145)])
-                elif isinstance(enemy, Tank):
-                    for _ in range(20): # location, velocity, radius
-                        self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
-                                                [random.randrange(-3, 3), -2], 
-                                                random.randrange(10, 14),
-                                                (155, 86, 186)])
+    def create_impacts(self, pos):
+        for _ in range(6):
+            self.sparks.append(Spark([pos[0], pos[1]], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
 
-    def create_radiation(self):
-        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, True, False)
-
-        for bullet, flying_enemies in hits.items():
-            pos = list(bullet.rect.center)
-
-            for enemy in flying_enemies: # location, radius, width, id, color (main and shadow)
-                if isinstance(enemy, Soar):
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            1,
-                                            (145, 47, 47)])
-
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            0,
-                                            [(145, 47, 47), (82, 27, 27)]])
-                elif isinstance(enemy, Flight):
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            0,
-                                            [(199, 48, 115), (105, 41, 71)]])
-                elif isinstance(enemy, Shoot):
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            0,
-                                            [(158, 0, 191), (71, 36, 82)]])
-                elif isinstance(enemy, Burst):
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            1,
-                                            (136, 0, 255)])
-
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            0,
-                                            [(136, 0, 255), (71, 36, 82)]])
-                elif isinstance(enemy, Specter):
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            1,
-                                            ((89, 0, 255))])
-
-                    self.radiations.append([[pos[0], pos[1]],
-                                            15,
-                                            8,
-                                            0,
-                                            [(89, 0, 255), (71, 36, 82)]])
-
-    def create_debris(self):
-        hits = pygame.sprite.groupcollide(self.all_bullets_group, tiles_group, False, False)
-
-        for bullet, tiles_hit_list in hits.items():
-            pos = list(bullet.rect.center) # location, velocity, radius, color
-            for _ in range(20):
-                r = random.randrange(60, 80)
-                g = r
-                self.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
-                            [random.randrange(-3, 3), random.randrange(-3, 3)], 
-                            random.randrange(10, 16),
-                            (r, g, 125)])
+    def create_debris(self, pos):
+        for _ in range(20):  # location, velocity, radius, color
+            r = random.randrange(60, 80)
+            g = r
+            self.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
+                        [random.randrange(-3, 3), random.randrange(-3, 3)], 
+                        random.randrange(10, 16),
+                        (r, g, 125)])
 
     def draw_impact(self):
         for i, spark in sorted(enumerate(self.sparks), reverse=True):
@@ -561,6 +607,11 @@ class Game:
                                    (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
                                    int(particle[2]))
 
+                # rad = int(particle[2])
+                # if rad > 0:
+                #     surf = self.get_cached_particle(rad, (particle[3],particle[3],particle[3]))
+                #     display.blit(surf, (particle[0][0]-self.scroll[0], particle[0][1]-self.scroll[1]))
+                    
     def draw_falling_particles(self):
         if self.falling_particles:
             self.falling_particles = [particle for particle in self.falling_particles if particle[2] > 0]

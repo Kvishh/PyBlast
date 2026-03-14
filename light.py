@@ -10,6 +10,7 @@ class Light(pygame.sprite.Sprite):
         self.image = LightImage.light_image_scaled
         self.orientation = {1: self.image, -1: LightImage.light_image_scaled_flipped}
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
+        self.mask = pygame.mask.from_surface(self.image)
         self.x_velocity = 120
         self.y_velocity = 0
         self.jumping = False
@@ -32,6 +33,7 @@ class Light(pygame.sprite.Sprite):
     def update(self, dt, player, scroll):
         self.switch_orientation(player)
         self.image = self.orientation[self.x_direction]
+        self.mask = pygame.mask.from_surface(self.image)
 
         # Border limit x
         if self.pos.x < 0:

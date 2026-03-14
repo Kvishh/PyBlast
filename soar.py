@@ -10,6 +10,7 @@ class Soar(pygame.sprite.Sprite):
         self.image = SoarImage.soar_image_scaled
         self.orientation = {1: self.image, -1: SoarImage.soar_image_scaled_flipped}
         self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
         self.x_vel = 0
         self.y_vel = 0
         self.speed = 20
@@ -33,6 +34,7 @@ class Soar(pygame.sprite.Sprite):
     def update(self, pl, dt, flying_enemies_group, scroll):
         self.switch_orientation()
         self.image = self.orientation[self.x_direction]
+        self.mask = pygame.mask.from_surface(self.image)
 
         self.create_particles()
         self._draw_particles(scroll)

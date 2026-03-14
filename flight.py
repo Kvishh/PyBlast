@@ -10,6 +10,7 @@ class Flight(pygame.sprite.Sprite):
         self.image = FlightImage.flight_image_scaled
         self.orientation = {1: self.image, -1: FlightImage.flight_image_scaled_flipped}
         self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
         self.x_vel = 0
         self.y_vel = 0
         self.speed = 35
@@ -78,6 +79,7 @@ class Flight(pygame.sprite.Sprite):
             self.image = self.animations_frames_list[self.animation_count]
         else:
             self.image = self.animations_frames_list_right[self.animation_count]
+        self.mask = pygame.mask.from_surface(self.image)
         self.update_animation()
 
     def update_animation(self):

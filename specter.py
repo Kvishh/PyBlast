@@ -10,6 +10,7 @@ class Specter(pygame.sprite.Sprite):
         self.pos = pygame.Vector2(x, y)
         self.image = SpecterImage.specter_image_scaled
         self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
         self.orig_image = self.image
         self.x_vel = 0
         self.y_vel = 0
@@ -37,13 +38,13 @@ class Specter(pygame.sprite.Sprite):
         self.allow_increase = True
         self.opacity = 255
 
-    def update(self, specter_enemy_bullet_group, pl, dt, flying_enemies_group):
+    def update(self, specter_enemy_bullet_group, pl, dt, flying_enemies_group, all_enemy_projectiles_that_hit_player):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
         # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
 
         self.rotate_sprite(pl)
 
-        self.shoot(specter_enemy_bullet_group, pl)
+        self.shoot(specter_enemy_bullet_group, all_enemy_projectiles_that_hit_player, pl)
 
         
         self.image.set_alpha(self.opacity)
@@ -81,7 +82,7 @@ class Specter(pygame.sprite.Sprite):
 
         self.rect.center = self.hit_rect.center
 
-    def shoot(self, specter_enemy_bullet_group, player):
+    def shoot(self, specter_enemy_bullet_group, all_enemy_projectiles_that_hit_player, player):
         current_time = pygame.time.get_ticks()
         self.slow_down()
         if current_time - self.previous_time > 3000:
@@ -95,6 +96,7 @@ class Specter(pygame.sprite.Sprite):
                                 target_x,
                                 target_y)
                 specter_enemy_bullet_group.add(bullet)
+                all_enemy_projectiles_that_hit_player.add(bullet)
 
                 self.speed = 20
                 self.previous_time_slowing_down = current_time
@@ -142,6 +144,7 @@ class Specter(pygame.sprite.Sprite):
         angle = math.degrees(math.atan2(dy, dx))
         self.image = pygame.transform.rotate(self.orig_image, -angle)
         self.rect = self.image.get_rect(center = (self.rect.centerx, self.rect.centery))
+        self.mask = pygame.mask.from_surface(self.image)
 
     def get_tile_collided(self):
         tiles_loc = []

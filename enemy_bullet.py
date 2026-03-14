@@ -8,6 +8,7 @@ class EnemyBullet(pygame.sprite.Sprite):
         super().__init__()
         self.image = EnemyBulletImage.enemy_bullet_image_scaled
         self.rect = self.image.get_rect(center=(x, y))
+        self.mask = pygame.mask.from_surface(self.image)
         self.speed = 450
         self.direction = direction
         self.pos = pygame.Vector2(x, y)
@@ -113,6 +114,7 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
         super().__init__()
         self.image = SpecterEnemyBulletImage.specter_enemy_bullet_image_scaled
         self.rect = self.image.get_rect(center=(x, y))
+        self.mask = pygame.mask.from_surface(self.image)
         self.speed = 450
         self.direction = direction
         self.pos = pygame.Vector2(x, y)

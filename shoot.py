@@ -10,6 +10,7 @@ class Shoot(pygame.sprite.Sprite):
         self.pos = pygame.Vector2(x, y)
         self.image = ShootImage.shoot_image_scaled
         self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
         self.orig_image = self.image
         self.x_vel = 0
         self.y_vel = 0
@@ -37,7 +38,7 @@ class Shoot(pygame.sprite.Sprite):
         self.particles = []
         self.angle_direction = 1
 
-    def update(self, enemy_bullet_group, all_bullets_group, pl, dt, flying_enemies_group, scroll):
+    def update(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt, flying_enemies_group, scroll):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
         # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
 
@@ -45,7 +46,7 @@ class Shoot(pygame.sprite.Sprite):
 
         self.rotate_sprite(pl)
 
-        self.shoot(enemy_bullet_group, all_bullets_group, pl)
+        self.shoot(enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl)
 
         self.seek_force = self.seek(pl)
         self.avoid_force = self.flee(flying_enemies_group)
@@ -82,7 +83,7 @@ class Shoot(pygame.sprite.Sprite):
             pygame.draw.circle(display, (23, 4, 23), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (i//3+2))
             pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
 
-    def shoot(self, enemy_bullet_group, all_bullets_group, player):
+    def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player):
         current_time = pygame.time.get_ticks()
         self.slow_down()
         if current_time - self.previous_time > 5000:
@@ -96,7 +97,8 @@ class Shoot(pygame.sprite.Sprite):
                                 target_x,
                                 target_y)
                 enemy_bullet_group.add(bullet)
-                all_bullets_group.add(bullet)
+                all_projectiles_that_hit_tiles.add(bullet)
+                all_enemy_projectiles_that_hit_player.add(bullet)
 
                 self.speed = 30
                 self.previous_time_slowing_down = current_time
@@ -167,6 +169,7 @@ class Shoot(pygame.sprite.Sprite):
 
         self.image = pygame.transform.rotate(self.orig_image, -angle)
         self.rect = self.image.get_rect(center = (self.rect.centerx, self.rect.centery))
+        self.mask = pygame.mask.from_surface(self.image)
 
     def get_tile_collided(self):
         tiles_loc = []

@@ -8,6 +8,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         super().__init__()
         self.image = BulletImage.bullet_image_scaled
         self.rect = self.image.get_rect(center=(x, y+10))
+        self.mask = pygame.mask.from_surface(self.image)
         self.speed = 450
         self.direction = direction
         self.pos = pygame.Vector2(x, y+4)

@@ -10,6 +10,7 @@ class Tank(pygame.sprite.Sprite):
         self.image = TankImages.tank_image_scaled
         self.orientation = {1: self.image, -1: TankImages.tank_image_scaled_flipped}
         self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
+        self.mask = pygame.mask.from_surface(self.image)
         self.x_velocity = 100
         self.y_velocity = 0
         self.jumping = False
@@ -77,6 +78,7 @@ class Tank(pygame.sprite.Sprite):
             self.image = self.animations_frames_list[self.animation_count]
         else:
             self.image = self.animations_frames_list_right[self.animation_count]
+        self.mask = pygame.mask.from_surface(self.image)
         self.update_animation()
 
     def update_animation(self):
