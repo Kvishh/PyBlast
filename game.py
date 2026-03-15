@@ -79,33 +79,33 @@ class Game:
         self.shake_timer = 0
 
         # Player---------------------------------------------------------------------------------------------------
-        self.player = Player(WINDOW_WIDTH - PLAYER_WIDTH, 0, self.player_group)
+        self.player = Player(0, 0, self.player_group)
 
         # Wand-----------------------------------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
 
-        # Light Enemy----------------------------------------------------------------------------------------------
-        self.light = Light(0, 0, self.light_enemy_group, self.all_ground_enemies)
-        self.another_light = Light(300, 0, self.light_enemy_group, self.all_ground_enemies)
-        self.ground_en = Light(600, 0, self.light_enemy_group, self.all_ground_enemies)
+        # # Light Enemy----------------------------------------------------------------------------------------------
+        # self.light = Light(0, 0, self.light_enemy_group, self.all_ground_enemies)
+        # self.another_light = Light(300, 0, self.light_enemy_group, self.all_ground_enemies)
+        # self.ground_en = Light(600, 0, self.light_enemy_group, self.all_ground_enemies)
 
         # Heavy Enemy----------------------------------------------------------------------------------------------
         self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0, self.tank_enemy_group, self.all_ground_enemies)
 
-        # Flight Enemy---------------------------------------------------------------------------------------------
-        self.flight_enemy = Flight(50, 0, self.flight_enemy_group, self.all_flying_enemies)
+        # # Flight Enemy---------------------------------------------------------------------------------------------
+        # self.flight_enemy = Flight(50, 0, self.flight_enemy_group, self.all_flying_enemies)
 
-        # Soar Enemy-----------------------------------------------------------------------------------------------
-        self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
+        # # Soar Enemy-----------------------------------------------------------------------------------------------
+        # self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
 
         # Shooting Enemy-------------------------------------------------------------------------------------------
         self.shoot_enemy = Shoot(250, 0, self.shoot_enemy_group, self.all_flying_enemies)
 
-        # Burst Shooting Enemy-------------------------------------------------------------------------------------
-        self.burst_enemy = Burst(350, 0, self.burst_enemy_group, self.all_flying_enemies)
+        # # Burst Shooting Enemy-------------------------------------------------------------------------------------
+        # self.burst_enemy = Burst(350, 0, self.burst_enemy_group, self.all_flying_enemies)
 
-        # Specter Shooting Enemy-----------------------------------------------------------------------------------
-        self.specter_enemy = Specter(350, 0, self.specter_enemy_group, self.all_flying_enemies)
+        # # Specter Shooting Enemy-----------------------------------------------------------------------------------
+        # self.specter_enemy = Specter(350, 0, self.specter_enemy_group, self.all_flying_enemies)
 
 
         ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
@@ -140,6 +140,9 @@ class Game:
 
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
+        # Group for of all enemies that can damage player-----------------------------------------------------------
+        self.all_enemies_group = pygame.sprite.Group(*self.all_ground_enemies, *self.all_flying_enemies)
+
         # Group for all enemies that can be detected as hit by player bullet----------------------------------------
         self.all_enemies_that_can_be_hit_by_playerbullet_group = pygame.sprite.Group(*self.all_ground_enemies, *self.flight_enemy_group, *self.soar_enemy_group, *self.shoot_enemy_group, *self.burst_enemy_group, *self.specter_enemy_group)
 
@@ -276,6 +279,9 @@ class Game:
                 # Check if projectiles hit player
                 self.projectiles_hit_player()
 
+                # Check if player has been hit/touched by enemies
+                self.all_enemies_touch_player()
+
                 # Check if player bulllets hit every kind of enemies
                 self.player_bullet_hit_all_enemies()
 
@@ -313,9 +319,9 @@ class Game:
                 # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
                 # self.soar_enemy_group.draw(display, self.scroll)
 
-                # # Shooting Enemy update and render
-                # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.shoot_enemy_group.draw(display, self.scroll)
+                # Shooting Enemy update and render
+                self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                self.shoot_enemy_group.draw(display, self.scroll)
 
                 # # Burst Enemy update and render
                 # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
@@ -375,7 +381,7 @@ class Game:
                 x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
                 if x < self.spawn_rect.left or x > self.spawn_rect.right:
                     break
-            Tank(x, FLOOR, self.tank_enemy_group, self.all_ground_enemies, self.all_enemies_that_can_be_hit_by_playerbullet_group)
+            Tank(x, FLOOR, self.tank_enemy_group, self.all_ground_enemies, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.all_enemies_group)
 
     def get_cached_particle(self, radius, color):
         radius = int(radius)
@@ -434,6 +440,18 @@ class Game:
                                         [random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)]), random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)])],
                                         random.choice(self.gradient_image_list)])
 
+    def all_enemies_touch_player(self):
+        if not self.player.is_invincible:
+            hits = pygame.sprite.spritecollide(self.player, self.all_enemies_group, False, self.collide_rect_then_mask)
+
+            for enemy in hits:
+                self.player.current_hp -= 1
+                self.player.invincible_timer = pygame.time.get_ticks()
+                self.player.is_invincible = True
+
+                self.wand.invincible_timer = pygame.time.get_ticks()
+                self.wand.is_invincible = True
+
     def player_bullet_hit_flying_enemies(self):
         hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, False, False, self.collide_rect_then_mask)
 
@@ -465,24 +483,32 @@ class Game:
             self.create_floating_particles(pos)
 
     def projectiles_hit_player(self):
-        tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
-        player_tile_loc = (int(self.player.rect.x // TILE_SIZE), int(self.player.rect.y // TILE_SIZE))
-        player_grid_locs = {f"{player_tile_loc[0] + offset[0]};{player_tile_loc[1] + offset[1]}" for offset in tiles_offset}
+        if not self.player.is_invincible:
+            tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+            player_tile_loc = (int(self.player.rect.x // TILE_SIZE), int(self.player.rect.y // TILE_SIZE))
+            player_grid_locs = {f"{player_tile_loc[0] + offset[0]};{player_tile_loc[1] + offset[1]}" for offset in tiles_offset}
 
-        for projectile in self.all_enemy_projectiles_that_hit_player:
-            projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
+            for projectile in self.all_enemy_projectiles_that_hit_player:
+                projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
 
-            for offset in tiles_offset:
-                check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
-                if check_loc in player_grid_locs:
-                    if projectile.rect.colliderect(self.player.rect):
-                        if pygame.sprite.collide_mask(projectile, self.player):
-                            self.shake_timer = 20
-                            pos = list(projectile.rect.center)
-                            self.create_impacts(pos)
-                            self.create_floating_particles(pos)
-                            projectile.kill()
-                            break
+                for offset in tiles_offset:
+                    check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
+                    if check_loc in player_grid_locs:
+                        if projectile.rect.colliderect(self.player.rect):
+                            if pygame.sprite.collide_mask(projectile, self.player):
+                                self.player.current_hp -= 1
+                                self.player.invincible_timer = pygame.time.get_ticks()
+                                self.player.is_invincible = True
+
+                                self.wand.invincible_timer = pygame.time.get_ticks()
+                                self.wand.is_invincible = True
+
+                                self.shake_timer = 20
+                                pos = list(projectile.rect.center)
+                                self.create_impacts(pos)
+                                self.create_floating_particles(pos)
+                                projectile.kill()
+                                break
 
     def projectiles_hit_tiles(self):
         # collided_tiles_loc = []

@@ -52,10 +52,17 @@ class Player(pygame.sprite.Sprite):
         self.current_hp = 3
         self.shield = 2
 
+        self.is_hit = True
+        self.is_invincible = False
+        self.invincible_timer = 0
+        self.invincible_duration = 1500
+
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll):
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
+
+        self.player_is_hit()
 
         self.draw_glow(dark_overlay, scroll)
 
@@ -111,6 +118,19 @@ class Player(pygame.sprite.Sprite):
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
+
+    def player_is_hit(self):
+        if self.is_invincible:
+            now = pygame.time.get_ticks()
+            if now - self.invincible_timer > self.invincible_duration:
+                self.is_invincible = False
+
+            if (pygame.time.get_ticks() // 100) % 2 == 0:
+                self.image.set_alpha(0)
+            else:
+                self.image.set_alpha(255)
+        else:
+            self.image.set_alpha(255)
 
     def draw_glow(self, dark_overlay, scroll):
         # pygame.draw.rect(display,(255,0,0),(self.rect.x-scroll[0],self.rect.y-scroll[1],self.rect.w,self.rect.h),2)
