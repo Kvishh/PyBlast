@@ -1,4 +1,4 @@
-import pygame, random, math
+import pygame, random, math, time
 from configs import *
 from game_map import tiles_blocks, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
@@ -134,7 +134,7 @@ class Game:
         self.wand_residues = []
 
 
-        ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------- ###
+        ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------ ###
         # Function for creating tile-------------------------------------------------------------------------------
         create_tiles()
 
@@ -178,12 +178,21 @@ class Game:
         pause_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
         pause_overlay.fill((0,0,0, 128))
 
+        countdown_time = 600
+        countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
+        timer_evt = pygame.USEREVENT + 1
+        pygame.time.set_timer(timer_evt, 1000)
+
+
         running = True
         is_paused = False
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                if event.type == timer_evt:
+                    countdown_time -= 1
+                    countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_screen = display.copy()
@@ -343,7 +352,7 @@ class Game:
                     self.shake_timer -= 1
                 
                 # HUD update
-                self.hud.update()
+                self.hud.update(countdown_time_text)
             elif is_paused:
                 display.blit(pause_screen, (0,0))
                 display.blit((pause_overlay), (0,0))
