@@ -165,11 +165,12 @@ class Game:
         # Particle cache--------------------------------------------------------------------------------------------
         self.particle_cache = {}
 
+        # Spawn rect for ground enemies-----------------------------------------------------------------------------
+        self.spawn_rect = pygame.Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+
 
     def game_run(self):
         previous_time = [pygame.time.get_ticks()]
-        running = True
-        count = 0
         interval = [pygame.time.get_ticks()]
 
         pause_screen = None
@@ -177,6 +178,7 @@ class Game:
         pause_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
         pause_overlay.fill((0,0,0, 128))
 
+        running = True
         is_paused = False
         while running:
             for event in pygame.event.get():
@@ -211,22 +213,10 @@ class Game:
                 self.scroll[0] = int(self.true_scroll[0])
                 self.scroll[1] = int(self.true_scroll[1])
 
+                # Spawn ground enemies 
+                self.spawn_ground_enemies(interval)
 
-                ########################
-                now = pygame.time.get_ticks()
-                if now - interval[0] > 5000:
-                    interval[0] = now
-                    count += 1
-
-                    x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
-                    while True:
-                        x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
-                        if x < self.spawn_rect.left or x > self.spawn_rect.right:
-                            break
-                    Tank(x, FLOOR, self.tank_enemy_group, self.all_ground_enemies, self.all_enemies_that_can_be_hit_by_playerbullet_group)
-                
-                ########################
-
+                # Movement of spawn rect x and y and limits
                 self.spawn_rect.x = self.player.rect.centerx - DISPLAY_WIDTH // 2
                 self.spawn_rect.y = self.player.rect.centery - DISPLAY_HEIGHT // 2
                 if self.spawn_rect.x < 0:
@@ -348,9 +338,6 @@ class Game:
                 # Rendering of front objects (long rocks)
                 draw_front_long_rocks(self.scroll)
 
-                pygame.draw.rect(display, (255,0,0), (self.spawn_rect.x-self.scroll[0],self.spawn_rect.y-self.scroll[1],self.spawn_rect.w,self.spawn_rect.h), 2)
-                pygame.draw.rect(display, (0,255,0), (self.slow_rect.x-self.scroll[0], self.slow_rect.y-self.scroll[1], self.slow_rect.w, self.slow_rect.h), 2)
-
                 # Shake timer decrement
                 if self.shake_timer > 0:
                     self.shake_timer -= 1
@@ -368,6 +355,18 @@ class Game:
         
         # Quit the window
         pygame.quit()
+
+    def spawn_ground_enemies(self, interval):
+        now = pygame.time.get_ticks()
+        if now - interval[0] > 5000:
+            interval[0] = now
+
+            x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
+            while True:
+                x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
+                if x < self.spawn_rect.left or x > self.spawn_rect.right:
+                    break
+            Tank(x, FLOOR, self.tank_enemy_group, self.all_ground_enemies, self.all_enemies_that_can_be_hit_by_playerbullet_group)
 
     def get_cached_particle(self, radius, color):
         radius = int(radius)
