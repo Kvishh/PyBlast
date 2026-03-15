@@ -169,149 +169,198 @@ class Game:
     def game_run(self):
         previous_time = [pygame.time.get_ticks()]
         running = True
+        count = 0
+        interval = [pygame.time.get_ticks()]
+
+        pause_screen = None
+
+        pause_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
+        pause_overlay.fill((0,0,0, 128))
+
+        is_paused = False
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-
-            dt = clock.tick(FPS) / 1000
-            display.fill((42, 59, 95))
-            self.dark_overlay.fill((190,190,190,100))
-
-            # Changing the scroll (camera) value
-            self.true_scroll[0] += (self.player.rect.x - self.true_scroll[0] - (DISPLAY_WIDTH//2 - PLAYER_WIDTH//2))/20
-            self.true_scroll[1] += (self.player.rect.y - self.true_scroll[1] - (DISPLAY_HEIGHT//2 - PLAYER_HEIGHT//2))/20
-
-            if self.true_scroll[0] < 0:
-                self.true_scroll[0] = 0
-            elif self.true_scroll[0] > 1300-DISPLAY_WIDTH:
-                self.true_scroll[0] = 1300-DISPLAY_WIDTH 
-
-            if self.true_scroll[1] < 0:
-                self.true_scroll[1] = 0
-            elif self.true_scroll[1] > 800-DISPLAY_HEIGHT:
-                self.true_scroll[1] = 800-DISPLAY_HEIGHT
-
-            # Actual values used in scrolling (camera)
-            self.scroll = self.true_scroll.copy()
-            self.scroll[0] = int(self.true_scroll[0])
-            self.scroll[1] = int(self.true_scroll[1])
-
-            # Applying shake in scroll
-            if self.shake_timer:
-                self.scroll[0] += random.randint(-4, 4)
-                self.scroll[1] += random.randint(-4, 4)
-
-            # For drawing background
-            draw_background(self.scroll)
-
-            # Drawing behind platforms but in front of background
-            draw_behind_long_rocks(self.scroll)
-
-            # For drawing tiles
-            draw_tiles(self.scroll)
-
-            # Creating background particles
-            self.create_background_particles()
-
-            # Checking of mouse hold and creation of bullet
-            self.shoot_bullet(previous_time, self.player.rect.centerx, self.player.rect.centery)
-
-            # Drawing of player bullets
-            self.player_bullet_group.update(dt, self.scroll)
-            self.player_bullet_group.draw(display, self.scroll)
-
-            # Update and draw methods of enemy bullet groups
-            self.enemy_bullet_group.update(dt, self.scroll)
-            self.enemy_bullet_group.draw(display, self.scroll)
-
-            # Update and draw methods of specter enemy bullet groups
-            self.specter_enemy_bullet_group.update(dt, self.scroll)
-            self.specter_enemy_bullet_group.draw(display, self.scroll)
-
-            # Check if projectiles hit tiles
-            self.projectiles_hit_tiles()
-
-            # Check if projectiles hit player
-            self.projectiles_hit_player()
-
-            # Check if player bulllets hit every kind of enemies
-            self.player_bullet_hit_all_enemies()
-
-            # Check if player bullet hit any flying enemies
-            self.player_bullet_hit_flying_enemies()
-
-            # Check if player bullet hit any ground enemies
-            self.player_bullet_hit_ground_enemies()
-
-            # Player and Wand update and draw methods
-            self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
-            self.wand.render(self.scroll)
-            self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.dark_overlay, self.scroll)
-            self.player.render(self.scroll)
-
-            # Draw jump particles
-            self.draw_jump_particles()
-
-            # Enemy update and render
-            self.light_enemy_group.update(dt, self.player, self.scroll)
-            self.light_enemy_group.draw(display, self.scroll)
-
-            # Heavy Enemy update and render
-            self.tank_enemy_group.update(dt, self.player, self.scroll)
-            self.tank_enemy_group.draw(display, self.scroll)
-
-            # Avoid overlapping between ground enemies
-            self.avoid_overlap()
-
-            # Flight Enemy update and render
-            self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-            self.flight_enemy_group.draw(display, self.scroll)
-
-            # Soar Enemy update and render
-            self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-            self.soar_enemy_group.draw(display, self.scroll)
-
-            # Shooting Enemy update and render
-            self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-            self.shoot_enemy_group.draw(display, self.scroll)
-
-            # Burst Enemy update and render
-            self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-            self.burst_enemy_group.draw(display, self.scroll)
-
-            # Specter Enemy update and render
-            self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
-            self.specter_enemy_group.draw(display, self.scroll)
-
-            # Drawing impacts/sparks
-            self.draw_impact()
-
-            # Drawing particles
-            self.draw_floating_particles()
-
-            # Drawing falling particles
-            self.draw_falling_particles()
-
-            # Drawing radiation
-            self.draw_radiations()
-
-            # Drawing debris
-            self.draw_debris()
-
-            # Drawing background particles
-            self.draw_background_particles()
-            display.blit(self.dark_overlay, (0,0), special_flags=pygame.BLEND_RGB_MULT)
-
-            # Rendering of front objects (long rocks)
-            draw_front_long_rocks(self.scroll)
-
-            # Shake timer decrement
-            if self.shake_timer > 0:
-                self.shake_timer -= 1
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pause_screen = display.copy()
+                        is_paused = not is_paused
             
-            # HUD update
-            self.hud.update()
+            if not is_paused:
+                dt = clock.tick(FPS) / 1000
+                display.fill((42, 59, 95))
+                self.dark_overlay.fill((190,190,190,100))
+
+                # Changing the scroll (camera) value
+                self.true_scroll[0] += (self.player.rect.x - self.true_scroll[0] - (DISPLAY_WIDTH//2 - PLAYER_WIDTH//2))/20
+                self.true_scroll[1] += (self.player.rect.y - self.true_scroll[1] - (DISPLAY_HEIGHT//2 - PLAYER_HEIGHT//2))/20
+
+                if self.true_scroll[0] < 0:
+                    self.true_scroll[0] = 0
+                elif self.true_scroll[0] > 1300-DISPLAY_WIDTH:
+                    self.true_scroll[0] = 1300-DISPLAY_WIDTH 
+
+                if self.true_scroll[1] < 0:
+                    self.true_scroll[1] = 0
+                elif self.true_scroll[1] > 800-DISPLAY_HEIGHT:
+                    self.true_scroll[1] = 800-DISPLAY_HEIGHT
+
+                # Actual values used in scrolling (camera)
+                self.scroll = self.true_scroll.copy()
+                self.scroll[0] = int(self.true_scroll[0])
+                self.scroll[1] = int(self.true_scroll[1])
+
+
+                ########################
+                now = pygame.time.get_ticks()
+                if now - interval[0] > 5000:
+                    interval[0] = now
+                    count += 1
+
+                    x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
+                    while True:
+                        x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
+                        if x < self.spawn_rect.left or x > self.spawn_rect.right:
+                            break
+                    Tank(x, FLOOR, self.tank_enemy_group, self.all_ground_enemies, self.all_enemies_that_can_be_hit_by_playerbullet_group)
+                
+                ########################
+
+                self.spawn_rect.x = self.player.rect.centerx - DISPLAY_WIDTH // 2
+                self.spawn_rect.y = self.player.rect.centery - DISPLAY_HEIGHT // 2
+                if self.spawn_rect.x < 0:
+                    self.spawn_rect.x = 0
+                elif self.spawn_rect.x > 1300-DISPLAY_WIDTH:
+                    self.spawn_rect.x = 1300-DISPLAY_WIDTH 
+
+                if self.spawn_rect.y < 0:
+                    self.spawn_rect.y = 0
+                elif self.spawn_rect.y > 800-DISPLAY_HEIGHT:
+                    self.spawn_rect.y = 800-DISPLAY_HEIGHT
+
+                # Applying shake in scroll
+                if self.shake_timer:
+                    self.scroll[0] += random.randint(-4, 4)
+                    self.scroll[1] += random.randint(-4, 4)
+
+                # For drawing background
+                draw_background(self.scroll)
+
+                # Drawing behind platforms but in front of background
+                draw_behind_long_rocks(self.scroll)
+
+                # For drawing tiles
+                draw_tiles(self.scroll)
+
+                # Creating background particles
+                self.create_background_particles()
+
+                # Checking of mouse hold and creation of bullet
+                self.shoot_bullet(previous_time, self.player.rect.centerx, self.player.rect.centery)
+
+                # Drawing of player bullets
+                self.player_bullet_group.update(dt, self.scroll)
+                self.player_bullet_group.draw(display, self.scroll)
+
+                # Update and draw methods of enemy bullet groups
+                self.enemy_bullet_group.update(dt, self.scroll)
+                self.enemy_bullet_group.draw(display, self.scroll)
+
+                # Update and draw methods of specter enemy bullet groups
+                self.specter_enemy_bullet_group.update(dt, self.scroll)
+                self.specter_enemy_bullet_group.draw(display, self.scroll)
+
+                # Check if projectiles hit tiles
+                self.projectiles_hit_tiles()
+
+                # Check if projectiles hit player
+                self.projectiles_hit_player()
+
+                # Check if player bulllets hit every kind of enemies
+                self.player_bullet_hit_all_enemies()
+
+                # Check if player bullet hit any flying enemies
+                self.player_bullet_hit_flying_enemies()
+
+                # Check if player bullet hit any ground enemies
+                self.player_bullet_hit_ground_enemies()
+
+                # Player and Wand update and draw methods
+                self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
+                self.wand.render(self.scroll)
+                self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.dark_overlay, self.scroll)
+                self.player.render(self.scroll)
+
+                # Draw jump particles
+                self.draw_jump_particles()
+
+                # # Enemy update and render
+                # self.light_enemy_group.update(dt, self.player, self.scroll)
+                # self.light_enemy_group.draw(display, self.scroll)
+
+                # Heavy Enemy update and render
+                self.tank_enemy_group.update(dt, self.player, self.scroll)
+                self.tank_enemy_group.draw(display, self.scroll)
+
+                # Avoid overlapping between ground enemies
+                self.avoid_overlap()
+
+                # # Flight Enemy update and render
+                # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.flight_enemy_group.draw(display, self.scroll)
+
+                # # Soar Enemy update and render
+                # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.soar_enemy_group.draw(display, self.scroll)
+
+                # # Shooting Enemy update and render
+                # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.shoot_enemy_group.draw(display, self.scroll)
+
+                # # Burst Enemy update and render
+                # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.burst_enemy_group.draw(display, self.scroll)
+
+                # # Specter Enemy update and render
+                # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
+                # self.specter_enemy_group.draw(display, self.scroll)
+
+                # Drawing impacts/sparks
+                self.draw_impact()
+
+                # Drawing particles
+                self.draw_floating_particles()
+
+                # Drawing falling particles
+                self.draw_falling_particles()
+
+                # Drawing radiation
+                self.draw_radiations()
+
+                # Drawing debris
+                self.draw_debris()
+
+                # Drawing background particles
+                self.draw_background_particles()
+                display.blit(self.dark_overlay, (0,0), special_flags=pygame.BLEND_RGB_MULT)
+
+                # Rendering of front objects (long rocks)
+                draw_front_long_rocks(self.scroll)
+
+                pygame.draw.rect(display, (255,0,0), (self.spawn_rect.x-self.scroll[0],self.spawn_rect.y-self.scroll[1],self.spawn_rect.w,self.spawn_rect.h), 2)
+                pygame.draw.rect(display, (0,255,0), (self.slow_rect.x-self.scroll[0], self.slow_rect.y-self.scroll[1], self.slow_rect.w, self.slow_rect.h), 2)
+
+                # Shake timer decrement
+                if self.shake_timer > 0:
+                    self.shake_timer -= 1
+                
+                # HUD update
+                self.hud.update()
+            elif is_paused:
+                display.blit(pause_screen, (0,0))
+                display.blit((pause_overlay), (0,0))
+                clock.tick()
 
             # last methods to be called
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
