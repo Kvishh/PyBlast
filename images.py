@@ -105,10 +105,19 @@ class ShootImage:
     shoot_image = pygame.image.load("assets/images/shoot.png").convert_alpha()
     shoot_image_scaled = pygame.transform.scale(shoot_image, (SHOOTING_ENEMY_WIDTH, SHOOTING_ENEMY_HEIGHT))
 
+    shoot_flashed_white_image = pygame.image.load("assets/images/shoot_flashed_white.png").convert_alpha()
+    shoot_flashed_white_image_scaled = pygame.transform.scale(shoot_flashed_white_image, (SHOOTING_ENEMY_WIDTH, SHOOTING_ENEMY_HEIGHT))
+
 class BurstImage:
     burst_image = pygame.image.load("assets/images/burst.png").convert_alpha()
     burst_image_scaled = pygame.transform.scale(burst_image, (BURST_ENEMY_WIDTH, BURST_ENEMY_HEIGHT))
 
+    burst_flashed_white_image = pygame.image.load("assets/images/burst_flashed_white.png").convert_alpha()
+    burst_flashed_white_image_scaled = pygame.transform.scale(burst_flashed_white_image, (BURST_ENEMY_WIDTH, BURST_ENEMY_HEIGHT))
+
 class SpecterImage:
     specter_image = pygame.image.load("assets/images/specter.png").convert_alpha()
     specter_image_scaled = pygame.transform.scale(specter_image, (SPECTER_ENEMY_WIDTH, SPECTER_ENEMY_HEIGHT))
+
+    specter_flashed_white_image = pygame.image.load("assets/images/specter_flashed_white.png").convert_alpha()
+    specter_flashed_white_image_scaled = pygame.transform.scale(specter_flashed_white_image, (SPECTER_ENEMY_WIDTH, SPECTER_ENEMY_HEIGHT))

@@ -19,6 +19,12 @@ class Burst(pygame.sprite.Sprite):
         self.hit_rect = pygame.Rect(0, 0, 62, 62)
         self.hit_rect.center = self.rect.center
 
+        self.flashed_white_image = BurstImage.burst_flashed_white_image_scaled
+
+        self.is_hit = False
+        self.flashed_timer = 0
+        self.flashed_duration = 210
+
         self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
                                 (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
                                 (-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0),
@@ -178,6 +184,12 @@ class Burst(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.orig_image, -angle)
         self.rect = self.image.get_rect(center = (self.rect.centerx, self.rect.centery))
         self.mask = pygame.mask.from_surface(self.image)
+
+        if self.is_hit:
+            if pygame.time.get_ticks() - self.flashed_timer > self.flashed_duration:
+                self.is_hit = False
+
+            self.image = pygame.transform.rotate(self.flashed_white_image, -angle)
 
     def get_tile_collided(self):
         tiles_loc = []

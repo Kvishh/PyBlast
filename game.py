@@ -92,20 +92,20 @@ class Game:
         # Heavy Enemy----------------------------------------------------------------------------------------------
         self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0, self.tank_enemy_group, self.all_ground_enemies)
 
-        # # Flight Enemy---------------------------------------------------------------------------------------------
-        # self.flight_enemy = Flight(50, 0, self.flight_enemy_group, self.all_flying_enemies)
+        # Flight Enemy---------------------------------------------------------------------------------------------
+        self.flight_enemy = Flight(50, 0, self.flight_enemy_group, self.all_flying_enemies)
 
-        # # Soar Enemy-----------------------------------------------------------------------------------------------
-        # self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
+        # Soar Enemy-----------------------------------------------------------------------------------------------
+        self.soar_enemy = Soar(50, 0, self.soar_enemy_group, self.all_flying_enemies)
 
         # Shooting Enemy-------------------------------------------------------------------------------------------
         self.shoot_enemy = Shoot(250, 0, self.shoot_enemy_group, self.all_flying_enemies)
 
-        # # Burst Shooting Enemy-------------------------------------------------------------------------------------
-        # self.burst_enemy = Burst(350, 0, self.burst_enemy_group, self.all_flying_enemies)
+        # Burst Shooting Enemy-------------------------------------------------------------------------------------
+        self.burst_enemy = Burst(350, 0, self.burst_enemy_group, self.all_flying_enemies)
 
-        # # Specter Shooting Enemy-----------------------------------------------------------------------------------
-        # self.specter_enemy = Specter(350, 0, self.specter_enemy_group, self.all_flying_enemies)
+        # Specter Shooting Enemy-----------------------------------------------------------------------------------
+        self.specter_enemy = Specter(350, 0, self.specter_enemy_group, self.all_flying_enemies)
 
 
         ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
@@ -311,31 +311,31 @@ class Game:
                 # Avoid overlapping between ground enemies
                 self.avoid_overlap()
 
-                # # Flight Enemy update and render
-                # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.flight_enemy_group.draw(display, self.scroll)
+                # Flight Enemy update and render
+                self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                self.flight_enemy_group.draw(display, self.scroll)
 
-                # # Soar Enemy update and render
-                # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.soar_enemy_group.draw(display, self.scroll)
+                # Soar Enemy update and render
+                self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                self.soar_enemy_group.draw(display, self.scroll)
 
-                # # Shooting Enemy update and render
-                # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.shoot_enemy_group.draw(display, self.scroll)
+                # Shooting Enemy update and render
+                self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                self.shoot_enemy_group.draw(display, self.scroll)
 
-                # # Burst Enemy update and render
-                # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.burst_enemy_group.draw(display, self.scroll)
+                # Burst Enemy update and render
+                self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                self.burst_enemy_group.draw(display, self.scroll)
 
-                # # Specter Enemy update and render
-                # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
-                # self.specter_enemy_group.draw(display, self.scroll)
+                # Specter Enemy update and render
+                self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
+                self.specter_enemy_group.draw(display, self.scroll)
 
                 # Drawing impacts/sparks
                 self.draw_impact()
 
-                # Drawing particles
-                self.draw_floating_particles()
+                # # Drawing particles
+                # self.draw_floating_particles()
 
                 # Drawing falling particles
                 self.draw_falling_particles()
@@ -480,12 +480,8 @@ class Game:
             pos = list(bullet.rect.center)
             
             for enemy in enemies:
-                if isinstance(enemy, Light):
-                    enemy.is_hit = True
-                    enemy.flashed_timer = pygame.time.get_ticks()
-                if isinstance(enemy, Tank):
-                    enemy.is_hit = True
-                    enemy.flashed_timer = pygame.time.get_ticks()
+                enemy.is_hit = True
+                enemy.flashed_timer = pygame.time.get_ticks()
 
             self.create_impacts(pos)
             self.create_floating_particles(pos)
