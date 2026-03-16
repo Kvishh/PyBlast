@@ -483,7 +483,7 @@ class Game:
                 if isinstance(enemy, Light):
                     enemy.is_hit = True
                     enemy.flashed_timer = pygame.time.get_ticks()
-                elif isinstance(enemy, Tank):
+                if isinstance(enemy, Tank):
                     enemy.is_hit = True
                     enemy.flashed_timer = pygame.time.get_ticks()
 

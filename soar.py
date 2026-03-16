@@ -18,6 +18,14 @@ class Soar(pygame.sprite.Sprite):
 
         self.vel = pygame.Vector2(0, 0)
 
+        self.image_flashed_white = SoarImage.soar_image_flashed_white_scaled
+        self.image_flashed_white_right = SoarImage.soar_image_flashed_white_scaled_flipped
+        self.flashed_white_orientation = {1: self.image_flashed_white, -1: self.image_flashed_white_right}
+
+        self.is_hit = False
+        self.flashed_timer = 0
+        self.flashed_duration = 210
+
         self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
                                        (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
                                        (-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0),
@@ -33,7 +41,6 @@ class Soar(pygame.sprite.Sprite):
 
     def update(self, pl, dt, flying_enemies_group, scroll):
         self.switch_orientation()
-        self.image = self.orientation[self.x_direction]
         self.mask = pygame.mask.from_surface(self.image)
 
         self.create_particles()
@@ -118,8 +125,18 @@ class Soar(pygame.sprite.Sprite):
     def switch_orientation(self):
         if self.x_vel < 0:
             self.x_direction = -1
+            self.image = self.orientation[self.x_direction]
         elif self.x_vel > 0:
             self.x_direction = 1
+            self.image = self.orientation[self.x_direction]
+        
+        if self.is_hit:
+            if pygame.time.get_ticks() - self.flashed_timer > self.flashed_duration:
+                self.is_hit = False
+
+            self.image = self.flashed_white_orientation[self.x_direction]
+        
+
 
     def get_tile_collided(self):
         tiles_loc = []

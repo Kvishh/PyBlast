@@ -89,10 +89,17 @@ class FlightImage:
     flight_run_animations_frames_list = load_animation("assets/images/flight_animation.png", 1, 3, 18, 20, FLIGHT_ENEMY_WIDTH, FLIGHT_ENEMY_HEIGHT)
     flight_run_animations_frames_flipped_list = [pygame.transform.flip(frame, True, False) for frame in flight_run_animations_frames_list]
 
+    flight_run_animations_flashed_white_frames_list = load_animation("assets/images/flight_animation_flashed_white.png", 1, 3, 18, 20, FLIGHT_ENEMY_WIDTH, FLIGHT_ENEMY_HEIGHT)
+    flight_run_animations_flashed_white_frames_flipped_list = [pygame.transform.flip(frame, True, False) for frame in flight_run_animations_flashed_white_frames_list]
+
 class SoarImage:
     soar_image = pygame.image.load("assets/images/soar.png").convert_alpha()
     soar_image_scaled = pygame.transform.scale(soar_image, (SOAR_ENEMY_WIDTH, SOAR_ENEMY_HEIGHT))
     soar_image_scaled_flipped = pygame.transform.flip(soar_image_scaled, True, False)
+
+    soar_image_flashed_white = pygame.image.load("assets/images/soar_flashed_white.png").convert_alpha()
+    soar_image_flashed_white_scaled = pygame.transform.scale(soar_image_flashed_white, (SOAR_ENEMY_WIDTH, SOAR_ENEMY_HEIGHT))
+    soar_image_flashed_white_scaled_flipped = pygame.transform.flip(soar_image_flashed_white_scaled, True, False)
 
 class ShootImage:
     shoot_image = pygame.image.load("assets/images/shoot.png").convert_alpha()
