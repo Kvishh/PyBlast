@@ -84,10 +84,10 @@ class Game:
         # Wand-----------------------------------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
 
-        # # Light Enemy----------------------------------------------------------------------------------------------
-        # self.light = Light(0, 0, self.light_enemy_group, self.all_ground_enemies)
-        # self.another_light = Light(300, 0, self.light_enemy_group, self.all_ground_enemies)
-        # self.ground_en = Light(600, 0, self.light_enemy_group, self.all_ground_enemies)
+        # Light Enemy----------------------------------------------------------------------------------------------
+        self.light = Light(0, 0, self.light_enemy_group, self.all_ground_enemies)
+        self.another_light = Light(300, 0, self.light_enemy_group, self.all_ground_enemies)
+        self.ground_en = Light(600, 0, self.light_enemy_group, self.all_ground_enemies)
 
         # Heavy Enemy----------------------------------------------------------------------------------------------
         self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0, self.tank_enemy_group, self.all_ground_enemies)
@@ -300,9 +300,9 @@ class Game:
                 # Draw jump particles
                 self.draw_jump_particles()
 
-                # # Enemy update and render
-                # self.light_enemy_group.update(dt, self.player, self.scroll)
-                # self.light_enemy_group.draw(display, self.scroll)
+                # Enemy update and render
+                self.light_enemy_group.update(dt, self.player, self.scroll)
+                self.light_enemy_group.draw(display, self.scroll)
 
                 # Heavy Enemy update and render
                 self.tank_enemy_group.update(dt, self.player, self.scroll)
@@ -319,9 +319,9 @@ class Game:
                 # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
                 # self.soar_enemy_group.draw(display, self.scroll)
 
-                # Shooting Enemy update and render
-                self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                self.shoot_enemy_group.draw(display, self.scroll)
+                # # Shooting Enemy update and render
+                # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.shoot_enemy_group.draw(display, self.scroll)
 
                 # # Burst Enemy update and render
                 # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
@@ -478,6 +478,14 @@ class Game:
         for bullet, enemies in hits.items():
             self.shake_timer = 20
             pos = list(bullet.rect.center)
+            
+            for enemy in enemies:
+                if isinstance(enemy, Light):
+                    enemy.is_hit = True
+                    enemy.flashed_timer = pygame.time.get_ticks()
+                elif isinstance(enemy, Tank):
+                    enemy.is_hit = True
+                    enemy.flashed_timer = pygame.time.get_ticks()
 
             self.create_impacts(pos)
             self.create_floating_particles(pos)
@@ -586,13 +594,13 @@ class Game:
 
     def create_falling_particles(self, enemy, pos):
         if isinstance(enemy, Light):
-            for _ in range(20): # location, velocity, radius, color
+            for _ in range(15): # location, velocity, radius, color
                 self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
                                         [random.randrange(-3, 3), -2], 
                                         random.randrange(10, 14),
                                         (78, 45, 145)])
         elif isinstance(enemy, Tank):
-            for _ in range(20): # location, velocity, radius
+            for _ in range(15): # location, velocity, radius
                 self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
                                         [random.randrange(-3, 3), -2], 
                                         random.randrange(10, 14),

@@ -16,6 +16,14 @@ class Light(pygame.sprite.Sprite):
         self.jumping = False
         self.x_direction = 0
 
+        self.image_flashed_white = LightImage.light_image_flashed_white_scaled
+        self.image_flashed_white_right = LightImage.light_image_flashed_white_scaled_flipped
+        self.flashed_white_orientation = {1: self.image_flashed_white, -1: self.image_flashed_white_right}
+
+        self.is_hit = False
+        self.flashed_timer = 0
+        self.flashed_duration = 170
+
         self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
                                 (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
                                 (-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0),
@@ -32,7 +40,6 @@ class Light(pygame.sprite.Sprite):
 
     def update(self, dt, player, scroll):
         self.switch_orientation(player)
-        self.image = self.orientation[self.x_direction]
         self.mask = pygame.mask.from_surface(self.image)
 
         # Border limit x
@@ -137,8 +144,16 @@ class Light(pygame.sprite.Sprite):
     def switch_orientation(self, player):
         if self.x_velocity < 0:
             self.x_direction = -1
+            self.image = self.orientation[self.x_direction]
         elif self.x_velocity > 0:
             self.x_direction = 1
+            self.image = self.orientation[self.x_direction]
+
+        if self.is_hit:
+            if pygame.time.get_ticks() - self.flashed_timer > self.flashed_duration:
+                self.is_hit = False
+
+            self.image = self.flashed_white_orientation[self.x_direction]
 
     def _detect_jump(self, player):
         is_going_right = player.rect.centerx > self.rect.centerx

@@ -16,6 +16,10 @@ class Tank(pygame.sprite.Sprite):
         self.jumping = False
         self.x_direction = -1
 
+        self.is_hit = False
+        self.flashed_timer = 0
+        self.flashed_duration = 170
+
         self.dust_particles = []
 
         self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
@@ -28,6 +32,8 @@ class Tank(pygame.sprite.Sprite):
         self.animation_update = pygame.time.get_ticks()
         self.animations_frames_list = TankImages.tank_run_animations_frames_list
         self.animations_frames_list_right = TankImages.tank_run_animations_frames_flipped_list
+        self.animations_frames_flashed_white_list = TankImages.tank_run_animations_flashed_white_frames_list
+        self.animations_frames_flashed_white_list_right = TankImages.tank_run_animations_flashed_white_frames_flipped_list
 
     def update(self, dt, player, scroll):
         self.image = self.orientation[self.x_direction]
@@ -79,6 +85,16 @@ class Tank(pygame.sprite.Sprite):
         else:
             self.image = self.animations_frames_list_right[self.animation_count]
         self.mask = pygame.mask.from_surface(self.image)
+        
+        if self.is_hit:
+            if pygame.time.get_ticks() - self.flashed_timer > self.flashed_duration:
+                self.is_hit = False
+
+            if self.x_direction > 0:
+                self.image = self.animations_frames_flashed_white_list[self.animation_count]
+            else:
+                self.image = self.animations_frames_flashed_white_list_right[self.animation_count]
+
         self.update_animation()
 
     def update_animation(self):
