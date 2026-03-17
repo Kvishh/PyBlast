@@ -1,6 +1,6 @@
 import pygame
 
-FPS = 60
+FPS = 90
 
 WINDOW_WIDTH = 1300
 WINDOW_HEIGHT = 800
