@@ -113,7 +113,7 @@ class Shoot(pygame.sprite.Sprite):
 
     def slow_down(self):
         current_time = pygame.time.get_ticks()
-        if current_time - self.previous_time_slowing_down > 3000:
+        if current_time - self.previous_time_slowing_down > 3500:
             self.speed -= .5
 
     def seek(self, player):

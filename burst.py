@@ -90,7 +90,7 @@ class Burst(pygame.sprite.Sprite):
     def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player):
         current_time = pygame.time.get_ticks()
 
-        if current_time - self.previous_time_slowing_down > 3000:
+        if current_time - self.previous_time_slowing_down > 3500:
             self.speed -= .5
         else:
             self.speed += .5 if self.speed < 30 else 0
@@ -112,7 +112,7 @@ class Burst(pygame.sprite.Sprite):
                     all_enemy_projectiles_that_hit_player.add(bullet)
 
                     self.shoot_count += 1
-                    self.speed = 15
+                    self.speed = 20
 
                 elif self.shoot_count >= 3:
                     self.previous_time_slowing_down = current_time
