@@ -25,6 +25,8 @@ class Specter(pygame.sprite.Sprite):
         self.flashed_timer = 0
         self.flashed_duration = 210
 
+        self.hp = 20
+
         self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
                                     (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
                                     (-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0),
@@ -43,6 +45,7 @@ class Specter(pygame.sprite.Sprite):
 
         self.allow_increase = True
         self.opacity = 255
+
 
     def update(self, specter_enemy_bullet_group, pl, dt, flying_enemies_group, all_enemy_projectiles_that_hit_player):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)

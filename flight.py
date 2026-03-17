@@ -20,6 +20,8 @@ class Flight(pygame.sprite.Sprite):
         self.flashed_timer = 0
         self.flashed_duration = 210
 
+        self.hp = 25
+
         self.vel = pygame.Vector2(0, 0)
 
         self.tiles_collision_offset = [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),

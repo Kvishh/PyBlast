@@ -51,6 +51,7 @@ class Player(pygame.sprite.Sprite):
         self.max_hp = 4
         self.current_hp = 3
         self.shield = 2
+        self.damage = 10
 
         self.is_hit = True
         self.is_invincible = False
