@@ -27,15 +27,7 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.end_p = self.cast_line()
     
     def update(self, dt, scroll):
-        ########## TRAIL PARTICLE ##########
-        for particle in self.particles:
-            particle[0][0] -= 1
-            particle[0][1] += particle[1]
-        particle = [list(self.rect.midleft), random.uniform(-2, 2), pygame.Color(random.randrange(147, 206), 43, 207)]
-        self.particles.append(particle)
-        if len(self.particles) > 20:
-            self.particles.pop(0)
-        ########## TRAIL PARTICLE ##########
+        self.create_trail_particle()
         self._draw_particles(scroll)
 
         self.draw_line(scroll)
@@ -64,11 +56,25 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.rect.centery = int(self.pos.y)
 
     def _draw_particles(self, scroll):
-        for i, particle in enumerate(self.particles):
-            pygame.draw.circle(display, (48, 18, 56), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (i//3+2))
+        if self.particles:
+            self.particles = [p for p in self.particles if p[2] > 0]
 
-            pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
-    
+            for particle in self.particles:
+                particle[0][0] -= particle[1][0]
+                particle[0][1] += particle[1][1]
+                particle[2] -= .4
+
+                pygame.draw.circle(display, (48, 18, 56), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (particle[2]))
+                pygame.draw.circle(display, particle[3], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (particle[2]))
+
+    def create_trail_particle(self):
+        if len(self.particles) < 20:
+            # location, velocity, radius, color
+            self.particles.append([list(self.rect.center),
+                                   [random.randint(-1, 1), random.uniform(-2.5, 2.5)],
+                                   random.randrange(7, 11),
+                                   pygame.Color(random.randrange(147, 206), 43, 207)])
+
     def draw_line(self, scroll):
         start = (self.rect.centerx, self.rect.centery)
 
@@ -135,15 +141,7 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
         self.end_p = self.cast_line()
     
     def update(self, dt, scroll):
-        ########## TRAIL PARTICLE ##########
-        for particle in self.particles:
-            particle[0][0] -= 1
-            particle[0][1] += particle[1]
-        particle = [list(self.rect.midleft), random.uniform(-2, 2), (random.randrange(147, 206), 43, 207)]
-        self.particles.append(particle)
-        if len(self.particles) > 20:
-            self.particles.pop(0)
-        ########## TRAIL PARTICLE ##########
+        self.create_trail_particle()
         self._draw_particles(scroll)
 
         self.draw_line(scroll)
@@ -213,14 +211,32 @@ class SpecterEnemyBullet(pygame.sprite.Sprite):
         self.rect.centery = int(self.pos.y)
 
     def _draw_particles(self, scroll):
-        for i, particle in enumerate(self.particles):
-            radius = i//3+2
-            circle = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
-            shadow = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+        if self.particles:
+            self.particles = [p for p in self.particles if p[2] > 0]
 
-            pygame.draw.circle(shadow, (48, 18, 56, self.opacity), (radius, radius), i//3+2)
+            for particle in self.particles:
+                particle[0][0] -= particle[1][0]
+                particle[0][1] += particle[1][1]
+                particle[2] -= .4
 
-            pygame.draw.circle(circle, (particle[2][0], particle[2][1], particle[2][2], self.opacity), (radius, radius), i//3+2)
+                radius = particle[2]
+                circle = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+                shadow = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
 
-            display.blit(circle, (particle[0][0]-scroll[0], particle[0][1]-scroll[1]-5))
-            display.blit(shadow, (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]-5+4))
+                pygame.draw.circle(shadow, (48, 18, 56, self.opacity), (radius, radius), radius)
+
+                pygame.draw.circle(circle, (particle[3][0], particle[3][1], particle[3][2], self.opacity), (radius, radius), radius)
+
+                x = particle[0][0] - radius
+                y = particle[0][1] - radius
+
+                display.blit(shadow, (x-scroll[0]+3, y-scroll[1]+3))
+                display.blit(circle, (x-scroll[0], y-scroll[1]))
+
+    def create_trail_particle(self):
+        if len(self.particles) < 20:
+            # location, velocity, radius, color
+            self.particles.append([list(self.rect.center),
+                                   [random.randint(-1, 1), random.uniform(-2.5, 2.5)],
+                                   random.randrange(7, 11),
+                                   pygame.Color(random.randrange(147, 206), 43, 207)])
