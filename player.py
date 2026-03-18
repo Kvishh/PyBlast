@@ -2,6 +2,7 @@ import pygame, random
 from configs import *
 from game_map import tiles, tiles_blocks
 from images import PlayerImages, GradientImage
+from bullet import PlayerBullet
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
@@ -58,25 +59,37 @@ class Player(pygame.sprite.Sprite):
         self.invincible_timer = 0
         self.invincible_duration = 1500
 
+        self.shoot_previous_time = pygame.time.get_ticks()
+        self.shooting_cd = 700
 
-    def update(self, keys, dt, jump_particles, dark_overlay, scroll):
+
+    def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, all_projectile_that_hit_tiles):
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
 
+        # Shoot bullets
+        self.shoot_bullet(scroll, player_bullet_group, all_projectile_that_hit_tiles)
+
+        # Check if player is hit
         self.player_is_hit()
 
+        # Draw the gradient circle behind player
         self.draw_glow(dark_overlay, scroll)
 
         # checks if ground_test_rect is touching any tiles
         self.check_if_on_ground()
 
+        # Update animation image
         self.update_image()
+
+        # Keys checking for movement
         self._move(keys, jump_particles)
 
         # this is for checking whether enemy is stuck below or above
         self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
         # pygame.draw.rect(display, (255, 0, 0), self.vertical_rect, 2) # original
-
+        
+        # Creating and drawing of dust particles
         self.create_dust_particles()
         self.draw_dust_particles(scroll)
 
@@ -119,6 +132,24 @@ class Player(pygame.sprite.Sprite):
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
+
+    def shoot_bullet(self, scroll, player_bullet_group, all_projectile_that_hit_tiles):
+        mouse_hold = pygame.mouse.get_pressed()
+        if mouse_hold[0]:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.shoot_previous_time > self.shooting_cd:
+
+                mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
+                mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + scroll[1]
+                
+                bullet = PlayerBullet(self.rect.centerx, 
+                                self.rect.centery, 
+                                self.x_direction, 
+                                mouse_x,
+                                mouse_y)
+                player_bullet_group.add(bullet)
+                all_projectile_that_hit_tiles.add(bullet)
+                self.shoot_previous_time = current_time
 
     def player_is_hit(self):
         if self.is_invincible:
