@@ -9,7 +9,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.image = BulletImage.bullet_image_scaled
         self.rect = self.image.get_rect(center=(x, y+10))
         self.mask = pygame.mask.from_surface(self.image)
-        self.speed = 450
+        self.speed = 400
         self.direction = direction
         self.pos = pygame.Vector2(x, y+4)
         self._mouse_target_x = mouse_target_x
@@ -26,15 +26,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.particles = []
     
     def update(self, dt, scroll):
-        ########## TRAIL PARTICLE ##########
-        for particle in self.particles:
-            particle[0][0] -= 1
-            particle[0][1] += particle[1]
-        particle = [list(self.rect.midleft), random.uniform(-2, 2), pygame.Color(random.randrange(204, 251), 255, 0)]
-        self.particles.append(particle)
-        if len(self.particles) > 20:
-            self.particles.pop(0)
-        ########## TRAIL PARTICLE ##########
+        self.create_trail_particle()
         self._draw_particles(scroll)
 
         if self.rect.x > WINDOW_WIDTH:
@@ -45,7 +37,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         if self.direction > 0:
             self.speed = self.speed
         elif self.direction < 0:
-            self.speed = -400
+            self.speed = -1*self.speed
 
         self._kill_if_tile_collision()
 
@@ -57,9 +49,25 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.rect.centerx = int(self.pos.x)
         self.rect.centery = int(self.pos.y)
 
+    def create_trail_particle(self):
+        if len(self.particles) < 20:
+            # location, velocity, radius, color
+            self.particles.append([list(self.rect.center),
+                                   [random.randint(-1, 1), random.uniform(-2.5, 2.5)],
+                                   random.randrange(7, 11),
+                                   pygame.Color(random.randrange(204, 251), 255, 0)])
+
     def _draw_particles(self, scroll):
-        for i, particle in enumerate(self.particles):
-            pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
+        if self.particles:
+            self.particles = [p for p in self.particles if p[2] > 0]
+
+            for particle in self.particles:
+                particle[0][0] -= particle[1][0]
+                particle[0][1] += particle[1][1]
+                particle[2] -= .3
+
+                pygame.draw.circle(display, (60, 74, 0), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (particle[2]))
+                pygame.draw.circle(display, particle[3], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (particle[2]))
 
     def _kill_if_tile_collision(self):
         tile_offsets = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
