@@ -6,22 +6,49 @@ class HUD:
         self.font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 28)
         self.font_fps = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 26)
         self.font_timer = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 60)
+        self.font_level = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 20)
         self.player = player
         self.heart = pygame.transform.scale(pygame.image.load("assets/images/heart.png").convert_alpha(), (HEART_IMAGE_WIDTH, HEART_IMAGE_HEIGHT))
         self.empty_heart = pygame.transform.scale(pygame.image.load("assets/images/empty_heart.png").convert_alpha(), (EMPTY_HEART_IMAGE_WIDTH, EMPTY_HEART_IMAGE_HEIGHT))
         self.shield = pygame.transform.scale(pygame.image.load("assets/images/shield.png").convert_alpha(), (SHIELD_IMAGE_WIDTH, SHIELD_IMAGE_HEIGHT))
 
-        self.level_bar = pygame.Rect(10, 10, 980, 20)
+        self.level = 1
+        self.level_bar = pygame.Rect(10, 10, 980, 20) # Rect: 10, 10, 980, 20-left,top,width,height
+        self.current_xp_width = 0
     
-    def update(self, timer):
+    def update(self, timer, xp_increment):
         self._blit_heart()
         self._blit_shield()
         self.blit_FPS()
         self.blit_timer(timer)
-        self._blit_level_bar()
+        self._blit_level_bar(xp_increment)
 
-    def _blit_level_bar(self):
-        pygame.draw.rect(display, (0,255,0), self.level_bar)
+    def _blit_level_bar(self, xp_increment):
+        self.current_xp_width += xp_increment
+        if self.current_xp_width >= 980:
+            # The width before addition
+            old_xp_width = self.current_xp_width - xp_increment
+            # The difference in order to get the amount that will be subtracted to the increment
+            diff = 980 - old_xp_width
+            # The surplus added after leveling up
+            xp_increment = xp_increment - diff
+            
+            self.current_xp_width = 980 - (980 - xp_increment)
+            self.level += 1
+        elif self.current_xp_width <= 0:
+            self.current_xp_width = 0
+
+        # Black background
+        pygame.draw.rect(display, (0,0,0), self.level_bar)
+        
+        # The green level bar
+        pygame.draw.rect(display, (0,255,0), (self.level_bar.left, self.level_bar.top, self.current_xp_width, self.level_bar.height))
+
+        # Level text rendering
+        text = self.render_outlined(f"Lvl {str(self.level)}", (255,255,255), (0,0,0), 2, self.font_level)
+        display.blit(text, (DISPLAY_WIDTH//2,7))
+
+        # White outline
         pygame.draw.rect(display, (255,255,255), self.level_bar, 2)
 
     def _blit_heart(self):

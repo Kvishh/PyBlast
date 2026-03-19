@@ -165,6 +165,12 @@ class Game:
         self.dark_overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         self.dark_overlay.fill((190,190,190,100))
 
+        # Xp increment for level ----------------------------------------------------------------------------------
+        self.xp_increment = 0
+
+        # Set of enemies killed -----------------------------------------------------------------------------------
+        self.enemies_killed = set([])
+
         # Particle cache--------------------------------------------------------------------------------------------
         self.particle_cache = {}
 
@@ -173,7 +179,6 @@ class Game:
 
 
     def game_run(self):
-        previous_time = [pygame.time.get_ticks()]
         interval = [pygame.time.get_ticks()]
 
         pause_screen = None
@@ -258,9 +263,6 @@ class Game:
                 # Creating background particles
                 self.create_background_particles()
 
-                # Checking of mouse hold and creation of bullet
-                self.shoot_bullet(previous_time, self.player.rect.centerx, self.player.rect.centery)
-
                 # Drawing of player bullets
                 self.player_bullet_group.update(dt, self.scroll)
                 self.player_bullet_group.draw(display, self.scroll)
@@ -294,48 +296,48 @@ class Game:
                 # Player and Wand update and draw methods
                 self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
                 self.wand.render(self.scroll)
-                self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.dark_overlay, self.scroll)
+                self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group, self.all_projectile_that_hit_tiles)
                 self.player.render(self.scroll)
 
                 # Draw jump particles
                 self.draw_jump_particles()
 
-                # Enemy update and render
-                self.light_enemy_group.update(dt, self.player, self.scroll)
-                self.light_enemy_group.draw(display, self.scroll)
+                # # Enemy update and render
+                # self.light_enemy_group.update(dt, self.player, self.scroll)
+                # self.light_enemy_group.draw(display, self.scroll)
 
                 # Heavy Enemy update and render
                 self.tank_enemy_group.update(dt, self.player, self.scroll)
                 self.tank_enemy_group.draw(display, self.scroll)
 
-                # Avoid overlapping between ground enemies
-                self.avoid_overlap()
+                # # Avoid overlapping between ground enemies
+                # self.avoid_overlap()
 
-                # Flight Enemy update and render
-                self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-                self.flight_enemy_group.draw(display, self.scroll)
+                # # Flight Enemy update and render
+                # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.flight_enemy_group.draw(display, self.scroll)
 
-                # Soar Enemy update and render
-                self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-                self.soar_enemy_group.draw(display, self.scroll)
+                # # Soar Enemy update and render
+                # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.soar_enemy_group.draw(display, self.scroll)
 
                 # Shooting Enemy update and render
                 self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
                 self.shoot_enemy_group.draw(display, self.scroll)
 
-                # Burst Enemy update and render
-                self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                self.burst_enemy_group.draw(display, self.scroll)
+                # # Burst Enemy update and render
+                # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.burst_enemy_group.draw(display, self.scroll)
 
-                # Specter Enemy update and render
-                self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
-                self.specter_enemy_group.draw(display, self.scroll)
+                # # Specter Enemy update and render
+                # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
+                # self.specter_enemy_group.draw(display, self.scroll)
 
                 # Drawing impacts/sparks
                 self.draw_impact()
 
-                # # Drawing particles
-                # self.draw_floating_particles()
+                # Drawing particles
+                self.draw_floating_particles()
 
                 # Drawing falling particles
                 self.draw_falling_particles()
@@ -356,10 +358,21 @@ class Game:
                 # Shake timer decrement
                 if self.shake_timer > 0:
                     self.shake_timer -= 1
+
+                # Increase of level width
+                self.xp_increment *= len(self.enemies_killed)
+
+                # Killing of enemies
+                for enemy in self.enemies_killed: enemy.kill()
                 
                 # HUD update
-                self.hud.update(countdown_time_text)
+                self.hud.update(countdown_time_text, self.xp_increment)
+
+                # Reset of set and xp_increment
+                self.enemies_killed.clear()
+                self.xp_increment = 0
             elif is_paused:
+                # Blitting of the last screen and the dark overlay when paused
                 display.blit(pause_screen, (0,0))
                 display.blit((pause_overlay), (0,0))
                 clock.tick()
@@ -415,24 +428,6 @@ class Game:
                             x.pos.x += overlap.h // 6
                             y.pos.x -= overlap.h // 6
 
-    def shoot_bullet(self, previous_time, player_rect_centerx, player_rect_centery):
-        mouse_hold = pygame.mouse.get_pressed()
-        if mouse_hold[0]:
-            current_time = pygame.time.get_ticks()
-            if current_time - previous_time[0] > SHOOTING_COOLDOWN:
-
-                mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + self.scroll[0]
-                mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + self.scroll[1]
-                
-                bullet = PlayerBullet(player_rect_centerx, 
-                                player_rect_centery, 
-                                self.player.x_direction, 
-                                mouse_x,
-                                mouse_y)
-                self.player_bullet_group.add(bullet)
-                self.all_projectile_that_hit_tiles.add(bullet)
-                previous_time[0] = current_time
-
     def create_background_particles(self):
         if len(self.background_particles) < 10: # loc, radius, direction
             self.background_particles.append([[random.randrange(WINDOW_WIDTH), random.randrange(WINDOW_HEIGHT)],
@@ -482,6 +477,12 @@ class Game:
             for enemy in enemies:
                 enemy.is_hit = True
                 enemy.flashed_timer = pygame.time.get_ticks()
+
+                enemy.hp -= self.player.damage
+                    
+                if enemy.hp <= 0:
+                    self.enemies_killed.add(enemy)
+                    self.xp_increment = 110 - (self.hud.level*10)
 
             self.create_impacts(pos)
             self.create_floating_particles(pos)
