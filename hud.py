@@ -64,7 +64,8 @@ class HUD:
                 display.blit(self.empty_heart, (10+(i*(EMPTY_HEART_IMAGE_WIDTH + 5)), 40))
     
     def _blit_shield(self):
-        display.blit(self.shield, (10, 85))
+        for i in range(self.player.shield):
+            display.blit(self.shield, (10+(i*(SHIELD_IMAGE_WIDTH + 5)), 85))
     
     def blit_FPS(self):
         text = self.render_outlined((f"FPS: {clock.get_fps():.0f}"), (255,255,255), (0,0,0), 2, self.font_fps)
