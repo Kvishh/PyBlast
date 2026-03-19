@@ -1,0 +1,334 @@
+import pygame, math, random
+from configs import *
+from game_map import tiles_blocks
+from images import GradientImage
+from spark import Spark
+from tank import Tank
+from light import Light
+from flight import Flight
+from soar import Soar
+from shoot import Shoot
+from burst import Burst
+from specter import Specter
+
+
+class FxList:
+    # For background particles---------------------------------------------------------------------------------
+    background_particles = []
+
+    # For sparks-----------------------------------------------------------------------------------------------
+    sparks = []
+
+    # For particles--------------------------------------------------------------------------------------------
+    particles = []
+
+    # For falling particles------------------------------------------------------------------------------------
+    falling_particles = []
+
+    # For radiation--------------------------------------------------------------------------------------------
+    radiations = []
+
+    # For debris------------------------------------------------------------------------------------------------
+    debris = []
+
+    # For jump particles----------------------------------------------------------------------------------------
+    jump_particles = []
+
+    # Particle cache--------------------------------------------------------------------------------------------
+    particle_cache = {}
+
+def get_cached_particle(radius, color):
+    radius = int(radius)
+    
+    if radius <= 0: return None
+
+    tag = (radius, color)
+    if tag not in FxList.particle_cache:
+        surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(surf, (color[0], color[1], color[2]), (radius, radius), radius)
+        FxList.particle_cache[tag] = surf.convert_alpha()
+    return FxList.particle_cache[tag]
+
+
+def create_background_particles():
+    if len(FxList.background_particles) < 10: # loc, radius, direction
+        FxList.background_particles.append([[random.randrange(WINDOW_WIDTH), random.randrange(WINDOW_HEIGHT)],
+                                    2,
+                                    [random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)]), random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)])],
+                                    random.choice(GradientImage.gradient_background_image_list)])
+
+def draw_background_particles(dark_overlay, scroll):
+    if FxList.background_particles:
+        FxList.background_particles = [background_particle for background_particle in FxList.background_particles
+                                if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
+                                (background_particle[0][0] > 0 and background_particle[0][0] < WINDOW_WIDTH)]            
+        
+        # loc, radius, direction
+        for bg_particle in FxList.background_particles:
+            bg_particle[0][0] += bg_particle[2][0]
+            bg_particle[0][1] += bg_particle[2][1]
+            """Movement of particle"""
+
+            gradient_copy = bg_particle[3]
+            dark_overlay.blit(gradient_copy,
+                                    (bg_particle[0][0]-scroll[0] - (gradient_copy.get_rect().w//2),
+                                    bg_particle[0][1]-scroll[1] - (gradient_copy.get_rect().h//2)),
+                                    special_flags=pygame.BLEND_RGBA_ADD)
+            """The two lines above are responsible for the gradient image"""
+
+            pygame.draw.circle(display, (255, 255, 255), [int(bg_particle[0][0])-scroll[0], int(bg_particle[0][1])-scroll[1]], bg_particle[1])
+            """The line above is for the white opaque circle"""
+
+            radius = 35 # if gradient_image w and h is 70
+            r_increment = -1 # if gradient_image w and h is 70
+            gradient_image_w = gradient_copy.get_rect().w
+            if gradient_image_w == 90:
+                radius = 45
+                r_increment = 5
+
+            layer1 = pygame.Surface((radius,radius))
+            layer1.set_colorkey((0,0,0))
+
+            for i in range(2, -1, -1):
+                c = 30 - i*10 * 4
+                c = pygame.math.clamp(c, 5, 255)
+                r = r_increment + (i*5) + 8
+                pygame.draw.circle(layer1, (c,c,c), layer1.get_rect().center, r)
+
+            display.blit(layer1,
+                            ((bg_particle[0][0]-scroll[0]) - (layer1.get_rect().w//2),
+                            (bg_particle[0][1]-scroll[1]) - (layer1.get_rect().h//2)),
+                            special_flags=pygame.BLEND_RGBA_ADD)
+
+
+def create_floating_particles(pos):
+    for _ in range(15): # location, velocity, radius, color
+        FxList.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
+                                [random.randrange(-3, 3), -3], 
+                                random.randrange(24, 30),
+                                255])
+
+def draw_floating_particles(scroll):
+    if FxList.particles:
+        FxList.particles = [particle for particle in FxList.particles if particle[2] > 0]
+
+        for particle in FxList.particles:
+            # radius decrement
+            particle[2] -= .8
+
+            # change position over time
+            particle[0][0] += particle[1][0]
+            particle[0][1] += particle[1][1]
+
+            # change y velocity over time
+            particle[1][1] += .02
+
+            # change color over time
+            particle[3] -= random.randint(1, 3)
+            pygame.draw.circle(display,
+                                (int(particle[3]), int(particle[3]), int(particle[3])),
+                                (particle[0][0] - scroll[0], particle[0][1] - scroll[1]),
+                                int(particle[2]))
+
+            # rad = int(particle[2])
+            # if rad > 0:
+            #     surf = self.get_cached_particle(rad, (particle[3],particle[3],particle[3]))
+            #     display.blit(surf, (particle[0][0]-self.scroll[0], particle[0][1]-self.scroll[1]))
+
+
+def create_falling_particles(enemy, pos):
+    if isinstance(enemy, Light):
+        for _ in range(15): # location, velocity, radius, color
+            FxList.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
+                                    [random.randrange(-3, 3), -2], 
+                                    random.randrange(10, 14),
+                                    (78, 45, 145)])
+    elif isinstance(enemy, Tank):
+        for _ in range(15): # location, velocity, radius
+            FxList.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
+                                    [random.randrange(-3, 3), -2], 
+                                    random.randrange(10, 14),
+                                    (155, 86, 186)])
+
+def draw_falling_particles(scroll):
+    if FxList.falling_particles:
+        FxList.falling_particles = [particle for particle in FxList.falling_particles if particle[2] > 0]
+
+        for particle in FxList.falling_particles:
+            # radius decrement
+            particle[2] -= .2
+
+            # change position over time
+            particle[0][0] += particle[1][0]
+            particle[0][1] += particle[1][1]
+
+            # change y velocity over time
+            particle[1][1] += .2
+
+            pygame.draw.circle(display,
+                                (32, 33, 48),
+                                (particle[0][0] + 3 - scroll[0], particle[0][1] + 3 - scroll[1]),
+                                int(particle[2]))
+
+            pygame.draw.circle(display,
+                                particle[3],
+                                (particle[0][0] - scroll[0], particle[0][1] - scroll[1]),
+                                int(particle[2]))
+
+
+def create_debris(pos):
+    for _ in range(20):  # location, velocity, radius, color
+        r = random.randrange(60, 80)
+        g = r
+        FxList.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
+                    [random.randrange(-3, 3), random.randrange(-3, 3)], 
+                    random.randrange(10, 16),
+                    (r, g, 125)])
+
+def draw_debris(scroll):
+    if FxList.debris:
+        FxList.debris = [debris for debris in FxList.debris if debris[2] > 0]
+
+        for debris in FxList.debris:
+            # radius decrement
+            debris[2] -= .2
+
+            # change position over time
+            debris[0][0] += debris[1][0]
+            debris_loc = str(int(debris[0][0] / TILE_SIZE)) + ';' + str(int(debris[0][1] / TILE_SIZE))
+            if debris_loc in tiles_blocks:
+                debris[1][0] = -.85 * debris[1][0]
+                debris[1][1] *= 0.95
+                debris[0][0] += debris[1][0] * 2
+
+            debris[0][1] += debris[1][1]
+            debris_loc = str(int(debris[0][0] / TILE_SIZE)) + ';' + str(int(debris[0][1] / TILE_SIZE))
+            if debris_loc in tiles_blocks:
+                debris[1][1] = -.65 * debris[1][1]
+                debris[1][0] *= 0.95
+                debris[0][1] += debris[1][1] * 2
+
+            # change y velocity over time
+            debris[1][1] += .2
+
+            pygame.draw.circle(display,
+                                (32, 33, 48),
+                                (debris[0][0] + 5 - scroll[0], debris[0][1] + 5 - scroll[1]),
+                                debris[2])
+
+            pygame.draw.circle(display,
+                                debris[3],
+                                (debris[0][0] - scroll[0], debris[0][1] - scroll[1]),
+                                debris[2])
+
+
+def create_radiation(enemy, pos):
+    if isinstance(enemy, Soar):
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                1,
+                                (145, 47, 47)])
+
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                0,
+                                [(145, 47, 47), (82, 27, 27)]])
+    elif isinstance(enemy, Flight):
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                0,
+                                [(199, 48, 115), (105, 41, 71)]])
+    elif isinstance(enemy, Shoot):
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                0,
+                                [(158, 0, 191), (71, 36, 82)]])
+    elif isinstance(enemy, Burst):
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                1,
+                                (136, 0, 255)])
+
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                0,
+                                [(136, 0, 255), (71, 36, 82)]])
+    elif isinstance(enemy, Specter):
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                1,
+                                ((89, 0, 255))])
+
+        FxList.radiations.append([[pos[0], pos[1]],
+                                15,
+                                8,
+                                0,
+                                [(89, 0, 255), (71, 36, 82)]])
+
+def draw_radiations(scroll):
+    if FxList.radiations:
+        FxList.radiations = [radiation for radiation in FxList.radiations if radiation[2] > 1.1]
+
+        for radiation in FxList.radiations:
+            if radiation[3] == 1:
+                radiation[1] += 12 # radius
+                radiation[2] -= .4 # width
+
+                if radiation[2] < 1: radiation[2] = 1
+
+                pygame.draw.circle(display,
+                                radiation[4],
+                                (radiation[0][0] - scroll[0], radiation[0][1] - scroll[1]), int(radiation[1]),
+                                int(radiation[2]))
+            else:
+                radiation[1] += 7 # radius
+                radiation[2] -= .2 # width
+
+                if radiation[2] < 1: radiation[2] = 1
+
+                pygame.draw.circle(display,
+                                radiation[4][1],
+                                (radiation[0][0] + 6 - scroll[0], radiation[0][1] + 3 - scroll[1]), int(radiation[1]),
+                                int(radiation[2]))
+
+                pygame.draw.circle(display,
+                                radiation[4][0],
+                                (radiation[0][0]-scroll[0], radiation[0][1]-scroll[1]), int(radiation[1]),
+                                int(radiation[2]))
+
+
+def create_impacts(pos):
+    for _ in range(6):
+        FxList.sparks.append(Spark([pos[0], pos[1]], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
+
+def draw_impact(scroll):
+    for i, spark in sorted(enumerate(FxList.sparks), reverse=True):
+        spark.move(1)
+        spark.draw(display, scroll)
+        if not spark.alive:
+            FxList.sparks.pop(i)
+
+
+def draw_jump_particles(scroll):
+    if FxList.jump_particles:
+        FxList.jump_particles = [p for p in FxList.jump_particles if p[2] > 0]
+
+        for particle in FxList.jump_particles:
+            particle[2] -= .2
+            particle[0][0] += particle[1][0]
+            particle[0][1] += particle[1][1]
+
+            
+            pygame.draw.circle(display,
+                            (10, 43, 12),
+                            (particle[0][0]-scroll[0] + 3, particle[0][1]-scroll[1] + 3),
+                            int(particle[2]))
+
+            pygame.draw.circle(display, (178, 235, 23), (particle[0][0] - scroll[0], particle[0][1] - scroll[1]), particle[2])

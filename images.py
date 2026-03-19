@@ -20,6 +20,8 @@ class GradientImage:
     gradient_image = pygame.image.load("assets/images/radial_gradient.png").convert()
     gradient_player_image_scaled = pygame.transform.scale(pygame.image.load("assets/images/radial_gradient.png").convert(), (270, 270))
 
+    gradient_background_image_list = [pygame.transform.scale(gradient_image, (70, 70)), pygame.transform.scale(gradient_image, (90, 90))]
+
 class TileImage:
     tile_image = pygame.image.load("assets/images/tile1.png").convert_alpha()
     tile_image_scaled = pygame.transform.scale(tile_image, (TILE_SIZE, TILE_SIZE))

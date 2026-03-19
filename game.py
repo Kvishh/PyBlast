@@ -1,12 +1,11 @@
 import pygame, random, math, time
+import effects_sytem as fx
 from configs import *
 from game_map import tiles_blocks, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
-from bullet import PlayerBullet
 from customgroup import CustomGroup, ShootCustomGroup
 from light import Light
-from spark import Spark
 from flight import Flight
 from soar import Soar
 from shoot import Shoot
@@ -108,29 +107,6 @@ class Game:
         self.specter_enemy = Specter(350, 0, self.specter_enemy_group, self.all_flying_enemies)
 
 
-        ### EFFECTS LIST ---------------------------------------------------------------------------------------------------- ###
-        # For background particles---------------------------------------------------------------------------------
-        self.background_particles = []
-
-        # For sparks-----------------------------------------------------------------------------------------------
-        self.sparks = []
-
-        # For particles--------------------------------------------------------------------------------------------
-        self.particles = []
-
-        # For falling particles------------------------------------------------------------------------------------
-        self.falling_particles = []
-
-        # For radiation--------------------------------------------------------------------------------------------
-        self.radiations = []
-
-        # For debris------------------------------------------------------------------------------------------------
-        self.debris = []
-
-        # For jump particles----------------------------------------------------------------------------------------
-        self.jump_particles = []
-
-
         ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------ ###
         # Function for creating tile-------------------------------------------------------------------------------
         create_tiles()
@@ -154,10 +130,6 @@ class Game:
         # For HUD --------------------------------------------------------------------------------------------------
         self.hud = HUD(self.player)
 
-        # Gradient image/s -----------------------------------------------------------------------------------------
-        self.gradient_image = pygame.image.load("assets/images/radial_gradient.png").convert()
-        self.gradient_image_list = [pygame.transform.scale(self.gradient_image, (70, 70)), pygame.transform.scale(self.gradient_image, (90, 90))]
-
         # Black Overlay -------------------------------------------------------------------------------------------
         self.dark_overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         self.dark_overlay.fill((190,190,190,100))
@@ -167,9 +139,6 @@ class Game:
 
         # Set of enemies killed -----------------------------------------------------------------------------------
         self.enemies_killed = set([])
-
-        # Particle cache--------------------------------------------------------------------------------------------
-        self.particle_cache = {}
 
         # Spawn rect for ground enemies-----------------------------------------------------------------------------
         self.spawn_rect = pygame.Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -258,7 +227,7 @@ class Game:
                 draw_tiles(self.scroll)
 
                 # Creating background particles
-                self.create_background_particles()
+                fx.create_background_particles()
 
                 # Drawing of player bullets
                 self.player_bullet_group.update(dt, self.scroll)
@@ -293,60 +262,60 @@ class Game:
                 # Player and Wand update and draw methods
                 self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
                 self.wand.render(self.scroll)
-                self.player.update(pygame.key.get_pressed(), dt, self.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group, self.all_projectile_that_hit_tiles)
+                self.player.update(pygame.key.get_pressed(), dt, fx.FxList.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group, self.all_projectile_that_hit_tiles)
                 self.player.render(self.scroll)
 
                 # Draw jump particles
-                self.draw_jump_particles()
+                fx.draw_jump_particles(self.scroll)
 
-                # # Enemy update and render
-                # self.light_enemy_group.update(dt, self.player, self.scroll)
-                # self.light_enemy_group.draw(display, self.scroll)
+                # Enemy update and render
+                self.light_enemy_group.update(dt, self.player, self.scroll)
+                self.light_enemy_group.draw(display, self.scroll)
 
                 # Heavy Enemy update and render
                 self.tank_enemy_group.update(dt, self.player, self.scroll)
                 self.tank_enemy_group.draw(display, self.scroll)
 
-                # # Avoid overlapping between ground enemies
-                # self.avoid_overlap()
+                # Avoid overlapping between ground enemies
+                self.avoid_overlap()
 
-                # # Flight Enemy update and render
-                # self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.flight_enemy_group.draw(display, self.scroll)
+                # Flight Enemy update and render
+                self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                self.flight_enemy_group.draw(display, self.scroll)
 
-                # # Soar Enemy update and render
-                # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.soar_enemy_group.draw(display, self.scroll)
+                # Soar Enemy update and render
+                self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
+                self.soar_enemy_group.draw(display, self.scroll)
 
                 # Shooting Enemy update and render
                 self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
                 self.shoot_enemy_group.draw(display, self.scroll)
 
-                # # Burst Enemy update and render
-                # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.burst_enemy_group.draw(display, self.scroll)
+                # Burst Enemy update and render
+                self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                self.burst_enemy_group.draw(display, self.scroll)
 
-                # # Specter Enemy update and render
-                # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
-                # self.specter_enemy_group.draw(display, self.scroll)
+                # Specter Enemy update and render
+                self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
+                self.specter_enemy_group.draw(display, self.scroll)
 
                 # Drawing impacts/sparks
-                self.draw_impact()
+                fx.draw_impact(self.scroll)
 
                 # Drawing particles
-                self.draw_floating_particles()
+                fx.draw_floating_particles(self.scroll)
 
                 # Drawing falling particles
-                self.draw_falling_particles()
+                fx.draw_falling_particles(self.scroll)
 
                 # Drawing radiation
-                self.draw_radiations()
+                fx.draw_radiations(self.scroll)
 
                 # Drawing debris
-                self.draw_debris()
+                fx.draw_debris(self.scroll)
 
                 # Drawing background particles
-                self.draw_background_particles()
+                fx.draw_background_particles(self.dark_overlay, self.scroll)
                 display.blit(self.dark_overlay, (0,0), special_flags=pygame.BLEND_RGB_MULT)
 
                 # Rendering of front objects (long rocks)
@@ -393,18 +362,6 @@ class Game:
                     break
             Tank(x, FLOOR, self.tank_enemy_group, self.all_ground_enemies, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.all_enemies_group)
 
-    def get_cached_particle(self, radius, color):
-        radius = int(radius)
-        
-        if radius <= 0: return None
-
-        tag = (radius, color)
-        if tag not in self.particle_cache:
-            surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(surf, (color[0], color[1], color[2]), (radius, radius), radius)
-            self.particle_cache[tag] = surf.convert_alpha()
-        return self.particle_cache[tag]
-
     def avoid_overlap(self):
         for x in self.all_ground_enemies:
             for y in self.all_ground_enemies:
@@ -425,13 +382,6 @@ class Game:
                             x.pos.x += overlap.h // 6
                             y.pos.x -= overlap.h // 6
 
-    def create_background_particles(self):
-        if len(self.background_particles) < 10: # loc, radius, direction
-            self.background_particles.append([[random.randrange(WINDOW_WIDTH), random.randrange(WINDOW_HEIGHT)],
-                                        2,
-                                        [random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)]), random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)])],
-                                        random.choice(self.gradient_image_list)])
-
     def all_enemies_touch_player(self):
         if not self.player.is_invincible:
             hits = pygame.sprite.spritecollide(self.player, self.all_enemies_group, False, self.collide_rect_then_mask)
@@ -451,7 +401,7 @@ class Game:
             pos = list(bullet.rect.center)
 
             for enemy in enemies:
-                self.create_radiation(enemy, pos)
+                fx.create_radiation(enemy, pos)
             bullet.kill()
 
     def player_bullet_hit_ground_enemies(self):
@@ -461,7 +411,7 @@ class Game:
             pos = list(bullet.rect.center)
 
             for enemy in enemies:
-                self.create_falling_particles(enemy, pos)
+                fx.create_falling_particles(enemy, pos)
             bullet.kill()
 
     def player_bullet_hit_all_enemies(self):
@@ -481,8 +431,8 @@ class Game:
                     self.enemies_killed.add(enemy)
                     self.xp_increment = 110 - (self.hud.level*10)
 
-            self.create_impacts(pos)
-            self.create_floating_particles(pos)
+            fx.create_impacts(pos)
+            fx.create_floating_particles(pos)
 
     def projectiles_hit_player(self):
         if not self.player.is_invincible:
@@ -507,8 +457,8 @@ class Game:
 
                                 self.shake_timer = 20
                                 pos = list(projectile.rect.center)
-                                self.create_impacts(pos)
-                                self.create_floating_particles(pos)
+                                fx.create_impacts(pos)
+                                fx.create_floating_particles(pos)
                                 projectile.kill()
                                 break
 
@@ -526,282 +476,12 @@ class Game:
                     if collided_tile.rect.colliderect(projectile.rect):
                         self.shake_timer = 20
                         pos = list(projectile.rect.center)
-                        self.create_debris(pos)
-                        self.create_impacts(pos)
-                        self.create_floating_particles(pos)
+                        fx.create_debris(pos)
+                        fx.create_impacts(pos)
+                        fx.create_floating_particles(pos)
                         projectile.kill()
 
     def collide_rect_then_mask(self, sprite1, sprite2):
         if not sprite1.rect.colliderect(sprite2.rect): return False
 
         return True if pygame.sprite.collide_mask(sprite1, sprite2) else False
-
-    def create_radiation(self, enemy, pos):
-        if isinstance(enemy, Soar):
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    1,
-                                    (145, 47, 47)])
-
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    0,
-                                    [(145, 47, 47), (82, 27, 27)]])
-        elif isinstance(enemy, Flight):
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    0,
-                                    [(199, 48, 115), (105, 41, 71)]])
-        elif isinstance(enemy, Shoot):
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    0,
-                                    [(158, 0, 191), (71, 36, 82)]])
-        elif isinstance(enemy, Burst):
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    1,
-                                    (136, 0, 255)])
-
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    0,
-                                    [(136, 0, 255), (71, 36, 82)]])
-        elif isinstance(enemy, Specter):
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    1,
-                                    ((89, 0, 255))])
-
-            self.radiations.append([[pos[0], pos[1]],
-                                    15,
-                                    8,
-                                    0,
-                                    [(89, 0, 255), (71, 36, 82)]])
-
-    def create_falling_particles(self, enemy, pos):
-        if isinstance(enemy, Light):
-            for _ in range(15): # location, velocity, radius, color
-                self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
-                                        [random.randrange(-3, 3), -2], 
-                                        random.randrange(10, 14),
-                                        (78, 45, 145)])
-        elif isinstance(enemy, Tank):
-            for _ in range(15): # location, velocity, radius
-                self.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
-                                        [random.randrange(-3, 3), -2], 
-                                        random.randrange(10, 14),
-                                        (155, 86, 186)])
-
-    def create_floating_particles(self, pos):
-        for _ in range(15): # location, velocity, radius, color
-            self.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
-                                    [random.randrange(-3, 3), -3], 
-                                    random.randrange(24, 30),
-                                    255])
-
-    def create_impacts(self, pos):
-        for _ in range(6):
-            self.sparks.append(Spark([pos[0], pos[1]], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
-
-    def create_debris(self, pos):
-        for _ in range(20):  # location, velocity, radius, color
-            r = random.randrange(60, 80)
-            g = r
-            self.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
-                        [random.randrange(-3, 3), random.randrange(-3, 3)], 
-                        random.randrange(10, 16),
-                        (r, g, 125)])
-
-    def draw_impact(self):
-        for i, spark in sorted(enumerate(self.sparks), reverse=True):
-            spark.move(1)
-            spark.draw(display, self.scroll)
-            if not spark.alive:
-                self.sparks.pop(i)
-
-    def draw_background_particles(self):
-        if self.background_particles:
-            self.background_particles = [background_particle for background_particle in self.background_particles
-                                    if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
-                                    (background_particle[0][0] > 0 and background_particle[0][0] < WINDOW_WIDTH)]            
-            
-            # loc, radius, direction
-            for bg_particle in self.background_particles:
-                bg_particle[0][0] += bg_particle[2][0]
-                bg_particle[0][1] += bg_particle[2][1]
-                """Movement of particle"""
-
-                gradient_copy = bg_particle[3]
-                self.dark_overlay.blit(gradient_copy,
-                                       (bg_particle[0][0]-self.scroll[0] - (gradient_copy.get_rect().w//2),
-                                        bg_particle[0][1]-self.scroll[1] - (gradient_copy.get_rect().h//2)),
-                                        special_flags=pygame.BLEND_RGBA_ADD)
-                """The two lines above are responsible for the gradient image"""
-
-                pygame.draw.circle(display, (255, 255, 255), [int(bg_particle[0][0])-self.scroll[0], int(bg_particle[0][1])-self.scroll[1]], bg_particle[1])
-                """The line above is for the white opaque circle"""
-
-                radius = 35 # if gradient_image w and h is 70
-                r_increment = -1 # if gradient_image w and h is 70
-                gradient_image_w = gradient_copy.get_rect().w
-                if gradient_image_w == 90:
-                    radius = 45
-                    r_increment = 5
-
-                layer1 = pygame.Surface((radius,radius))
-                layer1.set_colorkey((0,0,0))
-
-                for i in range(2, -1, -1):
-                    c = 30 - i*10 * 4
-                    c = pygame.math.clamp(c, 5, 255)
-                    r = r_increment + (i*5) + 8
-                    pygame.draw.circle(layer1, (c,c,c), layer1.get_rect().center, r)
-
-                display.blit(layer1,
-                             ((bg_particle[0][0]-self.scroll[0]) - (layer1.get_rect().w//2),
-                              (bg_particle[0][1]-self.scroll[1]) - (layer1.get_rect().h//2)),
-                              special_flags=pygame.BLEND_RGBA_ADD)
-
-    def draw_floating_particles(self):
-        if self.particles:
-            self.particles = [particle for particle in self.particles if particle[2] > 0]
-
-            for particle in self.particles:
-                # radius decrement
-                particle[2] -= .8
-
-                # change position over time
-                particle[0][0] += particle[1][0]
-                particle[0][1] += particle[1][1]
-
-                # change y velocity over time
-                particle[1][1] += .02
-
-                # change color over time
-                particle[3] -= random.randint(1, 3)
-                pygame.draw.circle(display,
-                                   (int(particle[3]), int(particle[3]), int(particle[3])),
-                                   (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
-                                   int(particle[2]))
-
-                # rad = int(particle[2])
-                # if rad > 0:
-                #     surf = self.get_cached_particle(rad, (particle[3],particle[3],particle[3]))
-                #     display.blit(surf, (particle[0][0]-self.scroll[0], particle[0][1]-self.scroll[1]))
-                    
-    def draw_falling_particles(self):
-        if self.falling_particles:
-            self.falling_particles = [particle for particle in self.falling_particles if particle[2] > 0]
-
-            for particle in self.falling_particles:
-                # radius decrement
-                particle[2] -= .2
-
-                # change position over time
-                particle[0][0] += particle[1][0]
-                particle[0][1] += particle[1][1]
-
-                # change y velocity over time
-                particle[1][1] += .2
-
-                pygame.draw.circle(display,
-                                   (32, 33, 48),
-                                   (particle[0][0] + 3 - self.scroll[0], particle[0][1] + 3 - self.scroll[1]),
-                                   int(particle[2]))
-
-                pygame.draw.circle(display,
-                                   particle[3],
-                                   (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]),
-                                   int(particle[2]))
-
-    def draw_radiations(self):
-        if self.radiations:
-            self.radiations = [radiation for radiation in self.radiations if radiation[2] > 1.1]
-
-            for radiation in self.radiations:
-                if radiation[3] == 1:
-                    radiation[1] += 12 # radius
-                    radiation[2] -= .4 # width
-
-                    if radiation[2] < 1: radiation[2] = 1
-
-                    pygame.draw.circle(display,
-                                    radiation[4],
-                                    (radiation[0][0] - self.scroll[0], radiation[0][1] - self.scroll[1]), int(radiation[1]),
-                                    int(radiation[2]))
-                else:
-                    radiation[1] += 7 # radius
-                    radiation[2] -= .2 # width
-
-                    if radiation[2] < 1: radiation[2] = 1
-
-                    pygame.draw.circle(display,
-                                    radiation[4][1],
-                                    (radiation[0][0] + 6 - self.scroll[0], radiation[0][1] + 3 - self.scroll[1]), int(radiation[1]),
-                                    int(radiation[2]))
-
-                    pygame.draw.circle(display,
-                                    radiation[4][0],
-                                    (radiation[0][0]-self.scroll[0], radiation[0][1]-self.scroll[1]), int(radiation[1]),
-                                    int(radiation[2]))
-    
-    def draw_debris(self):
-        if self.debris:
-            self.debris = [debris for debris in self.debris if debris[2] > 0]
-
-            for debris in self.debris:
-                # radius decrement
-                debris[2] -= .2
-
-                # change position over time
-                debris[0][0] += debris[1][0]
-                debris_loc = str(int(debris[0][0] / TILE_SIZE)) + ';' + str(int(debris[0][1] / TILE_SIZE))
-                if debris_loc in tiles_blocks:
-                    debris[1][0] = -.85 * debris[1][0]
-                    debris[1][1] *= 0.95
-                    debris[0][0] += debris[1][0] * 2
-
-                debris[0][1] += debris[1][1]
-                debris_loc = str(int(debris[0][0] / TILE_SIZE)) + ';' + str(int(debris[0][1] / TILE_SIZE))
-                if debris_loc in tiles_blocks:
-                    debris[1][1] = -.65 * debris[1][1]
-                    debris[1][0] *= 0.95
-                    debris[0][1] += debris[1][1] * 2
-
-                # change y velocity over time
-                debris[1][1] += .2
-
-                pygame.draw.circle(display,
-                                   (32, 33, 48),
-                                   (debris[0][0] + 5 - self.scroll[0], debris[0][1] + 5 - self.scroll[1]),
-                                   debris[2])
-
-                pygame.draw.circle(display,
-                                   debris[3],
-                                   (debris[0][0] - self.scroll[0], debris[0][1] - self.scroll[1]),
-                                   debris[2])
-
-    def draw_jump_particles(self):
-        if self.jump_particles:
-            self.jump_particles = [p for p in self.jump_particles if p[2] > 0]
-
-            for particle in self.jump_particles:
-                particle[2] -= .2
-                particle[0][0] += particle[1][0]
-                particle[0][1] += particle[1][1]
-
-                
-                pygame.draw.circle(display,
-                                (10, 43, 12),
-                                (particle[0][0]-self.scroll[0] + 3, particle[0][1]-self.scroll[1] + 3),
-                                int(particle[2]))
-
-                pygame.draw.circle(display, (178, 235, 23), (particle[0][0] - self.scroll[0], particle[0][1] - self.scroll[1]), particle[2])
