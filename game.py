@@ -429,7 +429,7 @@ class Game:
                     
                 if enemy.hp <= 0:
                     self.enemies_killed.add(enemy)
-                    self.xp_increment = 110 - (self.hud.level*10)
+                    self.xp_increment = 80 - (self.hud.level*10)
 
             fx.create_impacts(pos)
             fx.create_floating_particles(pos)
