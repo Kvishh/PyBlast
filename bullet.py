@@ -4,16 +4,20 @@ from game_map import tiles, tiles_blocks
 from images import BulletImage
 
 class PlayerBullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction, mouse_target_x, mouse_target_y):
+    def __init__(self, x, y, speed, pierce_number, bounce_number, bullet_number, direction, mouse_target_x, mouse_target_y):
         super().__init__()
         self.image = BulletImage.bullet_image_scaled
         self.rect = self.image.get_rect(center=(x, y+10))
         self.mask = pygame.mask.from_surface(self.image)
-        self.speed = 400
         self.direction = direction
         self.pos = pygame.Vector2(x, y+4)
         self._mouse_target_x = mouse_target_x
         self._mouse_target_y = mouse_target_y
+
+        self.speed = speed # 400 start, 650 max
+        self.pierce_number = pierce_number
+        self.bounce_number = bounce_number
+        self.bullet_number = bullet_number
 
         self.dy = self._mouse_target_y - self.pos.y
         self.dx = self._mouse_target_x - self.pos.x

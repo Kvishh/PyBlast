@@ -17,6 +17,23 @@ class Player(pygame.sprite.Sprite):
         self.on_ground = False
         self.x_direction = 1
 
+        self.movement_speed = 350 # 350 start, 500 max
+        self.bullet_number = 1
+        self.buller_pierce_number = 1
+        self.bullet_bounce_number = 1
+        self.bullet_speed = 400
+        self.damage = 10
+        
+        self.max_hp = 4
+        self.current_hp = 3
+        self.shield = 2
+
+        self.shoot_previous_time = pygame.time.get_ticks()
+        self.shooting_cd = 700 #700 start, 300 max
+
+        self.active_skills = set([])
+        
+
         # [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2)]
         # [(-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1)]
         # [(-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0)]
@@ -49,18 +66,10 @@ class Player(pygame.sprite.Sprite):
         self.run_animations_frames_list = PlayerImages.player_run_animations_frames_list
         self.run_animations_frames_list_left = PlayerImages.player_run_animations_frames_flipped_list
 
-        self.max_hp = 4
-        self.current_hp = 3
-        self.shield = 2
-        self.damage = 10
-
         self.is_hit = True
         self.is_invincible = False
         self.invincible_timer = 0
         self.invincible_duration = 1500
-
-        self.shoot_previous_time = pygame.time.get_ticks()
-        self.shooting_cd = 700
 
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, all_projectile_that_hit_tiles):
@@ -143,7 +152,11 @@ class Player(pygame.sprite.Sprite):
                 mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + scroll[1]
                 
                 bullet = PlayerBullet(self.rect.centerx, 
-                                self.rect.centery, 
+                                self.rect.centery,
+                                self.bullet_speed,
+                                self.buller_pierce_number,
+                                self.bullet_bounce_number, 
+                                self.bullet_number,
                                 self.x_direction, 
                                 mouse_x,
                                 mouse_y)
@@ -224,10 +237,10 @@ class Player(pygame.sprite.Sprite):
                                        [random.randrange(-2, 2), 2],
                                        random.randrange(5, 8)]) 
         elif keys_hold[pygame.K_d]:
-            self.x_velocity = 350
+            self.x_velocity = self.movement_speed
             self.x_direction = 1
         elif keys_hold[pygame.K_a]:
-            self.x_velocity = -350
+            self.x_velocity = -self.movement_speed
             self.x_direction = -1
 
     def create_dust_particles(self):
