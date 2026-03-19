@@ -16,14 +16,14 @@ class HUD:
         self.level_bar = pygame.Rect(10, 10, 980, 20) # Rect: 10, 10, 980, 20-left,top,width,height
         self.current_xp_width = 0
     
-    def update(self, timer, xp_increment):
+    def update(self, timer):
         self._blit_heart()
         self._blit_shield()
         self.blit_FPS()
         self.blit_timer(timer)
-        self._blit_level_bar(xp_increment)
+        self._blit_level_bar()
 
-    def _blit_level_bar(self, xp_increment):
+    def update_level_bar(self, xp_increment):
         self.current_xp_width += xp_increment
         if self.current_xp_width >= 980:
             # The width before addition
@@ -38,6 +38,7 @@ class HUD:
         elif self.current_xp_width <= 0:
             self.current_xp_width = 0
 
+    def _blit_level_bar(self):
         # Black background
         pygame.draw.rect(display, (0,0,0), self.level_bar)
         

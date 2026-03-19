@@ -332,7 +332,7 @@ class Game:
                 for enemy in self.enemies_killed: enemy.kill()
                 
                 # HUD update
-                self.hud.update(countdown_time_text, self.xp_increment)
+                self.hud.update(countdown_time_text)
 
                 # Reset of set and xp_increment
                 self.enemies_killed.clear()
@@ -430,6 +430,7 @@ class Game:
                 if enemy.hp <= 0:
                     self.enemies_killed.add(enemy)
                     self.xp_increment = 80 - (self.hud.level*10)
+                    self.hud.update_level_bar(self.xp_increment)
 
             fx.create_impacts(pos)
             fx.create_floating_particles(pos)
