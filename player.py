@@ -23,6 +23,8 @@ class Player(pygame.sprite.Sprite):
         self.bullet_bounce_number = 1
         self.bullet_speed = 400
         self.damage = 10
+
+        self.bullet_size_doubled_activated = False
         
         self.max_hp = 4
         self.current_hp = 3
@@ -157,7 +159,8 @@ class Player(pygame.sprite.Sprite):
                                 self.buller_pierce_number,
                                 self.bullet_bounce_number, 
                                 self.bullet_number,
-                                self.x_direction, 
+                                self.x_direction,
+                                self.bullet_size_doubled_activated, 
                                 mouse_x,
                                 mouse_y)
                 player_bullet_group.add(bullet)

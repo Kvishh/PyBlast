@@ -4,9 +4,9 @@ from game_map import tiles, tiles_blocks
 from images import BulletImage
 
 class PlayerBullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed, pierce_number, bounce_number, bullet_number, direction, mouse_target_x, mouse_target_y):
+    def __init__(self, x, y, speed, pierce_number, bounce_number, bullet_number, direction, skill_activated, mouse_target_x, mouse_target_y):
         super().__init__()
-        self.image = BulletImage.bullet_image_scaled
+        self.image = BulletImage.bullet_image_scaled if not skill_activated else BulletImage.bullet_image_doubled_scaled
         self.rect = self.image.get_rect(center=(x, y+10))
         self.mask = pygame.mask.from_surface(self.image)
         self.direction = direction

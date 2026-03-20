@@ -55,6 +55,8 @@ class BulletImage:
     bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
     bullet_image_scaled = pygame.transform.scale(bullet_image, (BULLET_SIZE, BULLET_SIZE))
 
+    bullet_image_doubled_scaled = pygame.transform.scale(bullet_image, (BULLET_SIZE*2, BULLET_SIZE*2))
+
 class EnemyBulletImage:
     enemy_bullet_image = pygame.image.load("assets/images/enemy_projectile.png").convert_alpha()
     enemy_bullet_image_scaled = pygame.transform.scale(enemy_bullet_image, (BULLET_SIZE, BULLET_SIZE))
