@@ -156,7 +156,7 @@ class Player(pygame.sprite.Sprite):
                 bullet = PlayerBullet(self.rect.centerx, 
                                 self.rect.centery,
                                 self.bullet_speed,
-                                self.buller_pierce_number,
+                                self.bullet_pierce_number,
                                 self.bullet_bounce_number, 
                                 self.bullet_number,
                                 self.x_direction,
