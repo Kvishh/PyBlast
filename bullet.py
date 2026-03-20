@@ -45,8 +45,6 @@ class PlayerBullet(pygame.sprite.Sprite):
         elif self.direction < 0:
             self.speed = -1*self.speed
 
-        self._kill_if_tile_collision()
-
         self._move(dt)
 
     def _move(self, dt):
@@ -74,14 +72,3 @@ class PlayerBullet(pygame.sprite.Sprite):
 
                 pygame.draw.circle(display, (60, 74, 0), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (particle[2]))
                 pygame.draw.circle(display, particle[3], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (particle[2]))
-
-    def _kill_if_tile_collision(self):
-        tile_offsets = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
-
-        bullet_tile_loc = (int(self.rect.x // TILE_SIZE), int(self.rect.y // TILE_SIZE))
-
-        for offset in tile_offsets:
-            check_loc = str(bullet_tile_loc[0] + offset[0]) + ";" + str(bullet_tile_loc[1] + offset[1])
-            if check_loc in tiles_blocks:
-                if tiles_blocks[check_loc].rect.colliderect(self.rect):
-                    self.kill()
