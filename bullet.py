@@ -19,6 +19,8 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.bounce_number = bounce_number
         self.bullet_number = bullet_number
 
+        self.enemies_hit = {}
+
         self.dy = self._mouse_target_y - self.pos.y
         self.dx = self._mouse_target_x - self.pos.x
         self._angle = math.atan2(self.dy, self.dx)

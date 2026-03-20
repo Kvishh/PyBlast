@@ -260,10 +260,10 @@ class Game:
                 cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
 
                 # Check if player bullet hit any flying enemies
-                cs.player_bullet_hit_flying_enemies(self.player_bullet_group, self.all_flying_enemies)
+                cs.player_bullet_hit_flying_enemies(self.player_bullet_group)
 
                 # Check if player bullet hit any ground enemies
-                cs.player_bullet_hit_ground_enemies(self.player_bullet_group, self.all_ground_enemies)
+                cs.player_bullet_hit_ground_enemies(self.player_bullet_group)
 
                 # Player and Wand update and draw methods
                 self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)

@@ -2,11 +2,30 @@ import pygame
 from configs import *
 from game_map import tiles_blocks
 import effects_sytem as fx
+from tank import Tank
+from light import Light
+from flight import Flight
+from soar import Soar
+from shoot import Shoot
+from burst import Burst
+from specter import Specter
 
 def collide_rect_then_mask(sprite1, sprite2):
     if not sprite1.rect.colliderect(sprite2.rect): return False
 
     return True if pygame.sprite.collide_mask(sprite1, sprite2) else False
+
+def collide_rect_then_mask_with_piercing_fx(sprite1, sprite2):
+    if sprite2 not in sprite1.enemies_hit:
+
+        if not sprite1.rect.colliderect(sprite2.rect):
+            return False
+
+        if pygame.sprite.collide_mask(sprite1, sprite2):
+            sprite1.enemies_hit[sprite2] = False
+            return True 
+        else:
+            return False
 
 def avoid_overlap(all_ground_enemies):
     for x in all_ground_enemies:
@@ -30,7 +49,7 @@ def avoid_overlap(all_ground_enemies):
 
 
 def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer):
-    hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask)
+    hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
 
     for bullet, enemies in hits.items():
         shake_timer[0] = 20
@@ -109,22 +128,28 @@ def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):
                     fx.create_floating_particles(pos)
                     projectile.kill()
 
-def player_bullet_hit_flying_enemies(player_bullet_group, all_flying_enemies):
-    hits = pygame.sprite.groupcollide(player_bullet_group, all_flying_enemies, False, False, collide_rect_then_mask)
+def player_bullet_hit_flying_enemies(player_bullet_group):
+    for bullet in player_bullet_group.sprites():
+        for enemy in bullet.enemies_hit:
+            if isinstance(enemy, (Flight, Soar, Shoot, Burst, Specter)):
+                pos = list(bullet.rect.center)
 
-    for bullet, enemies in hits.items():
-        pos = list(bullet.rect.center)
+                if not bullet.enemies_hit[enemy]:
+                    fx.create_radiation(enemy, pos)
+                    bullet.enemies_hit[enemy] = True
+                
+                if len(bullet.enemies_hit) >= bullet.pierce_number:
+                    bullet.kill()
 
-        for enemy in enemies:
-            fx.create_radiation(enemy, pos)
-        bullet.kill()
+def player_bullet_hit_ground_enemies(player_bullet_group):
+    for bullet in player_bullet_group.sprites():
+        for enemy in bullet.enemies_hit:
+            if isinstance(enemy, (Tank, Light)):
+                pos = list(bullet.rect.center)
 
-def player_bullet_hit_ground_enemies(player_bullet_group, all_ground_enemies):
-    hits = pygame.sprite.groupcollide(player_bullet_group, all_ground_enemies, False, False, collide_rect_then_mask)
-
-    for bullet, enemies in hits.items():
-        pos = list(bullet.rect.center)
-
-        for enemy in enemies:
-            fx.create_falling_particles(enemy, pos)
-        bullet.kill()
+                if not bullet.enemies_hit[enemy]:
+                    fx.create_falling_particles(enemy, pos)
+                    bullet.enemies_hit[enemy] = True
+                
+                if len(bullet.enemies_hit) >= bullet.pierce_number:
+                    bullet.kill()
