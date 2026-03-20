@@ -19,7 +19,7 @@ class Player(pygame.sprite.Sprite):
 
         self.movement_speed = 350 # 350 start, 500 max
         self.bullet_number = 1
-        self.buller_pierce_number = 1
+        self.bullet_pierce_number = 1
         self.bullet_bounce_number = 1
         self.bullet_speed = 400
         self.damage = 10
