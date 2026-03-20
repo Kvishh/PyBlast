@@ -125,9 +125,9 @@ class Player(pygame.sprite.Sprite):
         if int(self.x_velocity) == 0:
             self.x_velocity == 0
         elif self.x_velocity > 0:
-            self.x_velocity -= FRICTION
+            self.x_velocity = max(0, self.x_velocity-FRICTION)
         elif self.x_velocity < 0:
-            self.x_velocity += FRICTION
+            self.x_velocity = min(0 ,self.x_velocity+FRICTION)
         self.pos.x += self.x_velocity * dt
         self.rect.x = int(self.pos.x)
         
