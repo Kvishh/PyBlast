@@ -6,10 +6,11 @@ class Skill:
         self.acquired = is_acquired
 
 class SkillTree:
-    def __init__(self, name, total_number, abilities_list: list[Skill]):
+    def __init__(self, name, total_number, abilities_list: list[Skill], is_exhausted = False):
         self.name = name
         self.total_number = total_number
         self.abilities_list = abilities_list
+        self.is_exhausted = is_exhausted
 
 ############################
 # Count: 5
