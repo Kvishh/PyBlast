@@ -1,5 +1,6 @@
 import pygame, random, math, time
 import effects_sytem as fx
+import collision_system as cs
 from configs import *
 from game_map import tiles_blocks, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
@@ -75,7 +76,7 @@ class Game:
 
         ### INDIVIDUAL COMPONENTS --------------------------------------------------------------------------------------------- ###
         # Shake timer----------------------------------------------------------------------------------------------
-        self.shake_timer = 0
+        self.shake_timer = [0]
 
         # Player---------------------------------------------------------------------------------------------------
         self.player = Player(0, 0, self.player_group)
@@ -161,18 +162,23 @@ class Game:
         running = True
         is_paused = False
         while running:
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-                if event.type == timer_evt:
-                    countdown_time -= 1
-                    countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_screen = display.copy()
                         is_paused = not is_paused
+                    if event.key == pygame.K_u:
+                        self.hud.current_xp_width += 490
             
             if not is_paused:
+                for event in events:
+                    if event.type == timer_evt:
+                        countdown_time -= 1
+                        countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
+
                 dt = clock.tick(FPS) / 1000
                 display.fill((42, 59, 95))
                 self.dark_overlay.fill((190,190,190,100))
@@ -213,7 +219,7 @@ class Game:
                     self.spawn_rect.y = 800-DISPLAY_HEIGHT
 
                 # Applying shake in scroll
-                if self.shake_timer:
+                if self.shake_timer[0]:
                     self.scroll[0] += random.randint(-4, 4)
                     self.scroll[1] += random.randint(-4, 4)
 
@@ -242,22 +248,22 @@ class Game:
                 self.specter_enemy_bullet_group.draw(display, self.scroll)
 
                 # Check if projectiles hit tiles
-                self.projectiles_hit_tiles()
+                cs.projectiles_hit_tiles(self.all_projectile_that_hit_tiles, self.shake_timer)
 
                 # Check if projectiles hit player
-                self.projectiles_hit_player()
+                cs.projectiles_hit_player(self.player, self.wand, self.all_enemy_projectiles_that_hit_player, self.shake_timer)
 
                 # Check if player has been hit/touched by enemies
-                self.all_enemies_touch_player()
+                cs.all_enemies_touch_player(self.player, self.wand, self.all_enemies_group)
 
                 # Check if player bulllets hit every kind of enemies
-                self.player_bullet_hit_all_enemies()
+                cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
 
                 # Check if player bullet hit any flying enemies
-                self.player_bullet_hit_flying_enemies()
+                cs.player_bullet_hit_flying_enemies(self.player_bullet_group, self.all_flying_enemies)
 
                 # Check if player bullet hit any ground enemies
-                self.player_bullet_hit_ground_enemies()
+                cs.player_bullet_hit_ground_enemies(self.player_bullet_group, self.all_ground_enemies)
 
                 # Player and Wand update and draw methods
                 self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
@@ -277,7 +283,7 @@ class Game:
                 self.tank_enemy_group.draw(display, self.scroll)
 
                 # Avoid overlapping between ground enemies
-                self.avoid_overlap()
+                cs.avoid_overlap(self.all_ground_enemies)
 
                 # Flight Enemy update and render
                 self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
@@ -322,8 +328,8 @@ class Game:
                 draw_front_long_rocks(self.scroll)
 
                 # Shake timer decrement
-                if self.shake_timer > 0:
-                    self.shake_timer -= 1
+                if self.shake_timer[0] > 0:
+                    self.shake_timer[0] -= 1
 
                 # Increase of level width
                 self.xp_increment *= len(self.enemies_killed)
@@ -333,6 +339,10 @@ class Game:
                 
                 # HUD update
                 self.hud.update(countdown_time_text)
+
+                ###############################################
+                self.hud.update_level_bar(self.xp_increment)
+                ###############################################
 
                 # Reset of set and xp_increment
                 self.enemies_killed.clear()
@@ -361,128 +371,3 @@ class Game:
                 if x < self.spawn_rect.left or x > self.spawn_rect.right:
                     break
             Tank(x, FLOOR, self.tank_enemy_group, self.all_ground_enemies, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.all_enemies_group)
-
-    def avoid_overlap(self):
-        for x in self.all_ground_enemies:
-            for y in self.all_ground_enemies:
-                if x is y:
-                    continue
-
-                if x.rect.colliderect(y.rect):
-                    overlap = x.rect.clip(y.rect)
-
-                    if overlap.w < overlap.h:
-                        if x.rect.centerx < y.rect.centerx:
-                            x.pos.x -= overlap.w // 6
-                            y.pos.x += overlap.w // 6
-                        else:
-                            x.pos.x += overlap.w // 6
-                            y.pos.x -= overlap.w // 6
-                    elif overlap.h < overlap.w:
-                            x.pos.x += overlap.h // 6
-                            y.pos.x -= overlap.h // 6
-
-    def all_enemies_touch_player(self):
-        if not self.player.is_invincible:
-            hits = pygame.sprite.spritecollide(self.player, self.all_enemies_group, False, self.collide_rect_then_mask)
-
-            for enemy in hits:
-                self.player.current_hp -= 1
-                self.player.invincible_timer = pygame.time.get_ticks()
-                self.player.is_invincible = True
-
-                self.wand.invincible_timer = pygame.time.get_ticks()
-                self.wand.is_invincible = True
-
-    def player_bullet_hit_flying_enemies(self):
-        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_flying_enemies, False, False, self.collide_rect_then_mask)
-
-        for bullet, enemies in hits.items():
-            pos = list(bullet.rect.center)
-
-            for enemy in enemies:
-                fx.create_radiation(enemy, pos)
-            bullet.kill()
-
-    def player_bullet_hit_ground_enemies(self):
-        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_ground_enemies, False, False, self.collide_rect_then_mask)
-
-        for bullet, enemies in hits.items():
-            pos = list(bullet.rect.center)
-
-            for enemy in enemies:
-                fx.create_falling_particles(enemy, pos)
-            bullet.kill()
-
-    def player_bullet_hit_all_enemies(self):
-        hits = pygame.sprite.groupcollide(self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, False, False, self.collide_rect_then_mask)
-
-        for bullet, enemies in hits.items():
-            self.shake_timer = 20
-            pos = list(bullet.rect.center)
-            
-            for enemy in enemies:
-                enemy.is_hit = True
-                enemy.flashed_timer = pygame.time.get_ticks()
-
-                enemy.hp -= self.player.damage
-                    
-                if enemy.hp <= 0:
-                    self.enemies_killed.add(enemy)
-                    self.xp_increment = 80 - (self.hud.level*10)
-                    self.hud.update_level_bar(self.xp_increment)
-
-            fx.create_impacts(pos)
-            fx.create_floating_particles(pos)
-
-    def projectiles_hit_player(self):
-        if not self.player.is_invincible:
-            tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
-            player_tile_loc = (int(self.player.rect.x // TILE_SIZE), int(self.player.rect.y // TILE_SIZE))
-            player_grid_locs = {f"{player_tile_loc[0] + offset[0]};{player_tile_loc[1] + offset[1]}" for offset in tiles_offset}
-
-            for projectile in self.all_enemy_projectiles_that_hit_player:
-                projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
-
-                for offset in tiles_offset:
-                    check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
-                    if check_loc in player_grid_locs:
-                        if projectile.rect.colliderect(self.player.rect):
-                            if pygame.sprite.collide_mask(projectile, self.player):
-                                self.player.current_hp -= 1
-                                self.player.invincible_timer = pygame.time.get_ticks()
-                                self.player.is_invincible = True
-
-                                self.wand.invincible_timer = pygame.time.get_ticks()
-                                self.wand.is_invincible = True
-
-                                self.shake_timer = 20
-                                pos = list(projectile.rect.center)
-                                fx.create_impacts(pos)
-                                fx.create_floating_particles(pos)
-                                projectile.kill()
-                                break
-
-    def projectiles_hit_tiles(self):
-        # collided_tiles_loc = []
-        tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
-
-        for projectile in self.all_projectile_that_hit_tiles.sprites():
-            projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
-
-            for offset in tiles_offset:
-                check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
-                if check_loc in tiles_blocks:
-                    collided_tile = tiles_blocks[check_loc]
-                    if collided_tile.rect.colliderect(projectile.rect):
-                        self.shake_timer = 20
-                        pos = list(projectile.rect.center)
-                        fx.create_debris(pos)
-                        fx.create_impacts(pos)
-                        fx.create_floating_particles(pos)
-                        projectile.kill()
-
-    def collide_rect_then_mask(self, sprite1, sprite2):
-        if not sprite1.rect.colliderect(sprite2.rect): return False
-
-        return True if pygame.sprite.collide_mask(sprite1, sprite2) else False
