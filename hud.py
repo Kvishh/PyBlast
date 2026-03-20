@@ -1,5 +1,7 @@
 import pygame
 from configs import *
+import roll_system
+from abilities import apply_ability
 
 class HUD:
     def __init__(self, player):
@@ -35,6 +37,11 @@ class HUD:
             
             self.current_xp_width = 980 - (980 - xp_increment)
             self.level += 1
+
+            skill = roll_system.roll()
+            apply_ability(skill, self.player)
+
+            clock.tick()
         elif self.current_xp_width <= 0:
             self.current_xp_width = 0
 

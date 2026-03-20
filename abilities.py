@@ -20,12 +20,19 @@ def apply_ability(skill, receiver):
     if skill.effect == "addition":
         if skill.attribute == "BULLET_SIZE":
             receiver.bullet_size_doubled_activated = True
+        else:    
+            old_val = getattr(receiver, skill.attribute)
             
-        old_val = getattr(receiver, skill.attribute)
-        
-        setattr(receiver, skill.attribute, old_val+skill.quantity)
+            setattr(receiver, skill.attribute, old_val+skill.quantity)
     elif skill.effect == "percentage":
-        pass
+        if skill.attribute == "shooting_cd":
+            old_val = getattr(receiver, skill.attribute)
+            
+            setattr(receiver, skill.attribute, old_val-(old_val*skill.quantity))
+        else:
+            old_val = getattr(receiver, skill.attribute)
+            
+            setattr(receiver, skill.attribute, old_val+(old_val*skill.quantity))
     elif skill.effect == "state":
         pass
 
