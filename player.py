@@ -153,18 +153,26 @@ class Player(pygame.sprite.Sprite):
                 mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
                 mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + scroll[1]
                 
-                bullet = PlayerBullet(self.rect.centerx, 
-                                self.rect.centery,
-                                self.bullet_speed,
-                                self.bullet_pierce_number,
-                                self.bullet_bounce_number, 
-                                self.bullet_number,
-                                self.x_direction,
-                                self.bullet_size_doubled_activated, 
-                                mouse_x,
-                                mouse_y)
-                player_bullet_group.add(bullet)
-                self.shoot_previous_time = current_time
+                for i in range(self.bullet_number):
+                    spread = 0
+                    if i == 0:
+                        spread = -10
+                    elif i == 1:
+                        spread = 0
+                    else:
+                        spread = 10
+                    bullet = PlayerBullet(self.rect.centerx, 
+                                    self.rect.centery,
+                                    self.bullet_speed,
+                                    self.bullet_pierce_number,
+                                    self.bullet_bounce_number, 
+                                    self.x_direction,
+                                    self.bullet_size_doubled_activated, 
+                                    mouse_x,
+                                    mouse_y,
+                                    spread=spread)
+                    player_bullet_group.add(bullet)
+                    self.shoot_previous_time = current_time
 
     def player_is_hit(self):
         if self.is_invincible:

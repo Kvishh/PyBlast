@@ -5,7 +5,7 @@ import effects_sytem as fx
 from images import BulletImage
 
 class PlayerBullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed, pierce_number, bounce_number, bullet_number, direction, skill_activated, mouse_target_x, mouse_target_y):
+    def __init__(self, x, y, speed, pierce_number, bounce_number, direction, skill_activated, mouse_target_x, mouse_target_y, spread=0):
         super().__init__()
         self.image = BulletImage.bullet_image_scaled if not skill_activated else BulletImage.bullet_image_doubled_scaled
         self.rect = self.image.get_rect(center=(x, y+10))
@@ -18,14 +18,18 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.speed = speed # 400 start, 650 max
         self.pierce_number = pierce_number
         self.bounce_number = bounce_number
-        self.bullet_number = bullet_number
 
         self.enemies_hit = {}
         self.bounce_count = 0
 
         self.dy = self._mouse_target_y - self.pos.y
         self.dx = self._mouse_target_x - self.pos.x
-        self._angle = math.atan2(self.dy, self.dx)
+
+        norm = math.hypot(self.dx, self.dy)
+        self.dx /= norm
+        self.dy /= norm
+        self._angle = math.atan2(self.dy, self.dx) + math.radians(spread)
+
         self._x_vel = math.cos(self._angle)*self.speed
         self._y_vel = math.sin(self._angle)*self.speed
 
