@@ -156,9 +156,9 @@ class Player(pygame.sprite.Sprite):
                 for i in range(self.bullet_number):
                     spread = 0
                     if i == 0:
-                        spread = -10
-                    elif i == 1:
                         spread = 0
+                    elif i == 1:
+                        spread = -10
                     else:
                         spread = 10
                     bullet = PlayerBullet(self.rect.centerx, 
