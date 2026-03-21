@@ -25,6 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.damage = 10
 
         self.bullet_size_doubled_activated = False
+        self.bullets_explode_state = True
         
         self.max_hp = 4
         self.current_hp = 3

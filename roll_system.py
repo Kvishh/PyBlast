@@ -14,7 +14,8 @@ list_of_skill_trees = [abilities.swift_fire_skill_tree,
                        abilities.projectile_skill_tree,
                        abilities.slow_down_skill_tree,
                        abilities.projectile_negation_skill_tree,
-                       abilities.bullet_size_skill_tree]
+                       abilities.bullet_size_skill_tree,
+                       abilities.bullet_explosion_skill_tree]
 
 choices = []
 

@@ -22,6 +22,11 @@ class GradientImage:
 
     gradient_background_image_list = [pygame.transform.scale(gradient_image, (70, 70)), pygame.transform.scale(gradient_image, (90, 90))]
 
+class ExplosionSurface:
+    explosion_surf = pygame.Surface((70*2, 70*2), pygame.SRCALPHA)
+    pygame.draw.circle(explosion_surf, (255,255,255), (70, 70), 70)
+    explosion_surf_mask = pygame.mask.from_surface(explosion_surf)
+
 class TileImage:
     tile_image = pygame.image.load("assets/images/tile1.png").convert_alpha()
     tile_image_scaled = pygame.transform.scale(tile_image, (TILE_SIZE, TILE_SIZE))

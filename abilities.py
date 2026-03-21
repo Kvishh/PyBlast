@@ -136,3 +136,8 @@ bsize = Skill("Bullet size increase 1", "Increase bullet size", "addition", Fals
 
 # Bullet size increase skill tree
 bullet_size_skill_tree = SkillTree("Bullet size tree", 1, [bsize])
+
+bexp = Skill("Bullet explosion", "Player's bullets explodes when enemies are hit", "state", False)
+
+# Bullet explosion skill tree
+bullet_explosion_skill_tree = SkillTree("Bullet explosion tree", 1, [bexp])
