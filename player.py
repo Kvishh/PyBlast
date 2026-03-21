@@ -1,6 +1,6 @@
 import pygame, random
 from configs import *
-from game_map import tiles, tiles_blocks
+from game_map import tiles_blocks
 from images import PlayerImages, GradientImage
 from bullet import PlayerBullet
 
@@ -20,7 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.movement_speed = 350 # 350 start, 500 max
         self.bullet_number = 1
         self.bullet_pierce_number = 1
-        self.bullet_bounce_number = 1
+        self.bullet_bounce_number = 0
         self.bullet_speed = 400
         self.damage = 10
 
@@ -74,12 +74,12 @@ class Player(pygame.sprite.Sprite):
         self.invincible_duration = 1500
 
 
-    def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, all_projectile_that_hit_tiles):
+    def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group):
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
 
         # Shoot bullets
-        self.shoot_bullet(scroll, player_bullet_group, all_projectile_that_hit_tiles)
+        self.shoot_bullet(scroll, player_bullet_group)
 
         # Check if player is hit
         self.player_is_hit()
@@ -144,7 +144,7 @@ class Player(pygame.sprite.Sprite):
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
 
-    def shoot_bullet(self, scroll, player_bullet_group, all_projectile_that_hit_tiles):
+    def shoot_bullet(self, scroll, player_bullet_group):
         mouse_hold = pygame.mouse.get_pressed()
         if mouse_hold[0]:
             current_time = pygame.time.get_ticks()
@@ -164,7 +164,6 @@ class Player(pygame.sprite.Sprite):
                                 mouse_x,
                                 mouse_y)
                 player_bullet_group.add(bullet)
-                all_projectile_that_hit_tiles.add(bullet)
                 self.shoot_previous_time = current_time
 
     def player_is_hit(self):

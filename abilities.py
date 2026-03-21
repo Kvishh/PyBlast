@@ -96,6 +96,13 @@ pb3 = Skill("Piercing bullet 3", "Bullet pierce +1", "addition", False, quantity
 # Bullet pierce skill tree
 bullet_pierce_skill_tree = SkillTree("Bullet pierce tree", 3, [pb1, pb2, pb3])
 
+bb1 = Skill("Bullet bounce 1", "Bullet bounce +1", "addition", False, quantity=1, attribute="bullet_bounce_number")
+bb2 = Skill("Bullet bounce 2", "Bullet bounce +1", "addition", False, quantity=1, prereqs=[bb1], attribute="bullet_bounce_number")
+bb3 = Skill("Bullet bounce 3", "Bullet bounce +1", "addition", False, quantity=1, prereqs=[bb1, bb2], attribute="bullet_bounce_number")
+
+# Bullet bounce skill tree
+bullet_bounce_skill_tree = SkillTree("Bullet bounce tree", 3, [bb1, bb2, bb3])
+
 s1 = Skill("Shield 1", "Shield +1", "addition", False, quantity=1, attribute="shield")
 s2 = Skill("Shield 2", "Shield +1", "addition", False, quantity=1, prereqs=[s1], attribute="shield")
 s3 = Skill("Shield 3", "Shield +1", "addition", False, quantity=1, prereqs=[s1, s2], attribute="shield")
@@ -103,16 +110,9 @@ s3 = Skill("Shield 3", "Shield +1", "addition", False, quantity=1, prereqs=[s1, 
 # Shield skill tree
 shield_skill_tree = SkillTree("Shield tree", 3, [s1, s2, s3])
 
-
 ############################
 # Count: 2
 ############################
-bb1 = Skill("Bullet bounce 1", "Bullet bounce +1", "addition", False, quantity=1, attribute="bullet_bounce_number")
-bb2 = Skill("Bullet bounce 2", "Bullet bounce +1", "addition", False, quantity=1, prereqs=[bb1], attribute="bullet_bounce_number")
-
-# Bullet bounce skill tree
-bullet_bounce_skill_tree = SkillTree("Bullet bounce tree", 2, [bb1, bb2])
-
 proj1 = Skill("Projectile increase 1", "Projectile +1", "addition", False, quantity=1, attribute="bullet_number")
 proj2 = Skill("Projectile increase 2", "Projectile +1", "addition", False, quantity=1, prereqs=[proj1], attribute="bullet_number")
 
