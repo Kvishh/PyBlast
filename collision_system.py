@@ -115,7 +115,6 @@ def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):
 
     for projectile in all_projectile_that_hit_tiles.sprites():
         projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
-
         for offset in tiles_offset:
             check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
             if check_loc in tiles_blocks:

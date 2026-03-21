@@ -1,6 +1,7 @@
 import pygame, math, random
 from configs import *
-from game_map import tiles, tiles_blocks
+from game_map import tiles_blocks
+import effects_sytem as fx
 from images import BulletImage
 
 class PlayerBullet(pygame.sprite.Sprite):
@@ -20,6 +21,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.bullet_number = bullet_number
 
         self.enemies_hit = {}
+        self.bounce_count = 0
 
         self.dy = self._mouse_target_y - self.pos.y
         self.dx = self._mouse_target_x - self.pos.x
@@ -31,7 +33,7 @@ class PlayerBullet(pygame.sprite.Sprite):
 
         self.particles = []
     
-    def update(self, dt, scroll):
+    def update(self, dt, scroll, shake_timer):
         self.create_trail_particle()
         self._draw_particles(scroll)
 
@@ -45,13 +47,35 @@ class PlayerBullet(pygame.sprite.Sprite):
         elif self.direction < 0:
             self.speed = -1*self.speed
 
-        self._move(dt)
+        self._move(dt, shake_timer)
 
-    def _move(self, dt):
+    def _move(self, dt, shake_timer):
+        self.old_pos = self.pos.copy()
+
         self.pos.x += self._x_vel * dt
-        self.pos.y += self._y_vel * dt
         self.rect.centerx = int(self.pos.x)
+
+        if self.detect_tile_collision(shake_timer):
+            if self.old_pos.x < self.pos.x:
+                self._x_vel = -self._x_vel
+            elif self.old_pos.x > self.pos.x:
+                self._x_vel = -self._x_vel
+            self.pos.x = self.old_pos.x
+            self.rect.centerx = int(self.pos.x)
+
+        self.pos.y += self._y_vel * dt
         self.rect.centery = int(self.pos.y)
+
+        if self.detect_tile_collision(shake_timer):
+            if self.old_pos.y < self.pos.y:
+                self._y_vel = -self._y_vel
+            elif self.old_pos.y > self.pos.y:
+                self._y_vel = -self._y_vel
+            self.pos.y = self.old_pos.y
+            self.rect.centery = int(self.pos.y)
+        
+        if self.bounce_count > self.bounce_number:
+            self.kill()
 
     def create_trail_particle(self):
         if len(self.particles) < 20:
@@ -72,3 +96,21 @@ class PlayerBullet(pygame.sprite.Sprite):
 
                 pygame.draw.circle(display, (60, 74, 0), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (particle[2]))
                 pygame.draw.circle(display, particle[3], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (particle[2]))
+
+    def detect_tile_collision(self, shake_timer):
+        tile_offsets = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+
+        bullet_tile_loc = (int(self.rect.x // TILE_SIZE), int(self.rect.y // TILE_SIZE))
+
+        for offset in tile_offsets:
+            check_loc = str(bullet_tile_loc[0] + offset[0]) + ";" + str(bullet_tile_loc[1] + offset[1])
+            if check_loc in tiles_blocks:
+                if tiles_blocks[check_loc].rect.colliderect(self.rect):
+                    shake_timer[0] = 20
+                    pos = list(self.rect.center)
+                    fx.create_debris(pos)
+                    fx.create_impacts(pos)
+                    fx.create_floating_particles(pos)
+                    self.bounce_count += 1
+
+                    return True
