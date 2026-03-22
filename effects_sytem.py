@@ -19,6 +19,15 @@ class FxList:
     # For sparks-----------------------------------------------------------------------------------------------
     sparks = []
 
+    # For explosion sparks-------------------------------------------------------------------------------------
+    explosion_sparks = []
+
+    # For explosion -------------------------------------------------------------------------------------------
+    explosions = []
+
+    # For explosion radiations---------------------------------------------------------------------------------
+    explosion_radiations = []
+
     # For particles--------------------------------------------------------------------------------------------
     particles = []
 
@@ -314,6 +323,76 @@ def draw_impact(scroll):
         spark.draw(display, scroll)
         if not spark.alive:
             FxList.sparks.pop(i)
+
+
+def create_explosion_impacts(pos):
+    for i in range(13):
+        angle = math.pi * 2 * (i/10)
+        speed = random.randint(5,7)
+        FxList.explosion_sparks.append(Spark([pos[0], pos[1]], angle, speed, (255,255,255), scale=4))
+        FxList.explosion_sparks.append(Spark([pos[0], pos[1]], angle-.1, speed-1, (238, 255, 107), scale=4))
+
+def draw_explosion_impact(scroll):
+    for i, spark in sorted(enumerate(FxList.explosion_sparks), reverse=True):
+        spark.move(1)
+        spark.draw(display, scroll)
+        if not spark.alive:
+            FxList.explosion_sparks.pop(i)
+
+
+def create_explosion(pos):
+    # location, radius, width, color, new_loc, timer, color # id here if you want
+    FxList.explosions.append([[pos[0], pos[1]],
+                                       70,
+                                       5,
+                                       (204, 255, 0),
+                                       [0, 0],
+                                       [30, 0],
+                                       (252, 255, 209)])
+
+def draw_explosions(scroll):
+    if FxList.explosions:
+        FxList.explosions = [explosion for explosion in FxList.explosions if explosion[1] > 0]
+
+        for explosion in FxList.explosions:
+
+            if explosion[1] > 40:
+                explosion[1] = max(0, explosion[1] - 2)
+
+                pygame.draw.circle(display, (explosion[3]), (explosion[0][0]-scroll[0], explosion[0][1]-scroll[1]), explosion[1], 0)
+            else:
+                explosion[1] = max(0, explosion[1] - 1)
+
+                for i in range(5):
+                    explosion[4][0], explosion[4][1] = explosion[0][0] + random.randint(-20, 20), explosion[0][1] + random.randint(-20, 20)
+
+                    if explosion[5][0] == 0:
+                        explosion[5][0] = 30
+                        explosion[5][1] += 1
+
+                        explosion[6] = (252, 255, 209) if explosion[5][1] % 2 == 0 else (55, 71, 16)
+
+                    explosion[5][0] -= 1
+
+                    pygame.draw.circle(display, (explosion[6]), (explosion[4][0]-scroll[0], explosion[4][1]-scroll[1]), explosion[1], 0)
+
+
+def create_explosion_radiations(pos):
+    # location, radius, width
+    FxList.explosion_radiations.append([[pos[0], pos[1]],
+                                        80,
+                                        12])
+
+def draw_explosion_radiations(scroll):
+    if FxList.explosion_radiations:
+        FxList.explosion_radiations = [radiation for radiation in FxList.explosion_radiations if radiation[2] > 0]
+
+        for radiation in FxList.explosion_radiations:
+            radiation[1] = radiation[1]+4
+            radiation[2] -= .2
+
+            if radiation[2] > 1:
+                pygame.draw.circle(display, (203, 232, 60), (radiation[0][0]-scroll[0], radiation[0][1]-scroll[1]), radiation[1], int(radiation[2]))
 
 
 def draw_jump_particles(scroll):
