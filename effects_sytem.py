@@ -113,7 +113,7 @@ def draw_background_particles(dark_overlay, scroll):
 def create_floating_particles(pos):
     for _ in range(15): # location, velocity, radius, color
         FxList.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
-                                [random.randrange(-3, 3), -3], 
+                                [random.randrange(-4, 4), -5], 
                                 random.randrange(24, 30),
                                 255])
 
@@ -123,7 +123,7 @@ def draw_floating_particles(scroll):
 
         for particle in FxList.particles:
             # radius decrement
-            particle[2] -= .8
+            particle[2] -= 1
 
             # change position over time
             particle[0][0] += particle[1][0]

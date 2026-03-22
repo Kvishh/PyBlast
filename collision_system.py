@@ -83,7 +83,7 @@ def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, pla
         fx.create_impacts(pos)
         fx.create_floating_particles(pos)
 
-def check_enemies_within_explosion_radius(player, hud, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, scroll, shake_timer):
+def check_enemies_within_explosion_radius(player,   hud, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer):
     hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
 
     enemies_within_radius = set([])
@@ -109,7 +109,7 @@ def check_enemies_within_explosion_radius(player, hud, enemies_killed, player_bu
         enemy.is_hit = True
         enemy.flashed_timer = pygame.time.get_ticks()
 
-        # enemy.hp -= player.damage
+        enemy.hp -= player.damage
             
         if enemy.hp <= 0:
             enemies_killed.add(enemy)
