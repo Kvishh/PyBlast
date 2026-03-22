@@ -235,51 +235,39 @@ def create_radiation(enemy, pos):
     if isinstance(enemy, Soar):
         FxList.radiations.append([[pos[0], pos[1]],
                                 15,
-                                8,
+                                13,
                                 1,
-                                (145, 47, 47)])
+                                (152, 0, 212)])
 
         FxList.radiations.append([[pos[0], pos[1]],
                                 15,
                                 8,
                                 0,
-                                [(145, 47, 47), (82, 27, 27)]])
+                                [(152, 0, 212), (82, 27, 27)]])
     elif isinstance(enemy, Flight):
         FxList.radiations.append([[pos[0], pos[1]],
-                                15,
+                                4,
                                 8,
-                                0,
+                                3,
                                 [(199, 48, 115), (105, 41, 71)]])
     elif isinstance(enemy, Shoot):
         FxList.radiations.append([[pos[0], pos[1]],
                                 15,
                                 8,
                                 0,
-                                [(158, 0, 191), (71, 36, 82)]])
+                                [(203, 0, 255), (71, 36, 82)]])
     elif isinstance(enemy, Burst):
         FxList.radiations.append([[pos[0], pos[1]],
                                 15,
                                 8,
-                                1,
-                                (136, 0, 255)])
-
-        FxList.radiations.append([[pos[0], pos[1]],
-                                15,
-                                8,
                                 0,
-                                [(136, 0, 255), (71, 36, 82)]])
+                                [(165, 0, 207), (71, 36, 82)]])
     elif isinstance(enemy, Specter):
         FxList.radiations.append([[pos[0], pos[1]],
                                 15,
                                 8,
-                                1,
-                                ((89, 0, 255))])
-
-        FxList.radiations.append([[pos[0], pos[1]],
-                                15,
-                                8,
                                 0,
-                                [(89, 0, 255), (71, 36, 82)]])
+                                [(114, 0, 143), (71, 36, 82)]])
 
 def draw_radiations(scroll):
     if FxList.radiations:
@@ -295,6 +283,21 @@ def draw_radiations(scroll):
                 pygame.draw.circle(display,
                                 radiation[4],
                                 (radiation[0][0] - scroll[0], radiation[0][1] - scroll[1]), int(radiation[1]),
+                                int(radiation[2]))
+            elif radiation[3] == 3:
+                radiation[1] += 3 # radius
+                radiation[2] -= .2 # width
+
+                if radiation[2] < 1: radiation[2] = 1
+
+                pygame.draw.circle(display,
+                                radiation[4][1],
+                                (radiation[0][0] + 6 - scroll[0], radiation[0][1] + 3 - scroll[1]), int(radiation[1]),
+                                int(radiation[2]))
+
+                pygame.draw.circle(display,
+                                radiation[4][0],
+                                (radiation[0][0]-scroll[0], radiation[0][1]-scroll[1]), int(radiation[1]),
                                 int(radiation[2]))
             else:
                 radiation[1] += 7 # radius

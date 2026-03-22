@@ -203,7 +203,7 @@ class Game:
                 self.scroll[1] = int(self.true_scroll[1])
 
                 # Spawn ground enemies 
-                self.spawn_ground_enemies(interval)
+                # self.spawn_ground_enemies(interval)
 
                 # Movement of spawn rect x and y and limits
                 self.spawn_rect.x = self.player.rect.centerx - DISPLAY_WIDTH // 2
@@ -234,9 +234,18 @@ class Game:
 
                 # Creating background particles
                 fx.create_background_particles()
+                
+                # Drawing explosion impacts/sparks
+                fx.draw_explosion_impact(self.scroll)
+
+                # Drawing explosions
+                fx.draw_explosions(self.scroll)
+
+                # Drawing explosions
+                fx.draw_explosion_radiations(self.scroll)
 
                 # Drawing of player bullets
-                self.player_bullet_group.update(dt, self.scroll)
+                self.player_bullet_group.update(dt, self.scroll, self.shake_timer)
                 self.player_bullet_group.draw(display, self.scroll)
 
                 # Update and draw methods of enemy bullet groups
@@ -257,7 +266,10 @@ class Game:
                 cs.all_enemies_touch_player(self.player, self.wand, self.all_enemies_group)
 
                 # Check if player bulllets hit every kind of enemies
-                cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
+                if self.player.bullets_explode_state:
+                    cs.check_enemies_within_explosion_radius(self.player, self.hud, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
+                else:
+                    cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
 
                 # Check if player bullet hit any flying enemies
                 cs.player_bullet_hit_flying_enemies(self.player_bullet_group)
@@ -268,22 +280,22 @@ class Game:
                 # Player and Wand update and draw methods
                 self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery)
                 self.wand.render(self.scroll)
-                self.player.update(pygame.key.get_pressed(), dt, fx.FxList.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group, self.all_projectile_that_hit_tiles)
+                self.player.update(pygame.key.get_pressed(), dt, fx.FxList.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group)
                 self.player.render(self.scroll)
 
                 # Draw jump particles
                 fx.draw_jump_particles(self.scroll)
 
-                # Enemy update and render
-                self.light_enemy_group.update(dt, self.player, self.scroll)
-                self.light_enemy_group.draw(display, self.scroll)
+                # # Enemy update and render
+                # self.light_enemy_group.update(dt, self.player, self.scroll)
+                # self.light_enemy_group.draw(display, self.scroll)
 
-                # Heavy Enemy update and render
-                self.tank_enemy_group.update(dt, self.player, self.scroll)
-                self.tank_enemy_group.draw(display, self.scroll)
+                # # Heavy Enemy update and render
+                # self.tank_enemy_group.update(dt, self.player, self.scroll)
+                # self.tank_enemy_group.draw(display, self.scroll)
 
-                # Avoid overlapping between ground enemies
-                cs.avoid_overlap(self.all_ground_enemies)
+                # # Avoid overlapping between ground enemies
+                # cs.avoid_overlap(self.all_ground_enemies)
 
                 # Flight Enemy update and render
                 self.flight_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
@@ -293,17 +305,17 @@ class Game:
                 self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
                 self.soar_enemy_group.draw(display, self.scroll)
 
-                # Shooting Enemy update and render
-                self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                self.shoot_enemy_group.draw(display, self.scroll)
+                # # Shooting Enemy update and render
+                # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.shoot_enemy_group.draw(display, self.scroll)
 
-                # Burst Enemy update and render
-                self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                self.burst_enemy_group.draw(display, self.scroll)
+                # # Burst Enemy update and render
+                # self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                # self.burst_enemy_group.draw(display, self.scroll)
 
-                # Specter Enemy update and render
-                self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
-                self.specter_enemy_group.draw(display, self.scroll)
+                # # Specter Enemy update and render
+                # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
+                # self.specter_enemy_group.draw(display, self.scroll)
 
                 # Drawing impacts/sparks
                 fx.draw_impact(self.scroll)
