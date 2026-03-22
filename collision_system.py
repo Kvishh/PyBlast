@@ -1,6 +1,7 @@
 import pygame
 from configs import *
 from game_map import tiles_blocks
+from images import ExplosionSurface
 import effects_sytem as fx
 from tank import Tank
 from light import Light
@@ -47,6 +48,19 @@ def avoid_overlap(all_ground_enemies):
                         x.pos.x += overlap.h // 6
                         y.pos.x -= overlap.h // 6
 
+def check_explosion_radius_rect_collision(explosion_center, radius, rect):
+    cx, cy = explosion_center
+
+    closest_x = max(rect.left, min(cx, rect.right))
+    closest_y = max(rect.top, min(cy, rect.bottom))
+
+    dx = cx - closest_x
+    dy = cy - closest_y
+
+    dist_squared = dx**2 + dy**2
+
+    return dist_squared <= radius**2
+
 
 def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer):
     hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
@@ -68,6 +82,39 @@ def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, pla
 
         fx.create_impacts(pos)
         fx.create_floating_particles(pos)
+
+def check_enemies_within_explosion_radius(player, hud, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, scroll, shake_timer):
+    hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
+
+    enemies_within_radius = set([])
+    for bullet in hits.keys():
+        pos = bullet.rect.center
+        
+        shake_timer[0] = 20
+        for enemy in all_enemies_that_can_be_hit_by_playerbullet_group.sprites():
+            is_within_radius = check_explosion_radius_rect_collision(pos, 70, enemy.hit_rect) if isinstance(enemy, (Shoot, Burst, Specter)) else check_explosion_radius_rect_collision(pos, 70, enemy.rect)
+
+            if is_within_radius: # if true, check for circle enemy mask collision
+                explosion_rect = ExplosionSurface.explosion_surf.get_rect(center=(pos[0], pos[1]))
+
+                offset = (enemy.hit_rect.x - explosion_rect.x, enemy.hit_rect.y - explosion_rect.y) if isinstance(enemy, (Shoot, Burst, Specter)) else (enemy.rect.x - explosion_rect.x, enemy.rect.y - explosion_rect.y)
+
+                if ExplosionSurface.explosion_surf_mask.overlap(enemy.mask, offset):
+                    enemies_within_radius.add(enemy)
+                    fx.create_explosion_impacts(list(pos))
+                    fx.create_explosion(list(pos))
+                    fx.create_explosion_radiations(list(pos))
+    
+    for enemy in enemies_within_radius:
+        enemy.is_hit = True
+        enemy.flashed_timer = pygame.time.get_ticks()
+
+        # enemy.hp -= player.damage
+            
+        if enemy.hp <= 0:
+            enemies_killed.add(enemy)
+            xp_increment = 80 - (hud.level*10)
+            hud.update_level_bar(xp_increment)
 
 def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, shake_timer):
     if not player.is_invincible:
@@ -136,8 +183,9 @@ def player_bullet_hit_flying_enemies(player_bullet_group):
                 if not bullet.enemies_hit[enemy]:
                     fx.create_radiation(enemy, pos)
                     bullet.enemies_hit[enemy] = True
+                    bullet.pierced_enemy_counter += 1
                 
-                if len(bullet.enemies_hit) >= bullet.pierce_number:
+                if bullet.pierced_enemy_counter >= bullet.pierce_number:
                     bullet.kill()
 
 def player_bullet_hit_ground_enemies(player_bullet_group):
@@ -149,6 +197,7 @@ def player_bullet_hit_ground_enemies(player_bullet_group):
                 if not bullet.enemies_hit[enemy]:
                     fx.create_falling_particles(enemy, pos)
                     bullet.enemies_hit[enemy] = True
+                    bullet.pierced_enemy_counter += 1
                 
-                if len(bullet.enemies_hit) >= bullet.pierce_number:
+                if bullet.pierced_enemy_counter >= bullet.pierce_number:
                     bullet.kill()
