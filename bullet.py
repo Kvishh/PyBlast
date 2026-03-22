@@ -19,6 +19,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.pierce_number = pierce_number
         self.bounce_number = bounce_number
 
+        self.pierced_enemy_counter = 0
         self.enemies_hit = {}
         self.bounce_count = 0
 
