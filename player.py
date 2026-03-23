@@ -28,15 +28,21 @@ class Player(pygame.sprite.Sprite):
         self.bullet_size_doubled_activated = False
         self.bullets_explode_state = False
         self.negator_active = False
+        self.slow_time_active = False
 
         self.negator = Negator(self.rect.center)
+
+        self.slow_rect = pygame.Rect(self.rect.x - (180//2) + (self.rect.w//2), (self.rect.y - (180//2) + (self.rect.h//2)), 180, 180)
         
         self.max_hp = 4
         self.current_hp = 3
         self.shield = 2
 
-        self.shoot_previous_time = pygame.time.get_ticks()
-        self.shooting_cd = 700 #700 start, 300 max
+        self.shoot_previous_time = 0
+        self.fire_rate = 700
+        self.shooting_cd = self.fire_rate / 1000 #700 start, 300 max
+
+        self.current_time = 0
 
         self.active_skills = set([])
         
@@ -73,25 +79,32 @@ class Player(pygame.sprite.Sprite):
         self.run_animations_frames_list = PlayerImages.player_run_animations_frames_list
         self.run_animations_frames_list_left = PlayerImages.player_run_animations_frames_flipped_list
 
-        self.is_hit = True
+        self.is_hit_current_timer = 0
         self.is_invincible = False
         self.invincible_timer = 0
-        self.invincible_duration = 1500
+        self.invincible_duration = 1.5
+
+        self.blink_timer = 0
+        self.blink_state = False
 
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group):
+        if self.slow_time_active:
+            self.slow_rect = pygame.Rect(self.rect.x - (180//2) + (self.rect.w//2), (self.rect.y - (180//2) + (self.rect.h//2)), 180, 180)
+            # pygame.draw.rect(display, (255,0,0), (self.slow_rect.x-scroll[0], self.slow_rect.y-scroll[1], self.slow_rect.w, self.slow_rect.h), 2)
+
         if self.negator_active:
-            self.negator.update(self.rect.center)
+            self.negator.update(self.rect.center, dt)
             self.negator.render(scroll)
 
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
 
         # Shoot bullets
-        self.shoot_bullet(scroll, player_bullet_group)
+        self.shoot_bullet(scroll, player_bullet_group, dt)
 
         # Check if player is hit
-        self.player_is_hit()
+        self.player_is_hit(dt)
 
         # Draw the gradient circle behind player
         self.draw_glow(dark_overlay, scroll)
@@ -153,11 +166,17 @@ class Player(pygame.sprite.Sprite):
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))
 
-    def shoot_bullet(self, scroll, player_bullet_group):
+    def shoot_bullet(self, scroll, player_bullet_group, dt):
+        self.shooting_cd = max(.3, self.fire_rate / 1000)
+
         mouse_hold = pygame.mouse.get_pressed()
+        self.current_time += dt
         if mouse_hold[0]:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.shoot_previous_time > self.shooting_cd:
+            # current_time = pygame.time.get_ticks()
+            # ABOVE!!!
+
+            # if current_time - self.shoot_previous_time > self.shooting_cd:
+            if self.current_time - self.shoot_previous_time > self.shooting_cd:
 
                 mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
                 mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + scroll[1]
@@ -181,15 +200,21 @@ class Player(pygame.sprite.Sprite):
                                     mouse_y,
                                     spread=spread)
                     player_bullet_group.add(bullet)
-                    self.shoot_previous_time = current_time
+                    self.shoot_previous_time = self.current_time
 
-    def player_is_hit(self):
+    def player_is_hit(self, dt):
+        self.is_hit_current_timer += dt
+
         if self.is_invincible:
-            now = pygame.time.get_ticks()
-            if now - self.invincible_timer > self.invincible_duration:
+            if self.is_hit_current_timer - self.invincible_timer > self.invincible_duration:
                 self.is_invincible = False
 
-            if (pygame.time.get_ticks() // 100) % 2 == 0:
+            self.blink_timer += dt
+            if self.blink_timer >= .1:
+                self.blink_timer = 0
+                self.blink_state = not self.blink_state
+            
+            if self.blink_state:
                 self.image.set_alpha(0)
             else:
                 self.image.set_alpha(255)

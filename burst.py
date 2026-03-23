@@ -33,8 +33,9 @@ class Burst(pygame.sprite.Sprite):
                                 (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
                                 (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)]
 
-        self.previous_time = pygame.time.get_ticks()
-        self.previous_time_slowing_down = pygame.time.get_ticks()
+        self.previous_time = 0
+        self.previous_time_slowing_down = 0
+        self.current_time = 0
 
         self.vel = pygame.Vector2(0, 0)
 
@@ -44,9 +45,10 @@ class Burst(pygame.sprite.Sprite):
         self.flee_rad = 60
 
         self.shoot_count = 0
-        self.shot_interval = pygame.time.get_ticks()
+        self.shot_interval = 0
 
         self.particles = []
+
 
     def update(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt, flying_enemies_group, scroll):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
@@ -55,7 +57,7 @@ class Burst(pygame.sprite.Sprite):
 
         self.rotate_sprite(pl)
 
-        self.shoot(enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl)
+        self.shoot(enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt)
 
         self.seek_force = self.seek(pl)
         self.avoid_force = self.flee(flying_enemies_group)
@@ -87,17 +89,17 @@ class Burst(pygame.sprite.Sprite):
 
         self.rect.center = self.hit_rect.center
 
-    def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player):
-        current_time = pygame.time.get_ticks()
-
-        if current_time - self.previous_time_slowing_down > 3500:
-            self.speed -= .5
+    def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player, dt):
+        self.current_time += dt
+        
+        if self.current_time - self.previous_time_slowing_down > 3.5:
+            self.speed -= .5 if self.speed > -30 else 0
         else:
             self.speed += .5 if self.speed < 30 else 0
 
-        if current_time - self.previous_time > 5000:
-                if self.shoot_count < 3 and current_time - self.shot_interval > 1000:
-                    self.shot_interval = current_time
+        if self.current_time - self.previous_time > 5.5:
+                if self.shoot_count < 3 and self.current_time - self.shot_interval > 1:
+                    self.shot_interval = self.current_time
 
                     target_x = player.rect.centerx
                     target_y = player.rect.centery
@@ -115,8 +117,8 @@ class Burst(pygame.sprite.Sprite):
                     self.speed = 20
 
                 elif self.shoot_count >= 3:
-                    self.previous_time_slowing_down = current_time
-                    self.previous_time = current_time
+                    self.previous_time_slowing_down = self.current_time
+                    self.previous_time = self.current_time
                     self.shoot_count = 0
 
     def seek(self, player):

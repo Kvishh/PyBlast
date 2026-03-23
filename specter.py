@@ -33,8 +33,9 @@ class Specter(pygame.sprite.Sprite):
                                     (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
                                     (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)]
 
-        self.previous_time = pygame.time.get_ticks()
-        self.previous_time_slowing_down = pygame.time.get_ticks()
+        self.previous_time = 0
+        self.previous_time_slowing_down = 0
+        self.current_time = 0
 
         self.vel = pygame.Vector2(0, 0)
 
@@ -53,7 +54,7 @@ class Specter(pygame.sprite.Sprite):
 
         self.rotate_sprite(pl)
 
-        self.shoot(specter_enemy_bullet_group, all_enemy_projectiles_that_hit_player, pl)
+        self.shoot(specter_enemy_bullet_group, all_enemy_projectiles_that_hit_player, pl, dt)
 
         
         self.image.set_alpha(self.opacity)
@@ -92,11 +93,11 @@ class Specter(pygame.sprite.Sprite):
 
         self.rect.center = self.hit_rect.center
 
-    def shoot(self, specter_enemy_bullet_group, all_enemy_projectiles_that_hit_player, player):
-        current_time = pygame.time.get_ticks()
+    def shoot(self, specter_enemy_bullet_group, all_enemy_projectiles_that_hit_player, player, dt):
+        self.current_time += dt
         self.slow_down()
-        if current_time - self.previous_time > 3200:
-                self.previous_time = current_time
+        if self.current_time - self.previous_time > 3.3:
+                self.previous_time = self.current_time
                 target_x = player.rect.centerx
                 target_y = player.rect.centery
 
@@ -109,13 +110,12 @@ class Specter(pygame.sprite.Sprite):
                 all_enemy_projectiles_that_hit_player.add(bullet)
 
                 self.speed = 20
-                self.previous_time_slowing_down = current_time
+                self.previous_time_slowing_down = self.current_time
                 self.allow_increase = True
 
     def slow_down(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.previous_time_slowing_down > 1500:
-            self.speed -= .3
+        if self.current_time - self.previous_time_slowing_down > 1.5:
+            self.speed = max(-20, self.speed - .3)
             self.opacity -= 2
             self.opacity = max(self.opacity, 30)
             self.allow_increase = False

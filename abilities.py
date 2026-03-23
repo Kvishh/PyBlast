@@ -25,7 +25,7 @@ def apply_ability(skill, receiver):
             
             setattr(receiver, skill.attribute, old_val+skill.quantity)
     elif skill.effect == "percentage":
-        if skill.attribute == "shooting_cd":
+        if skill.attribute == "fire_rate":
             old_val = getattr(receiver, skill.attribute)
             
             setattr(receiver, skill.attribute, old_val-(old_val*skill.quantity))
@@ -39,11 +39,11 @@ def apply_ability(skill, receiver):
 ############################
 # Count: 5
 ############################
-sw1 = Skill("Swift fire 1", "Fire rate +25%", "percentage", False, quantity=.25, attribute="shooting_cd")
-sw2 = Skill("Swift fire 2", "Fire rate +10%", "percentage", False, quantity=.10, prereqs=[sw1], attribute="shooting_cd")
-sw3 = Skill("Swift fire 3", "Fire rate +10%", "percentage", False, quantity=.10, prereqs=[sw1, sw2], attribute="shooting_cd")
-sw4 = Skill("Swift fire 4", "Fire rate +10%", "percentage", False, quantity=.10, prereqs=[sw1, sw2, sw3], attribute="shooting_cd")
-sw5 = Skill("Swift fire 5", "Fire rate +30% (maxed out)", "percentage", False, quantity=.30, prereqs=[sw1, sw2, sw3, sw4], attribute="shooting_cd")
+sw1 = Skill("Swift fire 1", "Fire rate +25%", "percentage", False, quantity=.25, attribute="fire_rate")
+sw2 = Skill("Swift fire 2", "Fire rate +10%", "percentage", False, quantity=.10, prereqs=[sw1], attribute="fire_rate")
+sw3 = Skill("Swift fire 3", "Fire rate +10%", "percentage", False, quantity=.10, prereqs=[sw1, sw2], attribute="fire_rate")
+sw4 = Skill("Swift fire 4", "Fire rate +10%", "percentage", False, quantity=.10, prereqs=[sw1, sw2, sw3], attribute="fire_rate")
+sw5 = Skill("Swift fire 5", "Fire rate +30% (maxed out)", "percentage", False, quantity=.30, prereqs=[sw1, sw2, sw3, sw4], attribute="fire_rate")
 
 # Swift fire skill tree
 swift_fire_skill_tree = SkillTree("Swift fire tree", 5, [sw1,sw2,sw3,sw4,sw5])
@@ -57,11 +57,11 @@ fb5 = Skill("Fast Bullet 5", "Bullet speed +10% (maxed out)", "percentage", Fals
 # Fast bullet skill tree
 fast_bullet_skill_tree = SkillTree("Fast bullet tree", 5, [fb1,fb2,fb3,fb4,fb5])
 
-hp1 = Skill("Max hp 1", "Max hp +1", "addition", False, quantity=1, attribute="max_hp")
-hp2 = Skill("Max hp 1", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1], attribute="max_hp")
-hp3 = Skill("Max hp 1", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1, hp2], attribute="max_hp")
-hp4 = Skill("Max hp 1", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1, hp2, hp3], attribute="max_hp")
-hp5 = Skill("Max hp 1", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1, hp2, hp3, hp4], attribute="max_hp")
+hp1 = Skill("Increase max hp 1", "Max hp +1", "addition", False, quantity=1, attribute="max_hp")
+hp2 = Skill("Increase max hp 2", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1], attribute="max_hp")
+hp3 = Skill("Increase max hp 3", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1, hp2], attribute="max_hp")
+hp4 = Skill("Increase max hp 4", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1, hp2, hp3], attribute="max_hp")
+hp5 = Skill("Increase max hp 5", "Max hp +1", "addition", False, quantity=1, prereqs=[hp1, hp2, hp3, hp4], attribute="max_hp")
 
 # HP skill tree
 hp_skill_tree = SkillTree("Max hp tree", 5, [hp1,hp2,hp3,hp4,hp5])
@@ -122,7 +122,7 @@ projectile_skill_tree = SkillTree("Projectile tree", 2, [proj1, proj2])
 ############################
 # Count: 1
 ############################
-sdtime = Skill("Slow down 1", "Slow down time when projectiles near player", "state", False)
+sdtime = Skill("Slow down 1", "Slow down time when projectiles near player", "state", False, attribute="slow_time_active")
 
 # Slow down skill tree
 slow_down_skill_tree = SkillTree("Slow down tree", 1, [sdtime])

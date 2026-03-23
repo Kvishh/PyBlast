@@ -11,6 +11,12 @@ from shoot import Shoot
 from burst import Burst
 from specter import Specter
 
+class Timer:
+    projectiles_hit_player_invincible_timer = 0
+    projectiles_hit_wand_invincible_timer = 0
+    enemies_touch_player_invincible_timer = 0
+    enemies_touch_wand_invincible_timer = 0
+
 def collide_rect_then_mask(sprite1, sprite2):
     if not sprite1.rect.colliderect(sprite2.rect): return False
 
@@ -47,6 +53,13 @@ def avoid_overlap(all_ground_enemies):
                 elif overlap.h < overlap.w:
                         x.pos.x += overlap.h // 6
                         y.pos.x -= overlap.h // 6
+
+def slow_down_time(player, all_enemy_projectiles_that_hit_player, dt):
+    for bullet in all_enemy_projectiles_that_hit_player.sprites():
+            if bullet.rect.colliderect(player.slow_rect):
+                dt = max(0.003, dt * .25)
+                return dt
+    return dt
 
 def check_explosion_radius_rect_collision(explosion_center, radius, rect):
     cx, cy = explosion_center
@@ -119,7 +132,10 @@ def check_enemies_within_explosion_radius(player,   hud, enemies_killed, player_
 def projectiles_hit_negator(player, all_enemy_projectiles_that_hit_player):
     hits = pygame.sprite.spritecollide(player.negator, all_enemy_projectiles_that_hit_player, True, collide_rect_then_mask)
 
-def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, shake_timer):
+def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, shake_timer, dt):
+    Timer.projectiles_hit_player_invincible_timer += dt
+    Timer.projectiles_hit_wand_invincible_timer += dt
+
     if not player.is_invincible:
         tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
         player_tile_loc = (int(player.rect.x // TILE_SIZE), int(player.rect.y // TILE_SIZE))
@@ -134,10 +150,10 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                     if projectile.rect.colliderect(player.rect):
                         if pygame.sprite.collide_mask(projectile, player):
                             player.current_hp -= 1
-                            player.invincible_timer = pygame.time.get_ticks()
+                            player.invincible_timer = Timer.projectiles_hit_player_invincible_timer
                             player.is_invincible = True
 
-                            wand.invincible_timer = pygame.time.get_ticks()
+                            wand.invincible_timer = Timer.projectiles_hit_wand_invincible_timer
                             wand.is_invincible = True
 
                             shake_timer[0] = 20
@@ -147,16 +163,19 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                             projectile.kill()
                             break
 
-def all_enemies_touch_player(player, wand, all_enemies_group):
+def all_enemies_touch_player(player, wand, all_enemies_group, dt):
+    Timer.enemies_touch_player_invincible_timer += dt
+    Timer.enemies_touch_wand_invincible_timer += dt
+
     if not player.is_invincible:
         hits = pygame.sprite.spritecollide(player, all_enemies_group, False, collide_rect_then_mask)
 
         for enemy in hits:
             player.current_hp -= 1
-            player.invincible_timer = pygame.time.get_ticks()
+            player.invincible_timer = Timer.enemies_touch_player_invincible_timer
             player.is_invincible = True
 
-            wand.invincible_timer = pygame.time.get_ticks()
+            wand.invincible_timer = Timer.enemies_touch_wand_invincible_timer
             wand.is_invincible = True
 
 def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):

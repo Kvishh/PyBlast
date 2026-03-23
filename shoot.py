@@ -33,8 +33,9 @@ class Shoot(pygame.sprite.Sprite):
                                        (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
                                        (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)]
 
-        self.previous_time = pygame.time.get_ticks()
-        self.previous_time_slowing_down = pygame.time.get_ticks()
+        self.previous_time = 0
+        self.previous_time_slowing_down = 0
+        self.current_time = 0
 
         self.vel = pygame.Vector2(0, 0)
 
@@ -54,7 +55,7 @@ class Shoot(pygame.sprite.Sprite):
 
         self.rotate_sprite(pl)
 
-        self.shoot(enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl)
+        self.shoot(enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt)
 
         self.seek_force = self.seek(pl)
         self.avoid_force = self.flee(flying_enemies_group)
@@ -91,11 +92,11 @@ class Shoot(pygame.sprite.Sprite):
             pygame.draw.circle(display, (23, 4, 23), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (i//3+2))
             pygame.draw.circle(display, particle[2], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), (i//3+2))
 
-    def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player):
-        current_time = pygame.time.get_ticks()
+    def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player, dt):
+        self.current_time += dt
         self.slow_down()
-        if current_time - self.previous_time > 5000:
-                self.previous_time = current_time
+        if self.current_time - self.previous_time > 5:
+                self.previous_time = self.current_time
                 target_x = player.rect.centerx
                 target_y = player.rect.centery
 
@@ -109,12 +110,12 @@ class Shoot(pygame.sprite.Sprite):
                 all_enemy_projectiles_that_hit_player.add(bullet)
 
                 self.speed = 30
-                self.previous_time_slowing_down = current_time
+                self.previous_time_slowing_down = self.current_time
 
     def slow_down(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.previous_time_slowing_down > 3500:
-            self.speed -= .5
+        self.current_time
+        if self.current_time - self.previous_time_slowing_down > 3.5:
+            self.speed = max(-35, self.speed - .5)
 
     def seek(self, player):
         desired = (player.pos - self.pos).normalize() * 5

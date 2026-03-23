@@ -13,9 +13,13 @@ class Wand(pygame.sprite.Sprite):
 
         self.is_invincible = False
         self.invincible_timer = 0
-        self.invincible_duration = 1500
+        self.invincible_duration = 1.5
+
+        self.is_hit_current_timer = 0
+        self.blink_timer = 0
+        self.blink_state = 0
     
-    def update(self, player, scroll, x, y):
+    def update(self, player, scroll, x, y, dt):
         mouse_pos_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
         mouse_pos_y = (pygame.mouse.get_pos()[1] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[1]
         pl_x = x
@@ -28,18 +32,24 @@ class Wand(pygame.sprite.Sprite):
         self._rotate_around_pivot(angle_mouse, x, y)
         self._switch_player_orientation(player, angle_mouse)
 
-        self.player_is_hit()
+        self.player_is_hit(dt)
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x - scroll[0], self.rect.y - scroll[1]))
 
-    def player_is_hit(self):
+    def player_is_hit(self, dt):
+        self.is_hit_current_timer += dt
+
         if self.is_invincible:
-            now = pygame.time.get_ticks()
-            if now - self.invincible_timer > self.invincible_duration:
+            if self.is_hit_current_timer - self.invincible_timer > self.invincible_duration:
                 self.is_invincible = False
 
-            if (pygame.time.get_ticks() // 100) % 2 == 0:
+            self.blink_timer += dt
+            if self.blink_timer >= .1:
+                self.blink_timer = 0
+                self.blink_state = not self.blink_state
+
+            if self.blink_state:
                 self.image.set_alpha(0)
             else:
                 self.image.set_alpha(255)

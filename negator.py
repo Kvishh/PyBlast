@@ -11,10 +11,10 @@ class Negator(pygame.sprite.Sprite):
         self.offset = pygame.Vector2(60, 0)
         self.angle = 0
     
-    def update(self, player_pos):
+    def update(self, player_pos, dt):
         self.pos = pygame.Vector2(player_pos)
 
-        self.angle -= 2
+        self.angle -= 100 * dt
         self.rect.center = self.pos + self.offset.rotate(self.angle)
     
     def render(self, scroll):
