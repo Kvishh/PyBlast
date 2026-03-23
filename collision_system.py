@@ -116,6 +116,9 @@ def check_enemies_within_explosion_radius(player,   hud, enemies_killed, player_
             xp_increment = 80 - (hud.level*10)
             hud.update_level_bar(xp_increment)
 
+def projectiles_hit_negator(player, all_enemy_projectiles_that_hit_player):
+    hits = pygame.sprite.spritecollide(player.negator, all_enemy_projectiles_that_hit_player, True, collide_rect_then_mask)
+
 def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, shake_timer):
     if not player.is_invincible:
         tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
