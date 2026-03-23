@@ -56,6 +56,10 @@ class WandImage:
     wand_image = pygame.image.load("assets/images/player_wand.png").convert_alpha()
     wand_image_rotated = pygame.transform.rotate(wand_image, -90)
 
+class NegatorImage:
+    negator_image = pygame.image.load("assets/images/negator.png").convert_alpha()
+    negator_image_scaled = pygame.transform.scale(negator_image, (NEGATOR_SIZE, NEGATOR_SIZE))
+
 class BulletImage:
     bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
     bullet_image_scaled = pygame.transform.scale(bullet_image, (BULLET_SIZE, BULLET_SIZE))

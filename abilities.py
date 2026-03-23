@@ -34,7 +34,7 @@ def apply_ability(skill, receiver):
             
             setattr(receiver, skill.attribute, old_val+(old_val*skill.quantity))
     elif skill.effect == "state":
-        pass
+        setattr(receiver, skill.attribute, True)
 
 ############################
 # Count: 5
@@ -127,7 +127,7 @@ sdtime = Skill("Slow down 1", "Slow down time when projectiles near player", "st
 # Slow down skill tree
 slow_down_skill_tree = SkillTree("Slow down tree", 1, [sdtime])
 
-negate = Skill("Projectile negation 1", "Spinning object around player that negates projectiles", "state", False)
+negate = Skill("Projectile negation 1", "Spinning object around player that negates projectiles", "state", False, attribute="negator_active")
 
 # Projectile negation skill tree
 projectile_negation_skill_tree = SkillTree("Projectile negation tree", 1, [negate])
@@ -137,7 +137,7 @@ bsize = Skill("Bullet size increase 1", "Increase bullet size", "addition", Fals
 # Bullet size increase skill tree
 bullet_size_skill_tree = SkillTree("Bullet size tree", 1, [bsize])
 
-bexp = Skill("Bullet explosion", "Player's bullets explodes when enemies are hit", "state", False)
+bexp = Skill("Bullet explosion", "Player's bullets explodes when enemies are hit", "state", False, attribute="bullets_explode_state")
 
 # Bullet explosion skill tree
 bullet_explosion_skill_tree = SkillTree("Bullet explosion tree", 1, [bexp])

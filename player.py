@@ -1,7 +1,7 @@
 import pygame, random
 from configs import *
 from game_map import tiles_blocks
-from images import PlayerImages, GradientImage
+from images import PlayerImages, GradientImage, NegatorImage
 from bullet import PlayerBullet
 
 class Player(pygame.sprite.Sprite):
@@ -26,6 +26,7 @@ class Player(pygame.sprite.Sprite):
 
         self.bullet_size_doubled_activated = False
         self.bullets_explode_state = False
+        self.negator_active = False
         
         self.max_hp = 4
         self.current_hp = 3
@@ -33,6 +34,12 @@ class Player(pygame.sprite.Sprite):
 
         self.shoot_previous_time = pygame.time.get_ticks()
         self.shooting_cd = 700 #700 start, 300 max
+
+        self.negator_image = NegatorImage.negator_image_scaled
+        self.negator_rect = self.negator_image.get_rect(center=self.rect.center)
+        self.negator_rect_pos = pygame.Vector2(self.rect.center)
+        self.negator_rect_offset = pygame.Vector2(60, 0)
+        self.negator_rect_angle = 0
 
         self.active_skills = set([])
         
@@ -76,6 +83,14 @@ class Player(pygame.sprite.Sprite):
 
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group):
+        if self.negator_active:
+            self.negator_rect_pos = pygame.Vector2(self.rect.center)
+            self.negator_rect_angle -= 2
+            self.negator_rect.center = self.negator_rect_pos + self.negator_rect_offset.rotate(self.negator_rect_angle)
+
+            display.blit(self.negator_image, (self.negator_rect.x-scroll[0], self.negator_rect.y-scroll[1]))
+
+
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
 
