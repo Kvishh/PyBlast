@@ -35,9 +35,9 @@ class Player(pygame.sprite.Sprite):
         self.slow_rect = pygame.Rect(self.rect.x - (180//2) + (self.rect.w//2), (self.rect.y - (180//2) + (self.rect.h//2)), 180, 180)
         
         self.max_hp = 4
-        self.current_hp = 3
-        self.max_shield = 2
-        self.current_shield = 1
+        self.current_hp = 4
+        self.max_shield = 0
+        self.current_shield = 0
 
         self.shield_timer = pygame.time.get_ticks()
 
@@ -181,23 +181,21 @@ class Player(pygame.sprite.Sprite):
         mouse_hold = pygame.mouse.get_pressed()
         self.current_time += dt
         if mouse_hold[0]:
-            # current_time = pygame.time.get_ticks()
-            # ABOVE!!!
 
-            # if current_time - self.shoot_previous_time > self.shooting_cd:
             if self.current_time - self.shoot_previous_time > self.shooting_cd:
 
                 mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
                 mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + scroll[1]
                 
+                spread = 0
+                if self.bullet_number >= 2:
+                    spread = -10
                 for i in range(self.bullet_number):
-                    spread = 0
-                    if i == 0:
-                        spread = 0
-                    elif i == 1:
-                        spread = -10
-                    else:
-                        spread = 10
+                    if self.bullet_number == 2 and i == 1:
+                        spread = -spread
+                    elif self.bullet_number == 3 and i >= 1:
+                        spread += 10
+
                     bullet = PlayerBullet(self.rect.centerx, 
                                     self.rect.centery,
                                     self.bullet_speed,
