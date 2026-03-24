@@ -20,6 +20,20 @@ def apply_ability(skill, receiver):
     if skill.effect == "addition":
         if skill.attribute == "BULLET_SIZE":
             receiver.bullet_size_doubled_activated = True
+        elif skill.attribute == "max_hp":
+            old_val = getattr(receiver, skill.attribute)
+            
+            setattr(receiver, skill.attribute, old_val+skill.quantity)
+
+            # Current hp gets addition if max_hp is increased
+            receiver.current_hp = min(receiver.max_hp, receiver.current_hp+1)
+        elif skill.attribute == "max_shield":
+            old_val = getattr(receiver, skill.attribute)
+            
+            setattr(receiver, skill.attribute, old_val+skill.quantity)
+            
+            # Current shield gets addition if max_shield is increased
+            receiver.current_shield = min(receiver.max_shield, receiver.current_shield+1)
         else:    
             old_val = getattr(receiver, skill.attribute)
             
@@ -103,9 +117,9 @@ bb3 = Skill("Bullet bounce 3", "Bullet bounce +1", "addition", False, quantity=1
 # Bullet bounce skill tree
 bullet_bounce_skill_tree = SkillTree("Bullet bounce tree", 3, [bb1, bb2, bb3])
 
-s1 = Skill("Shield 1", "Shield +1", "addition", False, quantity=1, attribute="shield")
-s2 = Skill("Shield 2", "Shield +1", "addition", False, quantity=1, prereqs=[s1], attribute="shield")
-s3 = Skill("Shield 3", "Shield +1", "addition", False, quantity=1, prereqs=[s1, s2], attribute="shield")
+s1 = Skill("Shield 1", "Shield +1", "addition", False, quantity=1, attribute="max_shield")
+s2 = Skill("Shield 2", "Shield +1", "addition", False, quantity=1, prereqs=[s1], attribute="max_shield")
+s3 = Skill("Shield 3", "Shield +1", "addition", False, quantity=1, prereqs=[s1, s2], attribute="max_shield")
 
 # Shield skill tree
 shield_skill_tree = SkillTree("Shield tree", 3, [s1, s2, s3])

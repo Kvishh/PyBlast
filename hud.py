@@ -72,7 +72,7 @@ class HUD:
                 display.blit(self.empty_heart, (10+(i*(EMPTY_HEART_IMAGE_WIDTH + 5)), 40))
     
     def _blit_shield(self):
-        for i in range(self.player.shield):
+        for i in range(self.player.current_shield):
             display.blit(self.shield, (10+(i*(SHIELD_IMAGE_WIDTH + 5)), 85))
     
     def blit_FPS(self):

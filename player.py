@@ -36,7 +36,10 @@ class Player(pygame.sprite.Sprite):
         
         self.max_hp = 4
         self.current_hp = 3
-        self.shield = 2
+        self.max_shield = 2
+        self.current_shield = 1
+
+        self.shield_timer = pygame.time.get_ticks()
 
         self.shoot_previous_time = 0
         self.fire_rate = 700
@@ -96,6 +99,12 @@ class Player(pygame.sprite.Sprite):
         if self.negator_active:
             self.negator.update(self.rect.center, dt)
             self.negator.render(scroll)
+
+        # For shield regeneration
+        now = pygame.time.get_ticks()
+        if now - self.shield_timer > 120000: # 2 mins
+            self.shield_timer = now
+            self.current_shield = min(self.current_shield+1, self.max_shield)
 
         self.on_ground = False
         self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)

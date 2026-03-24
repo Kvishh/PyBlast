@@ -149,7 +149,10 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                 if check_loc in player_grid_locs:
                     if projectile.rect.colliderect(player.rect):
                         if pygame.sprite.collide_mask(projectile, player):
-                            player.current_hp -= 1
+                            if player.current_shield != 0:
+                                player.current_shield -= 1
+                            else:
+                                player.current_hp -= 1
                             player.invincible_timer = Timer.projectiles_hit_player_invincible_timer
                             player.is_invincible = True
 
@@ -171,7 +174,11 @@ def all_enemies_touch_player(player, wand, all_enemies_group, dt):
         hits = pygame.sprite.spritecollide(player, all_enemies_group, False, collide_rect_then_mask)
 
         for enemy in hits:
-            player.current_hp -= 1
+            if player.current_shield != 0:
+                player.current_shield -= 1
+                player.shield_timer = pygame.time.get_ticks()
+            else:
+                player.current_hp -= 1
             player.invincible_timer = Timer.enemies_touch_player_invincible_timer
             player.is_invincible = True
 
