@@ -63,10 +63,11 @@ def create_background_particles():
     if len(FxList.background_particles) < 10: # loc, radius, direction
         FxList.background_particles.append([[random.randrange(WINDOW_WIDTH), random.randrange(WINDOW_HEIGHT)],
                                     2,
-                                    [random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)]), random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)])],
+                                    # [random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)]), random.choice([random.uniform(.4, .6), random.uniform(-.4, -.6)])],
+                                    [random.choice([random.uniform(40.4, 40.6), random.uniform(-40.4, -40.6)]), random.choice([random.uniform(40.4, 40.6), random.uniform(-40.4, -40.6)])],
                                     random.choice(GradientImage.gradient_background_image_list)])
 
-def draw_background_particles(dark_overlay, scroll):
+def draw_background_particles(dark_overlay, scroll, dt):
     if FxList.background_particles:
         FxList.background_particles = [background_particle for background_particle in FxList.background_particles
                                 if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
@@ -74,8 +75,8 @@ def draw_background_particles(dark_overlay, scroll):
         
         # loc, radius, direction
         for bg_particle in FxList.background_particles:
-            bg_particle[0][0] += bg_particle[2][0]
-            bg_particle[0][1] += bg_particle[2][1]
+            bg_particle[0][0] += bg_particle[2][0] * dt
+            bg_particle[0][1] += bg_particle[2][1] * dt
             """Movement of particle"""
 
             gradient_copy = bg_particle[3]
