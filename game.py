@@ -138,7 +138,7 @@ class Game:
         self.dark_overlay.fill((190,190,190,100))
 
         # Xp increment for level ----------------------------------------------------------------------------------
-        self.xp_increment = 0
+        self.xp_increment = [0]
 
         # Set of enemies killed -----------------------------------------------------------------------------------
         self.enemies_killed = set([])
@@ -154,6 +154,7 @@ class Game:
         interval = [pygame.time.get_ticks()]
 
         pause_screen = None
+        last_frame = []
 
         pause_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
         pause_overlay.fill((0,0,0, 128))
@@ -176,7 +177,7 @@ class Game:
                         is_paused = not is_paused
                     if event.key == pygame.K_u:
                         self.hud.current_xp_width += 490
-                        self.hud.update_level_bar(self.xp_increment, self.level_up_state)
+                        self.hud.update_level_bar(self.xp_increment, self.level_up_state, last_frame)
                     if event.key == pygame.K_i:
                         apply_ability(s1, self.player)
                     if event.key == pygame.K_o:
@@ -290,15 +291,18 @@ class Game:
 
                 # Check if player bulllets hit every kind of enemies
                 if self.player.bullets_explode_state:
-                    cs.check_enemies_within_explosion_radius(self.player, self.hud, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer, self.level_up_state)
+                    cs.check_enemies_within_explosion_radius(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
                 else:
-                    cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer, self.level_up_state)
+                    cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
 
                 # Check if player bullet hit any flying enemies
                 cs.player_bullet_hit_flying_enemies(self.player_bullet_group)
 
                 # Check if player bullet hit any ground enemies
                 cs.player_bullet_hit_ground_enemies(self.player_bullet_group)
+
+                # Killing of enemies
+                for enemy in self.enemies_killed: enemy.kill()
 
                 # Player and Wand update and draw methods
                 self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery, dt)
@@ -365,22 +369,23 @@ class Game:
                 # Shake timer decrement
                 if self.shake_timer[0] > 0:
                     self.shake_timer[0] -= 1
-
-                # Increase of level width
-                self.xp_increment *= len(self.enemies_killed)
-
-                # Killing of enemies
-                for enemy in self.enemies_killed: enemy.kill()
                 
                 # HUD update
-                self.hud.update(countdown_time_text)
-
-                # Reset of set and xp_increment
+                self.hud.update(countdown_time_text, self.xp_increment, self.level_up_state, last_frame)
+                
+                # Clearing of set
                 self.enemies_killed.clear()
-                self.xp_increment = 0
+
+                # Reset for xp_increment so that when it levels up it does not add the old values
+                # It will not accumulate. It is not cumulative
+                self.xp_increment[0] = 0
             elif self.level_up_state[0]:
 
-                rs.roll(events, self.level_up_state, self.player)
+                display.blit(last_frame[0], (0,0))
+                display.blit((pause_overlay), (0,0))
+
+                rs.roll(events, self.level_up_state, self.player, last_frame)
+
                 clock.tick()
             elif is_paused:
                 # Blitting of the last screen and the dark overlay when paused

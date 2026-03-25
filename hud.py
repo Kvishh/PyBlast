@@ -16,26 +16,35 @@ class HUD:
         self.level_bar = pygame.Rect(10, 10, 980, 20) # Rect: 10, 10, 980, 20-left,top,width,height
         self.current_xp_width = 0
     
-    def update(self, timer):
+    def update(self, timer, xp_increment, level_up_state, last_frame):
         self._blit_heart()
         self._blit_shield()
         self.blit_FPS()
         self.blit_timer(timer)
         self._blit_level_bar()
+        self.update_level_bar(xp_increment, level_up_state, last_frame)
 
-    def update_level_bar(self, xp_increment, level_up_state):
-        self.current_xp_width += xp_increment
+    def update_level_bar(self, xp_increment, level_up_state, last_frame):
+        self.current_xp_width += xp_increment[0]
         if self.current_xp_width >= 980:
             # The width before addition
-            old_xp_width = self.current_xp_width - xp_increment
+            old_xp_width = self.current_xp_width - xp_increment[0]
             # The difference in order to get the amount that will be subtracted to the increment
             diff = 980 - old_xp_width
             # The surplus added after leveling up
-            xp_increment = xp_increment - diff
+            xp_increment[0] = xp_increment[0] - diff
             
-            self.current_xp_width = 980 - (980 - xp_increment)
+            self.current_xp_width = 980 - (980 - xp_increment[0])
             self.level += 1
 
+            # Calling this again so that the level bar (the green bar that represents xp player has)
+            # is updated immediately after increasing it. This makes the last frame has the updated 
+            # level to its next level and the green bar to its new width
+            
+            # Otherwise, the last frame will be left to its old green bar and level despite it being already
+            # on next level. Only then will it be updated after the player has chosen an upgrade
+            self._blit_level_bar()
+            last_frame.append(display.copy())
             level_up_state[0] = True
         elif self.current_xp_width <= 0:
             self.current_xp_width = 0

@@ -52,7 +52,7 @@ def render_outlined(text: str, text_color: pygame.typing.ColorLike, outline_colo
         font.outline = old_outline
         return outlined_text_surf
 
-def roll(events, level_up_state, player):
+def roll(events, level_up_state, player, last_frame):
     # This is to ensure that skills choices and skill trees choices roll only once
     if not RollSystem.skills_choices and not RollSystem.skill_trees_choices:
         RollSystem.stop = False
@@ -82,16 +82,13 @@ def roll(events, level_up_state, player):
                     RollSystem.skills_choices.append(skill_tree.abilities_list[i])
                     break
     
-    show_choices(RollSystem.skills_choices, events, level_up_state, player)
+    show_choices(RollSystem.skills_choices, events, level_up_state, player, last_frame)
 
-def show_choices(skills_choices, events, level_up_state, player):
+def show_choices(skills_choices, events, level_up_state, player, last_frame):
     # Checks if RollSystem.choices is empty, if it is empty then fill it in
     # with skill name and description (not actual object)
     if not RollSystem.choices:
         for skill in skills_choices: RollSystem.choices.append((skill.name, skill.description))
-
-    # Dark overlay
-    display.blit(RollSystem.level_up_overlay, (0,0))
 
     mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
     for i, val in enumerate(RollSystem.rect_containers, start=1):
@@ -138,6 +135,7 @@ def show_choices(skills_choices, events, level_up_state, player):
                     RollSystem.skills_choices.clear()
                     RollSystem.skill_trees_choices.clear()
                     RollSystem.choices.clear()
+                    last_frame.clear()
 
                     # Applying the ability
                     apply_ability(skill, player)
