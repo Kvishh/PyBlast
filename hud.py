@@ -1,7 +1,5 @@
 import pygame
 from configs import *
-import roll_system
-from abilities import apply_ability
 
 class HUD:
     def __init__(self, player):
@@ -25,7 +23,7 @@ class HUD:
         self.blit_timer(timer)
         self._blit_level_bar()
 
-    def update_level_bar(self, xp_increment):
+    def update_level_bar(self, xp_increment, level_up_state):
         self.current_xp_width += xp_increment
         if self.current_xp_width >= 980:
             # The width before addition
@@ -38,10 +36,7 @@ class HUD:
             self.current_xp_width = 980 - (980 - xp_increment)
             self.level += 1
 
-            skill = roll_system.roll()
-            apply_ability(skill, self.player)
-
-            clock.tick()
+            level_up_state[0] = True
         elif self.current_xp_width <= 0:
             self.current_xp_width = 0
 

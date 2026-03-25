@@ -17,6 +17,8 @@ class Timer:
     enemies_touch_player_invincible_timer = 0
     enemies_touch_wand_invincible_timer = 0
 
+    dt_multiplier = 1
+
 def collide_rect_then_mask(sprite1, sprite2):
     if not sprite1.rect.colliderect(sprite2.rect): return False
 
@@ -56,9 +58,18 @@ def avoid_overlap(all_ground_enemies):
 
 def slow_down_time(player, all_enemy_projectiles_that_hit_player, dt):
     for bullet in all_enemy_projectiles_that_hit_player.sprites():
-            if bullet.rect.colliderect(player.slow_rect):
-                dt = max(0.003, dt * .25)
-                return dt
+        if bullet.rect.colliderect(player.slow_rect):
+            # This is responsible for slowing down movement smoothly
+            # Smooth in effect
+            Timer.dt_multiplier = max(0.25, Timer.dt_multiplier - .1)
+            dt = max(0.0038, dt * Timer.dt_multiplier)
+            return dt
+
+    # This is to smooth out the time if enemies' projectiles
+    # have gone past through player's radius where slow movement
+    # will take effect
+    Timer.dt_multiplier = min(1, Timer.dt_multiplier + .018)
+    dt = max(0.0038, dt * Timer.dt_multiplier)
     return dt
 
 def check_explosion_radius_rect_collision(explosion_center, radius, rect):
@@ -75,7 +86,7 @@ def check_explosion_radius_rect_collision(explosion_center, radius, rect):
     return dist_squared <= radius**2
 
 
-def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer):
+def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer, level_up_state):
     hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
 
     for bullet, enemies in hits.items():
@@ -91,12 +102,12 @@ def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, pla
             if enemy.hp <= 0:
                 enemies_killed.add(enemy)
                 xp_increment = 80 - (hud.level*10)
-                hud.update_level_bar(xp_increment)
+                hud.update_level_bar(xp_increment, level_up_state)
 
         fx.create_impacts(pos)
         fx.create_floating_particles(pos)
 
-def check_enemies_within_explosion_radius(player,   hud, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer):
+def check_enemies_within_explosion_radius(player,   hud, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer, level_up_state):
     hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
 
     enemies_within_radius = set([])
@@ -127,7 +138,7 @@ def check_enemies_within_explosion_radius(player,   hud, enemies_killed, player_
         if enemy.hp <= 0:
             enemies_killed.add(enemy)
             xp_increment = 80 - (hud.level*10)
-            hud.update_level_bar(xp_increment)
+            hud.update_level_bar(xp_increment, level_up_state)
 
 def projectiles_hit_negator(player, all_enemy_projectiles_that_hit_player):
     hits = pygame.sprite.spritecollide(player.negator, all_enemy_projectiles_that_hit_player, True, collide_rect_then_mask)

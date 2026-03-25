@@ -1,8 +1,9 @@
 import pygame, random, math, time
 import effects_sytem as fx
 import collision_system as cs
+import roll_system as rs
 from configs import *
-from game_map import tiles_blocks, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from game_map import draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
 from customgroup import CustomGroup, ShootCustomGroup
@@ -14,6 +15,7 @@ from burst import Burst
 from specter import Specter
 from tank import Tank
 from hud import HUD
+from abilities import apply_ability, s1, hp1, proj1, proj2
 
 
 class Game:
@@ -79,7 +81,7 @@ class Game:
         self.shake_timer = [0]
 
         # Player---------------------------------------------------------------------------------------------------
-        self.player = Player(0, 0, self.player_group)
+        self.player = Player(0, FLOOR, self.player_group)
 
         # Wand-----------------------------------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
@@ -90,7 +92,7 @@ class Game:
         self.ground_en = Light(600, 0, self.light_enemy_group, self.all_ground_enemies)
 
         # Heavy Enemy----------------------------------------------------------------------------------------------
-        self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, 0, self.tank_enemy_group, self.all_ground_enemies)
+        self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, FLOOR, self.tank_enemy_group, self.all_ground_enemies)
 
         # Flight Enemy---------------------------------------------------------------------------------------------
         self.flight_enemy = Flight(50, 0, self.flight_enemy_group, self.all_flying_enemies)
@@ -141,8 +143,11 @@ class Game:
         # Set of enemies killed -----------------------------------------------------------------------------------
         self.enemies_killed = set([])
 
-        # Spawn rect for ground enemies-----------------------------------------------------------------------------
+        # Spawn rect for ground enemies----------------------------------------------------------------------------
         self.spawn_rect = pygame.Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+
+        # Object responsible for pausing the game loop if in leveling up-------------------------------------------
+        self.level_up_state = [False]
 
 
     def game_run(self):
@@ -154,9 +159,8 @@ class Game:
         pause_overlay.fill((0,0,0, 128))
 
         countdown_time = 600
+        countdown_timer = pygame.time.get_ticks()
         countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
-        timer_evt = pygame.USEREVENT + 1
-        pygame.time.set_timer(timer_evt, 1000)
 
 
         running = True
@@ -172,12 +176,22 @@ class Game:
                         is_paused = not is_paused
                     if event.key == pygame.K_u:
                         self.hud.current_xp_width += 490
+                        self.hud.update_level_bar(self.xp_increment, self.level_up_state)
+                    if event.key == pygame.K_i:
+                        apply_ability(s1, self.player)
+                    if event.key == pygame.K_o:
+                        apply_ability(hp1, self.player)
+                    if event.key == pygame.K_1:
+                        apply_ability(proj1, self.player)
+                    if event.key == pygame.K_2:
+                        apply_ability(proj2, self.player)
             
-            if not is_paused:
-                for event in events:
-                    if event.type == timer_evt:
-                        countdown_time -= 1
-                        countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
+            if not is_paused and not self.level_up_state[0]:
+                countdown_timer_now = pygame.time.get_ticks()
+                if countdown_timer_now - countdown_timer > 1000:
+                    countdown_time -= 1
+                    countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
+                    countdown_timer = countdown_timer_now
 
                 dt = clock.tick(FPS) / 1000
                 display.fill((42, 59, 95))
@@ -276,9 +290,9 @@ class Game:
 
                 # Check if player bulllets hit every kind of enemies
                 if self.player.bullets_explode_state:
-                    cs.check_enemies_within_explosion_radius(self.player, self.hud, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
+                    cs.check_enemies_within_explosion_radius(self.player, self.hud, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer, self.level_up_state)
                 else:
-                    cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer)
+                    cs.player_bullet_hit_all_enemies(self.player, self.hud, self.xp_increment, self.enemies_killed, self.player_bullet_group, self.all_enemies_that_can_be_hit_by_playerbullet_group, self.shake_timer, self.level_up_state)
 
                 # Check if player bullet hit any flying enemies
                 cs.player_bullet_hit_flying_enemies(self.player_bullet_group)
@@ -299,9 +313,9 @@ class Game:
                 # self.light_enemy_group.update(dt, self.player, self.scroll)
                 # self.light_enemy_group.draw(display, self.scroll)
 
-                # Heavy Enemy update and render
-                self.tank_enemy_group.update(dt, self.player, self.scroll)
-                self.tank_enemy_group.draw(display, self.scroll)
+                # # Heavy Enemy update and render
+                # self.tank_enemy_group.update(dt, self.player, self.scroll)
+                # self.tank_enemy_group.draw(display, self.scroll)
 
                 # # Avoid overlapping between ground enemies
                 # cs.avoid_overlap(self.all_ground_enemies)
@@ -314,17 +328,17 @@ class Game:
                 # self.soar_enemy_group.update(self.player, dt, self.all_flying_enemies, self.scroll)
                 # self.soar_enemy_group.draw(display, self.scroll)
 
-                # # Shooting Enemy update and render
-                # self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
-                # self.shoot_enemy_group.draw(display, self.scroll)
+                # Shooting Enemy update and render
+                self.shoot_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
+                self.shoot_enemy_group.draw(display, self.scroll)
 
                 # Burst Enemy update and render
                 self.burst_enemy_group.update(self.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, self.all_flying_enemies, self.scroll)
                 self.burst_enemy_group.draw(display, self.scroll)
 
-                # # Specter Enemy update and render
-                # self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
-                # self.specter_enemy_group.draw(display, self.scroll)
+                # Specter Enemy update and render
+                self.specter_enemy_group.update(self.specter_enemy_bullet_group, self.player, dt, self.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
+                self.specter_enemy_group.draw(display, self.scroll)
 
                 # Drawing impacts/sparks
                 fx.draw_impact(self.scroll)
@@ -342,7 +356,7 @@ class Game:
                 fx.draw_debris(self.scroll)
 
                 # Drawing background particles
-                fx.draw_background_particles(self.dark_overlay, self.scroll)
+                fx.draw_background_particles(self.dark_overlay, self.scroll, dt)
                 display.blit(self.dark_overlay, (0,0), special_flags=pygame.BLEND_RGB_MULT)
 
                 # Rendering of front objects (long rocks)
@@ -361,13 +375,13 @@ class Game:
                 # HUD update
                 self.hud.update(countdown_time_text)
 
-                ###############################################
-                self.hud.update_level_bar(self.xp_increment)
-                ###############################################
-
                 # Reset of set and xp_increment
                 self.enemies_killed.clear()
                 self.xp_increment = 0
+            elif self.level_up_state[0]:
+
+                rs.roll(events, self.level_up_state, self.player)
+                clock.tick()
             elif is_paused:
                 # Blitting of the last screen and the dark overlay when paused
                 display.blit(pause_screen, (0,0))
