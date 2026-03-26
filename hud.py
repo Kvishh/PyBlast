@@ -1,12 +1,9 @@
 import pygame
 from configs import *
+from font_system import FontSystem as fs
 
 class HUD:
     def __init__(self, player):
-        self.font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 28)
-        self.font_fps = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 26)
-        self.font_timer = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 60)
-        self.font_level = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 20)
         self.player = player
         self.heart = pygame.transform.scale(pygame.image.load("assets/images/heart.png").convert_alpha(), (HEART_IMAGE_WIDTH, HEART_IMAGE_HEIGHT))
         self.empty_heart = pygame.transform.scale(pygame.image.load("assets/images/empty_heart.png").convert_alpha(), (EMPTY_HEART_IMAGE_WIDTH, EMPTY_HEART_IMAGE_HEIGHT))
@@ -15,6 +12,42 @@ class HUD:
         self.level = 1
         self.level_bar = pygame.Rect(10, 10, 980, 20) # Rect: 10, 10, 980, 20-left,top,width,height
         self.current_xp_width = 0
+
+        # "FPS: " text cache for fps
+        self.FPS_text = fs.render_outlined(("FPS: "), (255,255,255), (0,0,0), 2, fs.font_fps)
+        self.cached_fps = {}
+
+        # ":" colon cache for timer
+        self.colon_text_surf = fs.render_outlined(":", (255,255,255), (0,0,0), 2, fs.font_timer)
+
+        # Minutes cache dict
+        # The key will be string and value will be the actual surface
+        self.minutes_timer_caches = {}
+        for i in range(0, 11):
+            # If i is less than 10, then the string will be "0{i}" where i is 0-9 (inclusive)
+            if i < 10:
+                self.minutes_timer_caches[f"0{i}"] = fs.render_outlined(f"0{i}", (255,255,255), (0,0,0), 2, fs.font_timer)
+            # If i is greater than 10, then the string will be "i" where i is 10 (inclusive)
+            else:
+                self.minutes_timer_caches[str(i)] = fs.render_outlined(str(i), (255,255,255), (0,0,0), 2, fs.font_timer)
+
+        # Seconds cache dict
+        # The key will be string and value will be the actual surface
+        self.seconds_timer_caches = {}
+        for i in range(0, 60):
+            # If i is less than 10, then the string will be "0{i}" where i is 0-9 (inclusive)
+            if i < 10:
+                self.seconds_timer_caches[f"0{i}"] = fs.render_outlined(f"0{i}", (255,255,255), (0,0,0), 2, fs.font_timer)
+            # If i is greater than 10, then the string will be "i" where i is 10-59 (inclusive)
+            else:
+                self.seconds_timer_caches[str(i)] = fs.render_outlined(str(i), (255,255,255), (0,0,0), 2, fs.font_timer)
+
+        # "Survive!" text cache
+        self.survive_text = fs.render_outlined("Survive!", (235, 0, 0), (0,0,0), 2, fs.font)
+
+        # This is for "lvl" text, the level number is not included
+        self.lvl_text = fs.render_outlined("Lvl ", (255,255,255), (0,0,0), 2, fs.font_level)
+
     
     def update(self, timer, xp_increment, level_up_state, last_frame):
         self._blit_heart()
@@ -57,8 +90,12 @@ class HUD:
         pygame.draw.rect(display, (0,255,0), (self.level_bar.left, self.level_bar.top, self.current_xp_width, self.level_bar.height))
 
         # Level text rendering
-        text = self.render_outlined(f"Lvl {str(self.level)}", (255,255,255), (0,0,0), 2, self.font_level)
-        display.blit(text, (DISPLAY_WIDTH//2,7))
+        # This is for actual level number
+        text = fs.render_outlined(f"{str(self.level)}", (255,255,255), (0,0,0), 2, fs.font_level)
+        display.blit(text, ((DISPLAY_WIDTH//2)+10,7))
+        
+        # This is for "lvl" text, not the level number
+        display.blit(self.lvl_text, ((DISPLAY_WIDTH//2)-10,7))
 
         # White outline
         pygame.draw.rect(display, (255,255,255), self.level_bar, 2)
@@ -80,23 +117,25 @@ class HUD:
             display.blit(self.shield, (10+(i*(SHIELD_IMAGE_WIDTH + 5)), 85))
     
     def blit_FPS(self):
-        text = self.render_outlined((f"FPS: {clock.get_fps():.0f}"), (255,255,255), (0,0,0), 2, self.font_fps)
-        display.blit(text, (DISPLAY_WIDTH-75,100))
+        fps_value = f"{clock.get_fps():.0f}"
+        
+        # For caching. If fps value not in cached dict yet, only then create new text surface (render_outlline method
+        # returns new surface), else don't create new text surface since it has been previously created and use that
+        if not fps_value in self.cached_fps:
+            self.cached_fps[fps_value] = fs.render_outlined(fps_value, (255,255,255), (0,0,0), 2, fs.font_fps)
+
+        display.blit(self.FPS_text, (DISPLAY_WIDTH-75,100))
+        display.blit(self.cached_fps[fps_value], (DISPLAY_WIDTH-37,100))
 
     def blit_timer(self, timer):
-        timer_text = self.render_outlined(timer, (255,255,255), (0,0,0), 2, self.font_timer)
-        text = self.render_outlined("Survive!", (235, 0, 0), (0,0,0), 2, self.font)
-        display.blit(timer_text, (DISPLAY_WIDTH-110,25))
-        display.blit(text, (DISPLAY_WIDTH-85,70))
-    
-    def render_outlined(self, text: str, text_color: pygame.typing.ColorLike, outline_color: pygame.typing.ColorLike, outline_width: int, font) -> pygame.Surface:
-        old_outline = font.outline
-        if old_outline != 0:
-            font.outline = 0
-        base_text_surf = font.render(text, False, text_color)
-        font.outline = outline_width
-        outlined_text_surf = font.render(text, True, outline_color)
+        minute_text = timer[0]
+        second_text = timer[1]
 
-        outlined_text_surf.blit(base_text_surf, (outline_width, outline_width))
-        font.outline = old_outline
-        return outlined_text_surf
+        # Blitting of caches timer text
+        display.blit(self.minutes_timer_caches[minute_text], (DISPLAY_WIDTH-110,25))
+        display.blit(self.colon_text_surf, (DISPLAY_WIDTH-66,25))
+        display.blit(self.seconds_timer_caches[second_text], (DISPLAY_WIDTH-55,25))
+
+        # The "Survive!" text is cached
+        display.blit(self.survive_text, (DISPLAY_WIDTH-85,70))
+    

@@ -1,4 +1,8 @@
 import pygame, random, math, time
+
+# Initialize pygame---------------------------------------------------------------------------------------
+pygame.init()
+
 import effects_sytem as fx
 import collision_system as cs
 import roll_system as rs
@@ -20,9 +24,6 @@ from abilities import apply_ability, s1, hp1, proj1, proj2
 
 class Game:
     def __init__(self):
-        # Initialize pygame---------------------------------------------------------------------------------------
-        pygame.init()
-
         # Setting custom cursor-----------------------------------------------------------------------------------
         crosshair_image = pygame.transform.scale(pygame.image.load("assets/images/crosshair.png").convert_alpha(), (32, 32))
         cursor = pygame.cursors.Cursor((16, 16,), crosshair_image)
@@ -375,7 +376,9 @@ class Game:
                     self.shake_timer[0] -= 1
                 
                 # HUD update
-                self.hud.update(countdown_time_text, self.xp_increment, self.level_up_state, last_frame)
+                # self.hud.update(countdown_time_text, self.xp_increment, self.level_up_state, last_frame)
+                # The split is done to separate the minute (00) and seconds (59) since they are used as keys for cache
+                self.hud.update(countdown_time_text.split(":"), self.xp_increment, self.level_up_state, last_frame)
                 
                 # Clearing of set
                 self.enemies_killed.clear()

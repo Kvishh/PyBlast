@@ -3,10 +3,10 @@ import random
 import abilities
 from configs import *
 from abilities import apply_ability
+from font_system import FontSystem as fs
 
-pygame.init()
-
-list_of_skill_trees = [abilities.swift_fire_skill_tree,
+class RollSystem:
+    list_of_skill_trees = [abilities.swift_fire_skill_tree,
                        abilities.fast_bullet_skill_tree,
                        abilities.hp_skill_tree,
                        abilities.movement_speed_skill_tree,
@@ -19,18 +19,24 @@ list_of_skill_trees = [abilities.swift_fire_skill_tree,
                        abilities.projectile_negation_skill_tree,
                        abilities.bullet_size_skill_tree,
                        abilities.bullet_explosion_skill_tree]
+    
+    cached_skill_name_and_desc_surfs = {}
+    for tree in list_of_skill_trees:
+        for skill in tree.abilities_list:
+            # Keys are tuple of string skill's name and description, values are the surfaces of skill's name and description
+            cached_skill_name_and_desc_surfs[(skill.name, skill.description)] = [fs.render_outlined(skill.name, (255,255,255), (0,0,0), 2, fs.skill_name_font),
+                                                                           fs.render_outlined(skill.description, (255,255,255), (0,0,0), 2, fs.skill_desc_font)]
+    
 
-class RollSystem:
+    # Header text: "Choose an Upgrade"
+    header_text = fs.render_outlined("Choose an Upgrade", (17, 255, 00), (0,0,0), 2, fs.header_font)
+
     choices = []
 
     level_up_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
     level_up_overlay.fill((0,0,0, 192))
 
     rect_containers = [pygame.Rect(((DISPLAY_WIDTH//2)-(600//2)),(150*i)-50,600,110) for i in range(1, 4)]
-
-    header_font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 64)
-    skill_name_font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 42)
-    skill_desc_font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 22)
 
     rect_containers_max_ypos_dict = {i: [rect, rect.y] for i, rect in enumerate(rect_containers, start=1)}
     # The key is the index and the values are rect and original rect y
@@ -39,18 +45,6 @@ class RollSystem:
     skills_choices = []
 
     stop = False
-
-def render_outlined(text: str, text_color: pygame.typing.ColorLike, outline_color: pygame.typing.ColorLike, outline_width: int, font) -> pygame.Surface:
-        old_outline = font.outline
-        if old_outline != 0:
-            font.outline = 0
-        base_text_surf = font.render(text, False, text_color)
-        font.outline = outline_width
-        outlined_text_surf = font.render(text, True, outline_color)
-
-        outlined_text_surf.blit(base_text_surf, (outline_width, outline_width))
-        font.outline = old_outline
-        return outlined_text_surf
 
 def roll(events, level_up_state, player, last_frame):
     # This is to ensure that skills choices and skill trees choices roll only once
@@ -67,7 +61,7 @@ def roll(events, level_up_state, player, last_frame):
             # of skill trees that will be given to the player and if every skill
             # in that tree has not been obtained by the player, then add that to
             # the top 3 skill trees
-            chosen_tree = random.choice(list_of_skill_trees)
+            chosen_tree = random.choice(RollSystem.list_of_skill_trees)
             if chosen_tree not in RollSystem.skill_trees_choices and not chosen_tree.is_exhausted:
                 RollSystem.skill_trees_choices.add(chosen_tree)
 
@@ -105,15 +99,19 @@ def show_choices(skills_choices, events, level_up_state, player, last_frame):
         pygame.draw.rect(display, (rect_bg_color), (val.x, val.y, val.w, val.h), border_radius=8)
         pygame.draw.rect(display, (3, 71, 55), (val.x, val.y, val.w, val.h), 3, border_radius=8)
 
-        # Creation of texts' surfaces
-        skill_name_text = render_outlined(RollSystem.choices[i-1][0], (255,255,255), (0,0,0), 2, RollSystem.skill_name_font)
-        skill_desc_text = render_outlined(RollSystem.choices[i-1][1], (255,255,255), (0,0,0), 2, RollSystem.skill_desc_font)
-        header_text = render_outlined("Choose an Upgrade", (17, 255, 00), (0,0,0), 2, RollSystem.header_font)
+        # First is skill name and second is skill description, both are strings
+        keys = RollSystem.choices[i-1][0], RollSystem.choices[i-1][1]
+
+        # The text surfaces with outlines
+        # The value is list, first element is surface of skill name
+        skill_name_text_surf = RollSystem.cached_skill_name_and_desc_surfs[keys][0] 
+        # The value is list, second element is surface of skill description
+        skill_desc_text_surf = RollSystem.cached_skill_name_and_desc_surfs[keys][1]
         
         # Blitting of texts 
-        display.blit(skill_name_text, (val.x+10, val.y+15))
-        display.blit(skill_desc_text, (val.x+10, val.y+55))
-        display.blit(header_text, ((DISPLAY_WIDTH//2)-(header_text.get_rect().w//2), 20))
+        display.blit(skill_name_text_surf, (val.x+10, val.y+15))
+        display.blit(skill_desc_text_surf, (val.x+10, val.y+55))
+        display.blit(RollSystem.header_text, ((DISPLAY_WIDTH//2)-(RollSystem.header_text.get_rect().w//2), 20))
 
         for evt in events:
             if evt.type == pygame.MOUSEBUTTONDOWN and evt.button == 1:
