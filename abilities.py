@@ -62,11 +62,11 @@ sw5 = Skill("Swift fire V", "Fire rate +30% (maxed out)", "percentage", False, q
 # Swift fire skill tree
 swift_fire_skill_tree = SkillTree("Swift fire tree", 5, [sw1,sw2,sw3,sw4,sw5])
 
-fb1 = Skill("Fast Bullet I", "Bullet speed +20%", "percentage", False, quantity=.20, attribute="bullet_speed")
-fb2 = Skill("Fast Bullet II", "Bullet speed +10%", "percentage", False, quantity=.10, prereqs=[fb1], attribute="bullet_speed")
-fb3 = Skill("Fast Bullet III", "Bullet speed +10%", "percentage", False, quantity=.10, prereqs=[fb1, fb2], attribute="bullet_speed")
-fb4 = Skill("Fast Bullet IV", "Bullet speed +10%", "percentage", False, quantity=.10, prereqs=[fb1, fb2, fb3], attribute="bullet_speed")
-fb5 = Skill("Fast Bullet V", "Bullet speed +10% (maxed out)", "percentage", False, quantity=.10, prereqs=[fb1, fb2, fb3, fb4], attribute="bullet_speed")
+fb1 = Skill("Fast projectile I", "Projectile speed +20%", "percentage", False, quantity=.20, attribute="bullet_speed")
+fb2 = Skill("Fast projectile II", "Projectile speed +10%", "percentage", False, quantity=.10, prereqs=[fb1], attribute="bullet_speed")
+fb3 = Skill("Fast projectile III", "Projectile speed +10%", "percentage", False, quantity=.10, prereqs=[fb1, fb2], attribute="bullet_speed")
+fb4 = Skill("Fast projectile IV", "Projectile speed +10%", "percentage", False, quantity=.10, prereqs=[fb1, fb2, fb3], attribute="bullet_speed")
+fb5 = Skill("Fast projectile V", "Projectile speed +10% (maxed out)", "percentage", False, quantity=.10, prereqs=[fb1, fb2, fb3, fb4], attribute="bullet_speed")
 
 # Fast bullet skill tree
 fast_bullet_skill_tree = SkillTree("Fast bullet tree", 5, [fb1,fb2,fb3,fb4,fb5])
@@ -96,23 +96,23 @@ movement_speed_skill_tree = SkillTree("Movement speed tree", 4, [ms1,ms2,ms3,ms4
 ############################
 # Count: 3
 ############################
-bd1 = Skill("Bullet damage I", "Bullet damage +5", "addition", False, quantity=5, attribute="damage")
-bd2 = Skill("Bullet damage II", "Bullet damage +5", "addition", False, quantity=5, prereqs=[bd1], attribute="damage")
-bd3 = Skill("Bullet damage III", "Bullet damage +10 (maxed out)", "addition", False, quantity=10, prereqs=[bd1, bd2], attribute="damage")
+bd1 = Skill("Projectile damage I", "Projectile damage +5", "addition", False, quantity=5, attribute="damage")
+bd2 = Skill("Projectile damage II", "Projectile damage +5", "addition", False, quantity=5, prereqs=[bd1], attribute="damage")
+bd3 = Skill("Projectile damage III", "Projectile damage +10 (maxed out)", "addition", False, quantity=10, prereqs=[bd1, bd2], attribute="damage")
 
 # Bullet damage skill tree
 bullet_damage_skill_tree = SkillTree("Bullet damage tree", 3, [bd1, bd2, bd3])
 
-pb1 = Skill("Piercing bullet I", "Bullet pierce +1", "addition", False, quantity=1, attribute="bullet_pierce_number")
-pb2 = Skill("Piercing bullet II", "Bullet pierce +1", "addition", False, quantity=1, prereqs=[pb1], attribute="bullet_pierce_number")
-pb3 = Skill("Piercing bullet III", "Bullet pierce +1", "addition", False, quantity=1, prereqs=[pb1, pb2], attribute="bullet_pierce_number")
+pb1 = Skill("Piercing projectile I", "Projectile pierce +1", "addition", False, quantity=1, attribute="bullet_pierce_number")
+pb2 = Skill("Piercing projectile II", "Projectile pierce +1", "addition", False, quantity=1, prereqs=[pb1], attribute="bullet_pierce_number")
+pb3 = Skill("Piercing projectile III", "Projectile pierce +1", "addition", False, quantity=1, prereqs=[pb1, pb2], attribute="bullet_pierce_number")
 
 # Bullet pierce skill tree
 bullet_pierce_skill_tree = SkillTree("Bullet pierce tree", 3, [pb1, pb2, pb3])
 
-bb1 = Skill("Bullet bounce I", "Bullet bounce +1", "addition", False, quantity=1, attribute="bullet_bounce_number")
-bb2 = Skill("Bullet bounce II", "Bullet bounce +1", "addition", False, quantity=1, prereqs=[bb1], attribute="bullet_bounce_number")
-bb3 = Skill("Bullet bounce III", "Bullet bounce +1", "addition", False, quantity=1, prereqs=[bb1, bb2], attribute="bullet_bounce_number")
+bb1 = Skill("Projectile bounce I", "Projectile bounce +1", "addition", False, quantity=1, attribute="bullet_bounce_number")
+bb2 = Skill("Projectile bounce II", "Projectile bounce +1", "addition", False, quantity=1, prereqs=[bb1], attribute="bullet_bounce_number")
+bb3 = Skill("Projectile bounce III", "Projectile bounce +1", "addition", False, quantity=1, prereqs=[bb1, bb2], attribute="bullet_bounce_number")
 
 # Bullet bounce skill tree
 bullet_bounce_skill_tree = SkillTree("Bullet bounce tree", 3, [bb1, bb2, bb3])
@@ -146,12 +146,12 @@ negate = Skill("Projectile negation I", "Spawn object that orbits around player 
 # Projectile negation skill tree
 projectile_negation_skill_tree = SkillTree("Projectile negation tree", 1, [negate])
 
-bsize = Skill("Bullet size increase I", "Increase bullet size 2x", "addition", False, attribute="BULLET_SIZE")
+bsize = Skill("Projectile size increase I", "Increase projectile size 2x", "addition", False, attribute="BULLET_SIZE")
 
 # Bullet size increase skill tree
 bullet_size_skill_tree = SkillTree("Bullet size tree", 1, [bsize])
 
-bexp = Skill("Bullet explosion I", "Player's bullets explodes when enemies are hit", "state", False, attribute="bullets_explode_state")
+bexp = Skill("Projectile explosion I", "Player's projectiles explodes when enemies are hit", "state", False, attribute="bullets_explode_state")
 
 # Bullet explosion skill tree
 bullet_explosion_skill_tree = SkillTree("Bullet explosion tree", 1, [bexp])
