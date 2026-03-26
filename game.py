@@ -171,6 +171,10 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.player.is_shooting = True
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.player.is_shooting = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_screen = display.copy()
@@ -387,6 +391,7 @@ class Game:
                 rs.roll(events, self.level_up_state, self.player, last_frame)
 
                 clock.tick()
+                self.player.is_shooting = False
             elif is_paused:
                 # Blitting of the last screen and the dark overlay when paused
                 display.blit(pause_screen, (0,0))

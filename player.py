@@ -18,6 +18,8 @@ class Player(pygame.sprite.Sprite):
         self.on_ground = False
         self.x_direction = 1
 
+        self.is_shooting = False
+
         self.movement_speed = 350 # 350 start, 500 max
         self.bullet_number = 1
         self.bullet_pierce_number = 1
@@ -178,9 +180,9 @@ class Player(pygame.sprite.Sprite):
     def shoot_bullet(self, scroll, player_bullet_group, dt):
         self.shooting_cd = max(.3, self.fire_rate / 1000)
 
-        mouse_hold = pygame.mouse.get_pressed()
         self.current_time += dt
-        if mouse_hold[0]:
+        # if mouse_hold[0]:
+        if self.is_shooting:
 
             if self.current_time - self.shoot_previous_time > self.shooting_cd:
 
