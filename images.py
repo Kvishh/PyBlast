@@ -16,6 +16,10 @@ def load_animation(file, row, col, width, height, scale_width, scale_height):
     
     return sprites_list
 
+class CrosshairImage:
+    crosshair_image = pygame.image.load("assets/images/crosshair.png").convert_alpha()
+    crosshair_image_scaled = pygame.transform.scale(crosshair_image, (32, 32))
+
 class GradientImage:
     gradient_image = pygame.image.load("assets/images/radial_gradient.png").convert()
     gradient_player_image_scaled = pygame.transform.scale(pygame.image.load("assets/images/radial_gradient.png").convert(), (270, 270))
@@ -40,6 +44,16 @@ class LongRocksImages:
     long_rock_4_image = pygame.transform.rotate(pygame.transform.flip(pygame.image.load("assets/images/long_rock2.png").convert_alpha(), True, False), 10)
 
     long_rocks_list = [long_rock_1_image,long_rock_2_image,long_rock_1_image,long_rock_4_image]
+
+class HUDImage:
+    heart_image = pygame.image.load("assets/images/heart.png").convert_alpha()
+    heart_image_scaled = pygame.transform.scale(heart_image, (HEART_IMAGE_WIDTH, HEART_IMAGE_HEIGHT))
+
+    empty_heart_image = pygame.image.load("assets/images/empty_heart.png").convert_alpha()
+    empty_heart_image_scaled = pygame.transform.scale(empty_heart_image, (EMPTY_HEART_IMAGE_WIDTH, EMPTY_HEART_IMAGE_HEIGHT))
+
+    shield_image = pygame.image.load("assets/images/shield.png").convert_alpha()
+    shield_image_scaled = pygame.transform.scale(shield_image, (SHIELD_IMAGE_WIDTH, SHIELD_IMAGE_HEIGHT))
 
 class PlayerImages:
     player_image = pygame.image.load("assets/images/main_sorcerer.png").convert_alpha()

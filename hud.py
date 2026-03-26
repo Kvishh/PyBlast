@@ -1,13 +1,14 @@
 import pygame
 from configs import *
+from images import HUDImage
 from font_system import FontSystem as fs
 
 class HUD:
     def __init__(self, player):
         self.player = player
-        self.heart = pygame.transform.scale(pygame.image.load("assets/images/heart.png").convert_alpha(), (HEART_IMAGE_WIDTH, HEART_IMAGE_HEIGHT))
-        self.empty_heart = pygame.transform.scale(pygame.image.load("assets/images/empty_heart.png").convert_alpha(), (EMPTY_HEART_IMAGE_WIDTH, EMPTY_HEART_IMAGE_HEIGHT))
-        self.shield = pygame.transform.scale(pygame.image.load("assets/images/shield.png").convert_alpha(), (SHIELD_IMAGE_WIDTH, SHIELD_IMAGE_HEIGHT))
+        self.heart = HUDImage.heart_image_scaled
+        self.empty_heart = HUDImage.empty_heart_image_scaled
+        self.shield = HUDImage.shield_image_scaled
 
         self.level = 1
         self.level_bar = pygame.Rect(10, 10, 980, 20) # Rect: 10, 10, 980, 20-left,top,width,height

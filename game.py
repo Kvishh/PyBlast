@@ -7,6 +7,7 @@ import effects_sytem as fx
 import collision_system as cs
 import roll_system as rs
 from configs import *
+from images import CrosshairImage
 from game_map import draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
@@ -25,7 +26,7 @@ from abilities import apply_ability, s1, hp1, proj1, proj2
 class Game:
     def __init__(self):
         # Setting custom cursor-----------------------------------------------------------------------------------
-        crosshair_image = pygame.transform.scale(pygame.image.load("assets/images/crosshair.png").convert_alpha(), (32, 32))
+        crosshair_image = CrosshairImage.crosshair_image_scaled
         cursor = pygame.cursors.Cursor((16, 16,), crosshair_image)
         pygame.mouse.set_cursor(cursor)
 
