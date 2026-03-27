@@ -101,7 +101,12 @@ def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, pla
                 
             if enemy.hp <= 0:
                 enemies_killed.add(enemy)
-                xp_increment[0] += 80 - (hud.level*10)
+                if hud.level <= 15:
+                    xp_increment[0] += 120 - (hud.level*5)
+                elif hud.level > 15 and hud.level <= 19:
+                    xp_increment[0] += 105 - (hud.level*5)
+                elif hud.level >= 20:
+                    xp_increment[0] += 10
 
         fx.create_impacts(pos)
         fx.create_floating_particles(pos)
@@ -135,8 +140,14 @@ def check_enemies_within_explosion_radius(player, hud, xp_increment, enemies_kil
         enemy.hp -= player.damage
             
         if enemy.hp <= 0:
-            enemies_killed.add(enemy)
-            xp_increment[0] += 80 - (hud.level*10)
+                enemies_killed.add(enemy)
+                if hud.level <= 15:
+                    xp_increment[0] += 120 - (hud.level*5)
+                elif hud.level > 15 and hud.level <= 19:
+                    xp_increment[0] += 105 - (hud.level*5)
+                elif hud.level >= 20:
+                    xp_increment[0] += 10
+
 
 def projectiles_hit_negator(player, all_enemy_projectiles_that_hit_player):
     hits = pygame.sprite.spritecollide(player.negator, all_enemy_projectiles_that_hit_player, True, collide_rect_then_mask)
