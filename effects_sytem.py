@@ -115,7 +115,7 @@ def create_floating_particles(pos):
     for _ in range(15): # location, velocity, radius, color
         FxList.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
                                 [random.randrange(-4, 4), -5], 
-                                random.randrange(24, 30),
+                                random.randrange(16, 20),
                                 255])
 
 def draw_floating_particles(scroll):
@@ -187,12 +187,12 @@ def draw_falling_particles(scroll):
 
 
 def create_debris(pos):
-    for _ in range(20):  # location, velocity, radius, color
+    for _ in range(15):  # location, velocity, radius, color
         r = random.randrange(60, 80)
         g = r
         FxList.debris.append([[pos[0], pos[1]], # x axis random.randrange(pos[0]-20, pos[0]+20) ; y axis random.randrange(pos[1]-20, pos[1]+20)
                     [random.randrange(-3, 3), random.randrange(-3, 3)], 
-                    random.randrange(10, 16),
+                    random.randrange(8, 12),
                     (r, g, 125)])
 
 def draw_debris(scroll):
