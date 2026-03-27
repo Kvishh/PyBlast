@@ -125,15 +125,6 @@ s3 = Skill("Shield III", "Max shield +1 (Shield regenerates every 2 minutes)", "
 shield_skill_tree = SkillTree("Shield tree", 3, [s1, s2, s3])
 
 ############################
-# Count: 2
-############################
-proj1 = Skill("Projectile increase I", "Projectile +1", "addition", False, quantity=1, attribute="bullet_number")
-proj2 = Skill("Projectile increase II", "Projectile +1", "addition", False, quantity=1, prereqs=[proj1], attribute="bullet_number")
-
-# Projectile skill tree
-projectile_skill_tree = SkillTree("Projectile tree", 2, [proj1, proj2])
-
-############################
 # Count: 1
 ############################
 sdtime = Skill("Slow down time I", "Slow down time when enemies' projectiles are near player", "state", False, attribute="slow_time_active")
