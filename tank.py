@@ -37,7 +37,7 @@ class Tank(pygame.sprite.Sprite):
         self.animations_frames_flashed_white_list = TankImages.tank_run_animations_flashed_white_frames_list
         self.animations_frames_flashed_white_list_right = TankImages.tank_run_animations_flashed_white_frames_flipped_list
 
-    def update(self, dt, player, scroll):
+    def update(self, dt, player, scroll, set_of_alive_enemies):
         self.image = self.orientation[self.x_direction]
         self.update_image()
         # Border limit x
@@ -51,7 +51,9 @@ class Tank(pygame.sprite.Sprite):
             self.pos.y = 0
         elif self.pos.y > WINDOW_HEIGHT - HEAVY_ENEMY_HEIGHT:
             self.y_velocity = 0
-            self.pos.y = FLOOR - HEAVY_ENEMY_HEIGHT
+            # If enemy fell down, kill (remove from pygame.Group objects) and remove it in set_of_alive_enemies
+            self.kill()
+            set_of_alive_enemies.remove(self)
 
         self.create_dust_particles()
         self.draw_dust_particles(scroll)
@@ -165,7 +167,9 @@ class Tank(pygame.sprite.Sprite):
     def _detect_tiles_collision_y(self):
         collided_tiles = self._get_tile_collision()
         for tile in collided_tiles:
-            if tile.rect.colliderect(self.rect):
+            if tile.rect.y == 672 and tile.image.get_alpha() == 0:
+                pass
+            elif tile.rect.colliderect(self.rect):
                 if self.y_velocity > 0:
                     self.pos.y = tile.rect.top - HEAVY_ENEMY_HEIGHT
                     self.rect.y = int(self.pos.y)

@@ -92,8 +92,12 @@ class Player(pygame.sprite.Sprite):
         self.blink_timer = 0
         self.blink_state = False
 
+        self.current_timer = 0
 
-    def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group):
+
+    def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, wand):
+        self.current_timer += dt
+
         if self.slow_time_active:
             self.slow_rect = pygame.Rect(self.rect.x - (180//2) + (self.rect.w//2), (self.rect.y - (180//2) + (self.rect.h//2)), 180, 180)
             # pygame.draw.rect(display, (255,0,0), (self.slow_rect.x-scroll[0], self.slow_rect.y-scroll[1], self.slow_rect.w, self.slow_rect.h), 2)
@@ -152,7 +156,15 @@ class Player(pygame.sprite.Sprite):
             self.pos.y = 0
         elif self.pos.y > WINDOW_HEIGHT - PLAYER_HEIGHT:
             self.y_velocity = 0
-            self.pos.y = FLOOR - PLAYER_HEIGHT
+            self.pos.x = (WINDOW_WIDTH // 2) - PLAYER_WIDTH
+            self.pos.y = 365
+
+            if not self.is_invincible:
+                self.current_hp -= 1
+                self.invincible_timer = self.current_timer
+                self.is_invincible = True
+                wand.invincible_timer = self.current_timer
+                wand.is_invincible = True
         
         # Responsible for x movement
         if int(self.x_velocity) == 0:
@@ -353,7 +365,9 @@ class Player(pygame.sprite.Sprite):
     def _detect_tiles_collision_y(self):
         collided_tiles = self._get_tile_collision()
         for tile in collided_tiles:
-            if tile.rect.colliderect(self.rect):
+            if tile.rect.y == 672 and tile.image.get_alpha() == 0:
+                pass
+            elif tile.rect.colliderect(self.rect):
                 if self.y_velocity > 0:
                     self.pos.y = tile.rect.top - PLAYER_HEIGHT
                     self.rect.y = int(self.pos.y)

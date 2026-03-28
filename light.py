@@ -40,7 +40,7 @@ class Light(pygame.sprite.Sprite):
 
         self.dust_particles = []
 
-    def update(self, dt, player, scroll):
+    def update(self, dt, player, scroll, set_of_alive_enemies):
         self.switch_orientation(player)
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -55,7 +55,9 @@ class Light(pygame.sprite.Sprite):
             self.pos.y = 0
         elif self.pos.y > WINDOW_HEIGHT - LIGHT_ENEMY_HEIGHT:
             self.y_velocity = 0
-            self.pos.y = FLOOR - LIGHT_ENEMY_HEIGHT
+            # If enemy fell down, kill (remove from pygame.Group objects) and remove it in set_of_alive_enemies
+            self.kill()
+            set_of_alive_enemies.remove(self)
 
 
         self.sensor.center = (self.rect.x+20, self.rect.centery - LIGHT_ENEMY_HEIGHT)
@@ -268,7 +270,9 @@ class Light(pygame.sprite.Sprite):
     def _detect_tiles_collision_y(self):
         collided_tiles = self._get_tile_collision()
         for tile in collided_tiles:
-            if tile.rect.colliderect(self.rect):
+            if tile.rect.y == 672 and tile.image.get_alpha() == 0:
+                pass
+            elif tile.rect.colliderect(self.rect):
                 if self.y_velocity > 0:
                     self.pos.y = tile.rect.top - LIGHT_ENEMY_HEIGHT
                     self.rect.y = int(self.pos.y)
