@@ -35,6 +35,8 @@ class TileImage:
     tile_image = pygame.image.load("assets/images/tile1.png").convert_alpha()
     tile_image_scaled = pygame.transform.scale(tile_image, (TILE_SIZE, TILE_SIZE))
 
+    tile_image_blink_scaled = pygame.transform.scale(tile_image, (TILE_SIZE, TILE_SIZE))
+
 class BackgroundImages:
     bg_images_list = [pygame.image.load(f"assets/images/bg_{i}.png").convert_alpha() for i in range(1, 5)]
 

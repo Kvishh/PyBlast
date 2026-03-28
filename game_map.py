@@ -6,8 +6,16 @@ from images import TileImage, BackgroundImages, LongRocksImages
 class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = TileImage.tile_image_scaled
+        self.image = TileImage.tile_image_scaled if y != 672 else TileImage.tile_image_blink_scaled
         self.rect = self.image.get_rect(topleft=(x, y))
+    
+class TileTimer:
+    tile_time = 0
+    interval_tile_timer = 0
+
+    blink_timer = 0
+
+    blink_state = False
 
 tiles: list[Tile] = []
 tiles_group = pygame.sprite.Group()
@@ -41,7 +49,7 @@ tile_map = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], # x is 21, x*32 = 672
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -56,7 +64,39 @@ def create_tiles():
                 tiles_group.add(tile)
                 tiles_blocks[f"{y};{x}"] = tile
 
-def draw_tiles(scroll):
+            
+
+def draw_tiles(scroll, countdown_time, dt):
+    TileTimer.interval_tile_timer += dt
+
+    if countdown_time <= 180 and TileTimer.interval_tile_timer >= 30:
+        TileTimer.tile_time += dt
+
+        # If timer has reached 3 seconds, then...
+        if TileTimer.tile_time > 3:
+            # If 5 seconds has passed since then, revert back to actual solid ground
+            if TileTimer.tile_time > 8:
+                TileTimer.tile_time = 0
+                TileTimer.interval_tile_timer = 0
+
+            # If 5 seconds has not passed yet, vanish-become pitfall
+            else:
+                tiles_blocks["0;21"].image.set_alpha(0)
+
+        # If timer is still not yet 3 seconds, then blink per 1 millisecond
+        else:
+            TileTimer.blink_timer += dt
+            if TileTimer.blink_timer >= .1:
+                TileTimer.blink_timer = 0
+                TileTimer.blink_state = not TileTimer.blink_state
+            
+            if TileTimer.blink_state:
+                tiles_blocks["0;21"].image.set_alpha(1)
+            else:
+                tiles_blocks["0;21"].image.set_alpha(255)
+    else:
+        tiles_blocks["0;21"].image.set_alpha(255)
+
     for tile in tiles:
         display.blit(tile.image, (tile.rect.x-scroll[0], tile.rect.y-scroll[1]))
 
