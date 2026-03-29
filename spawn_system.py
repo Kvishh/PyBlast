@@ -64,8 +64,6 @@ def spawn_enemies(current_level, spawn_rect, spawn_session_num, set_of_alive_ene
     else:
         num_of_enemies_that_will_spawn = (current_level * multiplier) // (len(set_of_alive_enemies) if len(set_of_alive_enemies) != 0 else 1)
 
-    print(num_of_enemies_that_will_spawn)
-
     for i in range(num_of_enemies_that_will_spawn):
         chance = random.random()
 
