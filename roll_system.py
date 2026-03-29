@@ -43,7 +43,21 @@ class RollSystem:
     skill_trees_choices = set([])
     skills_choices = []
 
+    # Used to stop showing the roll and continue the game loop
     stop = False
+
+    roll_layer = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
+    roll_layer_pos_y = -DISPLAY_HEIGHT
+    bounce_up = False
+
+    # To check whether upgrades are now clickable
+    is_clickable = False
+    
+    # Vanilla overlay before showing the upgrades
+    flash_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
+    flash_overlay_alpha = 2
+    flash_overlay.fill((255, 249, 201, flash_overlay_alpha))
+
 
 def roll(events, level_up_state, player, last_frame):
     # This is to ensure that skills choices and skill trees choices roll only once
@@ -82,62 +96,104 @@ def show_choices(skills_choices, events, level_up_state, player, last_frame):
     # with skill name and description (not actual object)
     if not RollSystem.choices:
         for skill in skills_choices: RollSystem.choices.append((skill.name, skill.description))
+    
+    # The alpha is used as timer and also used as the alpha for flash overlay
+    if RollSystem.flash_overlay_alpha < 192:
+        RollSystem.flash_overlay_alpha = min(192, RollSystem.flash_overlay_alpha+1)
+        RollSystem.flash_overlay.fill((255, 249, 201, RollSystem.flash_overlay_alpha))
 
-    mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
-    for i, val in enumerate(RollSystem.rect_containers, start=1):
+        # This only blits the flash overlay until alpha hits 92, if it is more than
+        # 92 then nothing happens, no flash overlay is blitted. Until the alpha 
+        # has not reached 192 then the roll will not be shown yet.
+        if RollSystem.flash_overlay_alpha < 92: display.blit(RollSystem.flash_overlay, (0,0))
+    else:
+        mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
+        for i, val in enumerate(RollSystem.rect_containers, start=1):
 
-        # if cursor is hovering over the rect containers, change color and moves upward a bit
-        if val.collidepoint(mx, my):
-            rect_bg_color = (63, 85, 117)
-            val.y = max(RollSystem.rect_containers_max_ypos_dict[i][1]-10, val.y - 3)
-        else:
-            val.y = min(RollSystem.rect_containers_max_ypos_dict[i][1], val.y + 3)
-            rect_bg_color = (23, 30, 41)
+            # if cursor is hovering over the rect containers, change color and moves upward a bit
+            if val.collidepoint(mx, my):
+                rect_bg_color = (63, 85, 117)
+                val.y = max(RollSystem.rect_containers_max_ypos_dict[i][1]-10, val.y - 3)
+            else:
+                val.y = min(RollSystem.rect_containers_max_ypos_dict[i][1], val.y + 3)
+                rect_bg_color = (23, 30, 41)
 
-        # Drawing of the box or rect container and their border
-        pygame.draw.rect(display, (rect_bg_color), (val.x, val.y, val.w, val.h), border_radius=8)
-        pygame.draw.rect(display, (3, 71, 55), (val.x, val.y, val.w, val.h), 3, border_radius=8)
+            # Drawing of the box or rect container and their border
+            # pygame.draw.rect(display, (rect_bg_color), (val.x, val.y, val.w, val.h), border_radius=8)
+            pygame.draw.rect(RollSystem.roll_layer, (rect_bg_color), (val.x, val.y, val.w, val.h), border_radius=8)
+            # pygame.draw.rect(display, (3, 71, 55), (val.x, val.y, val.w, val.h), 3, border_radius=8)
+            pygame.draw.rect(RollSystem.roll_layer, (3, 71, 55), (val.x, val.y, val.w, val.h), 3, border_radius=8)
 
-        # First is skill name and second is skill description, both are strings
-        keys = RollSystem.choices[i-1][0], RollSystem.choices[i-1][1]
+            # First is skill name and second is skill description, both are strings
+            keys = RollSystem.choices[i-1][0], RollSystem.choices[i-1][1]
 
-        # The text surfaces with outlines
-        # The value is list, first element is surface of skill name
-        skill_name_text_surf = RollSystem.cached_skill_name_and_desc_surfs[keys][0] 
-        # The value is list, second element is surface of skill description
-        skill_desc_text_surf = RollSystem.cached_skill_name_and_desc_surfs[keys][1]
-        
-        # Blitting of texts 
-        display.blit(skill_name_text_surf, (val.x+10, val.y+15))
-        display.blit(skill_desc_text_surf, (val.x+10, val.y+55))
-        display.blit(RollSystem.header_text, ((DISPLAY_WIDTH//2)-(RollSystem.header_text.get_rect().w//2), 20))
+            # The text surfaces with outlines
+            # The value is list, first element is surface of skill name
+            skill_name_text_surf = RollSystem.cached_skill_name_and_desc_surfs[keys][0] 
+            # The value is list, second element is surface of skill description
+            skill_desc_text_surf = RollSystem.cached_skill_name_and_desc_surfs[keys][1]
+            
+            # Blitting of texts 
+            # display.blit(skill_name_text_surf, (val.x+10, val.y+15))
+            RollSystem.roll_layer.blit(skill_name_text_surf, (val.x+10, val.y+15))
+            # display.blit(skill_desc_text_surf, (val.x+10, val.y+55))
+            RollSystem.roll_layer.blit(skill_desc_text_surf, (val.x+10, val.y+55))
+            # display.blit(RollSystem.header_text, ((DISPLAY_WIDTH//2)-(RollSystem.header_text.get_rect().w//2), 20))
+            RollSystem.roll_layer.blit(RollSystem.header_text, ((DISPLAY_WIDTH//2)-(RollSystem.header_text.get_rect().w//2), 20))
 
-        for evt in events:
-            if evt.type == pygame.MOUSEBUTTONDOWN and evt.button == 1:
-                if val.collidepoint(mx, my):
-                    skill = skills_choices[i-1]
-                    skill.acquired = True
+            # Another layer which is where everything in the roll is blitted
+            display.blit(RollSystem.roll_layer, (0,RollSystem.roll_layer_pos_y))
+            # Refresh in order to clean up the last frame
+            RollSystem.roll_layer.fill((0,0,0,0))
 
-                    # This is to make the rect rows stop looping when player has chosen 
-                    # an upgrade
-                    RollSystem.stop = True
+            # Move down the another layer/surface to make the effect of dropping down
+            if not RollSystem.bounce_up:
+                RollSystem.roll_layer_pos_y = min(100, RollSystem.roll_layer_pos_y+4)
 
-                    # Checking if the skill_tree is exhausted, meaning every skill in
-                    # that tree is acquired, by iterating every skill in its abilities_list
-                    for skill_tree in RollSystem.skill_trees_choices:
-                        if all(skill.acquired for skill in skill_tree.abilities_list):
-                            skill_tree.is_exhausted = True
-                    
-                    # Reset
-                    RollSystem.skills_choices.clear()
-                    RollSystem.skill_trees_choices.clear()
-                    RollSystem.choices.clear()
-                    last_frame.clear()
+                # If it's reached past the bottom, then it should bounce up
+                if RollSystem.roll_layer_pos_y >= 100: RollSystem.bounce_up = True
+            # If bounce_up is True, then it should slowly go up and stop exactly a y=0
+            else:
+                RollSystem.roll_layer_pos_y = max(0, RollSystem.roll_layer_pos_y-2)
 
-                    # Applying the ability
-                    apply_ability(skill, player)
+                # If RollSystem.roll_layer_pos_y has reached 0 then and only then handle the clicking of rects.
+                if RollSystem.roll_layer_pos_y <= 0: RollSystem.is_clickable = True
 
-        if RollSystem.stop:
-            # Continue game loop
-            level_up_state[0] = False
-            break
+            # This is to check if the preparation is done, if the RollSystem.roll_layer y pos has reached
+            # 0 then handle clicks.
+            # This ensures that the player does not accidentally click the upgrade immediately after leveling
+            # up.
+            if RollSystem.is_clickable:
+                for evt in events:
+                    if evt.type == pygame.MOUSEBUTTONDOWN and evt.button == 1:
+                        if val.collidepoint(mx, my):
+                            skill = skills_choices[i-1]
+                            skill.acquired = True
+
+                            # This is to make the rect rows stop looping when player has chosen 
+                            # an upgrade
+                            RollSystem.stop = True
+
+                            # Checking if the skill_tree is exhausted, meaning every skill in
+                            # that tree is acquired, by iterating every skill in its abilities_list
+                            for skill_tree in RollSystem.skill_trees_choices:
+                                if all(skill.acquired for skill in skill_tree.abilities_list):
+                                    skill_tree.is_exhausted = True
+                            
+                            # Reset
+                            RollSystem.skills_choices.clear()
+                            RollSystem.skill_trees_choices.clear()
+                            RollSystem.choices.clear()
+                            last_frame.clear()
+                            RollSystem.flash_overlay_alpha = 2
+                            RollSystem.bounce_up = False
+                            RollSystem.roll_layer_pos_y = -DISPLAY_HEIGHT
+                            RollSystem.is_clickable = False
+
+                            # Applying the ability
+                            apply_ability(skill, player)
+
+            if RollSystem.stop:
+                # Continue game loop
+                level_up_state[0] = False
+                break
