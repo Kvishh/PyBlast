@@ -179,6 +179,8 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                             wand.invincible_timer = Timer.projectiles_hit_wand_invincible_timer
                             wand.is_invincible = True
 
+                            player.hurt_overlay_alpha = 92
+
                             shake_timer[0] = 20
                             pos = list(projectile.rect.center)
                             fx.create_impacts(pos)
@@ -204,6 +206,8 @@ def all_enemies_touch_player(player, wand, all_enemies_group, dt):
 
             wand.invincible_timer = Timer.enemies_touch_wand_invincible_timer
             wand.is_invincible = True
+
+            player.hurt_overlay_alpha = 92
 
 def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):
     # collided_tiles_loc = []

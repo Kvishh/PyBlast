@@ -344,6 +344,12 @@ class Game:
                 if self.shake_timer[0] > 0:
                     self.shake_timer[0] -= 1
                 
+                if self.player.hurt_overlay_alpha:
+                    self.player.hurt_overlay.fill((255,0,0,self.player.hurt_overlay_alpha))
+                    display.blit(self.player.hurt_overlay, (0,0))
+
+                    self.player.hurt_overlay_alpha = max(0, self.player.hurt_overlay_alpha-1)
+                
                 # HUD update
                 # self.hud.update(countdown_time_text, self.xp_increment, self.level_up_state, last_frame)
                 # The split is done to separate the minute (00) and seconds (59) since they are used as keys for cache

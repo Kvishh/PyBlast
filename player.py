@@ -94,6 +94,9 @@ class Player(pygame.sprite.Sprite):
 
         self.current_timer = 0
 
+        self.hurt_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
+        self.hurt_overlay_alpha = 0
+
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, wand):
         self.current_timer += dt
@@ -165,6 +168,7 @@ class Player(pygame.sprite.Sprite):
                 self.is_invincible = True
                 wand.invincible_timer = self.current_timer
                 wand.is_invincible = True
+                self.hurt_overlay_alpha = 92
         
         # Responsible for x movement
         if int(self.x_velocity) == 0:
