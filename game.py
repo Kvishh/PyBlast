@@ -7,6 +7,7 @@ import effects_sytem as fx
 import collision_system as cs
 import roll_system as rs
 import spawn_system as ss
+import pause as p
 from spawn_system import Enemies as ems
 from configs import *
 from images import CrosshairImage
@@ -131,7 +132,7 @@ class Game:
 
 
         running = True
-        is_paused = False
+        is_paused = [False]
         while running:
             events = pygame.event.get()
             for event in events:
@@ -144,12 +145,12 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_screen = display.copy()
-                        is_paused = not is_paused
+                        is_paused[0] = not is_paused[0]
                     if event.key == pygame.K_u:
                         self.hud.current_xp_width += 490
                         self.hud.update_level_bar(self.xp_increment, self.level_up_state, last_frame)
             
-            if not is_paused and not self.level_up_state[0]:
+            if not is_paused[0] and not self.level_up_state[0]:
                 dt = clock.tick(FPS) / 1000
                 display.fill((42, 59, 95))
                 self.dark_overlay.fill((190,190,190,100))
@@ -369,11 +370,15 @@ class Game:
 
                 clock.tick()
                 self.player.is_shooting = False
-            elif is_paused:
+            elif is_paused[0]:
                 # Blitting of the last screen and the dark overlay when paused
                 display.blit(pause_screen, (0,0))
                 display.blit((pause_overlay), (0,0))
+
+                p.show_pause_options(events, is_paused)
+
                 clock.tick()
+                self.player.is_shooting = False
 
             # last methods to be called
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
