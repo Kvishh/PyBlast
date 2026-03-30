@@ -9,6 +9,7 @@ class HUD:
         self.heart = HUDImage.heart_image_scaled
         self.empty_heart = HUDImage.empty_heart_image_scaled
         self.shield = HUDImage.shield_image_scaled
+        self.dash = HUDImage.dash_image_scaled
 
         self.level = 1
         self.level_bar = pygame.Rect(10, 10, 980, 20) # Rect: 10, 10, 980, 20-left,top,width,height
@@ -50,9 +51,10 @@ class HUD:
         self.lvl_text = fs.render_outlined("Lvl ", (255,255,255), (0,0,0), 2, fs.font_level)
 
     
-    def update(self, timer, xp_increment, level_up_state, last_frame):
+    def update(self, player, timer, xp_increment, level_up_state, last_frame):
         self._blit_heart()
         self._blit_shield()
+        self._update_and_draw_dash(player)
         self.blit_FPS()
         self.blit_timer(timer)
         self._blit_level_bar()
@@ -100,6 +102,9 @@ class HUD:
 
         # White outline
         pygame.draw.rect(display, (255,255,255), self.level_bar, 2)
+
+    def _update_and_draw_dash(self, player):
+        if player.dash_num == 0: display.blit(self.dash, (15, 140))
 
     def _blit_heart(self):
         empty_num = 0

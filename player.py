@@ -213,7 +213,6 @@ class Player(pygame.sprite.Sprite):
             self.pos.y += self.y_velocity * dt * .8
             self.rect.y = int(self.pos.y)
             self.y_velocity += GRAVITY * dt * .8
-        print(self.y_velocity)
 
         self._detect_tiles_collision_y()
 

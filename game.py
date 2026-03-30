@@ -353,7 +353,7 @@ class Game:
                 # HUD update
                 # self.hud.update(countdown_time_text, self.xp_increment, self.level_up_state, last_frame)
                 # The split is done to separate the minute (00) and seconds (59) since they are used as keys for cache
-                self.hud.update(countdown_time_text.split(":"), self.xp_increment, self.level_up_state, last_frame)
+                self.hud.update(self.player, countdown_time_text.split(":"), self.xp_increment, self.level_up_state, last_frame)
                 
                 # Clearing of set
                 self.enemies_killed.clear()

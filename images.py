@@ -57,6 +57,9 @@ class HUDImage:
     shield_image = pygame.image.load("assets/images/shield.png").convert_alpha()
     shield_image_scaled = pygame.transform.scale(shield_image, (SHIELD_IMAGE_WIDTH, SHIELD_IMAGE_HEIGHT))
 
+    dash_image = pygame.image.load("assets/images/dash.png").convert_alpha()
+    dash_image_scaled = pygame.transform.scale(dash_image, (34, 34))
+
 class PlayerImages:
     player_image = pygame.image.load("assets/images/main_sorcerer.png").convert_alpha()
     player_image_scaled = pygame.transform.scale(player_image, (PLAYER_WIDTH, PLAYER_HEIGHT))
