@@ -15,7 +15,7 @@ from player import Player
 from wand import Wand
 from customgroup import CustomGroup
 from hud import HUD
-
+from light import Light
 
 class Game:
     def __init__(self):
@@ -48,7 +48,7 @@ class Game:
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
 
         # Light Enemy----------------------------------------------------------------------------------------------
-        # self.light = Light(WINDOW_WIDTH-LIGHT_ENEMY_WIDTH, 0, ems.light_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_ground_enemies)
+        # self.light = Light(WINDOW_WIDTH-LIGHT_ENEMY_WIDTH, 0, ems.light_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_ground_enemies, ems.all_enemies_group)
         # self.another_light = Light(300, 0, ems.light_enemy_group, ems.all_ground_enemies)
         # self.ground_en = Light(600, 0, ems.light_enemy_group, ems.all_ground_enemies)
 
@@ -171,7 +171,7 @@ class Game:
                 # if player has obtained the ability to slow down movement
                 if self.player.slow_time_active:
                     dt = cs.slow_down_time(self.player, self.all_enemy_projectiles_that_hit_player, dt)
-                
+
                 # Changing the scroll (camera) value
                 self.true_scroll[0] += (self.player.rect.x - self.true_scroll[0] - (DISPLAY_WIDTH//2 - PLAYER_WIDTH//2))/20
                 self.true_scroll[1] += (self.player.rect.y - self.true_scroll[1] - (DISPLAY_HEIGHT//2 - PLAYER_HEIGHT//2))/20

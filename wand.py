@@ -34,6 +34,9 @@ class Wand(pygame.sprite.Sprite):
 
         self.player_is_hit(dt)
 
+        if abs(player.dash_num) >= 45:
+            self.image.set_alpha(0)
+
     def render(self, scroll):
         display.blit(self.image, (self.rect.x - scroll[0], self.rect.y - scroll[1]))
 

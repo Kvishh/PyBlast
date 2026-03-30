@@ -1,4 +1,4 @@
-import pygame, random
+import pygame, random, math
 from configs import *
 from game_map import tiles_blocks
 from images import PlayerImages, GradientImage
@@ -97,6 +97,10 @@ class Player(pygame.sprite.Sprite):
         self.hurt_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
         self.hurt_overlay_alpha = 0
 
+        self.dash_num = 0
+
+        self.dash_particles = []
+
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, wand):
         self.current_timer += dt
@@ -169,15 +173,36 @@ class Player(pygame.sprite.Sprite):
                 wand.invincible_timer = self.current_timer
                 wand.is_invincible = True
                 self.hurt_overlay_alpha = 92
+
+        self.dash_num = max(0, self.dash_num - 1) if self.dash_num > 0 else min(0, self.dash_num + 1)
         
-        # Responsible for x movement
-        if int(self.x_velocity) == 0:
-            self.x_velocity == 0
-        elif self.x_velocity > 0:
-            self.x_velocity = max(0, self.x_velocity-FRICTION)
-        elif self.x_velocity < 0:
-            self.x_velocity = min(0 ,self.x_velocity+FRICTION)
-        self.pos.x += self.x_velocity * dt
+        # Apply dash movement independent of slow-time dt
+        dash_applied = False
+        if abs(self.dash_num) > 50:
+            self.x_velocity = 18 if self.dash_direction > 0 else -18
+            if abs(self.dash_num) == 51:
+                self.x_velocity *= 0.4 # Slow down at last frame of dash
+            
+            self._detect_tiles_collision_x()
+            self.pos.x += self.x_velocity
+            dash_applied = True
+            self.create_dash_particles()
+            
+        if abs(self.dash_num) >= 45:
+            self.image.set_alpha(0)
+            self.is_invincible = True
+        
+        self.draw_dash_particles(scroll)
+
+        # Apply normal movement only if not dashing
+        if not dash_applied:
+            if int(self.x_velocity) == 0:
+                self.x_velocity = 0
+            elif self.x_velocity > 0:
+                self.x_velocity = max(0, self.x_velocity-FRICTION)
+            elif self.x_velocity < 0:
+                self.x_velocity = min(0, self.x_velocity+FRICTION)
+            self.pos.x += self.x_velocity * dt
         self.rect.x = int(self.pos.x)
         
         self._detect_tiles_collision_x()
@@ -197,7 +222,6 @@ class Player(pygame.sprite.Sprite):
         self.shooting_cd = max(.3, self.fire_rate / 1000)
 
         self.current_time += dt
-        # if mouse_hold[0]:
         if self.is_shooting:
 
             if self.current_time - self.shoot_previous_time > self.shooting_cd:
@@ -245,6 +269,31 @@ class Player(pygame.sprite.Sprite):
                 self.image.set_alpha(255)
         else:
             self.image.set_alpha(255)
+
+    def create_dash_particles(self):
+        # if len(self.dash_particles) < 10:
+        for i in range(3):
+            # loc, velocity, radius, dash direction, color
+            angle = math.pi * random.uniform(.77, 1.3) if self.dash_direction > 0 else 2 * math.pi * random.uniform(.77, 1.3)
+            speed = random.randint(1, 3)
+            self.dash_particles.append([list(self.rect.center),
+                                        [math.cos(angle)* speed, math.sin(angle)* speed],
+                                        random.randint(8, 12),
+                                        self.dash_direction,
+                                        pygame.Color(random.randrange(204, 251), 255, 0)])
+    
+    def draw_dash_particles(self, scroll):
+        if self.dash_particles:
+            self.dash_particles = [p for p in self.dash_particles if p[2] > 0]
+
+            for particle in self.dash_particles:
+                particle[0][0] += particle[1][0]
+                particle[0][1] += particle[1][1]
+
+                particle[2] -= .3
+
+                pygame.draw.circle(display, (60, 74, 0), (particle[0][0]-scroll[0]+4, particle[0][1]-scroll[1]+4), (particle[2]))
+                pygame.draw.circle(display, particle[4], (particle[0][0]-scroll[0], particle[0][1]-scroll[1]), particle[2])
 
     def draw_glow(self, dark_overlay, scroll):
         # pygame.draw.rect(display,(255,0,0),(self.rect.x-scroll[0],self.rect.y-scroll[1],self.rect.w,self.rect.h),2)
@@ -305,10 +354,16 @@ class Player(pygame.sprite.Sprite):
                 jump_particles.append([[random.randrange(self.rect.midbottom[0]-5, self.rect.midbottom[0]+5), self.rect.midbottom[1]],
                                        [random.randrange(-2, 2), 2],
                                        random.randrange(5, 8)]) 
-        elif keys_hold[pygame.K_d]:
+
+        if not self.dash_num:
+            if keys_hold[pygame.K_LSHIFT]:
+                self.dash_num = 60 if self.x_direction > 0 else -60
+                self.dash_direction = 1 if self.x_direction > 0 else -1
+                self.is_invincible = True
+        if keys_hold[pygame.K_d]:
             self.x_velocity = self.movement_speed
             self.x_direction = 1
-        elif keys_hold[pygame.K_a]:
+        if keys_hold[pygame.K_a]:
             self.x_velocity = -self.movement_speed
             self.x_direction = -1
 
