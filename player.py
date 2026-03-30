@@ -208,10 +208,12 @@ class Player(pygame.sprite.Sprite):
         self._detect_tiles_collision_x()
 
         # Responsible for y movement
-        self.y_velocity += GRAVITY * dt * .8
-        self.pos.y += self.y_velocity * dt * .8
-        self.rect.y = int(self.pos.y)
-        self.y_velocity += GRAVITY * dt * .8
+        if not dash_applied:
+            self.y_velocity += GRAVITY * dt * .8
+            self.pos.y += self.y_velocity * dt * .8
+            self.rect.y = int(self.pos.y)
+            self.y_velocity += GRAVITY * dt * .8
+        print(self.y_velocity)
 
         self._detect_tiles_collision_y()
 
