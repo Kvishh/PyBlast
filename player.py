@@ -106,6 +106,19 @@ class Player(pygame.sprite.Sprite):
         self.died_text = fs.render_outlined("You Died!", (255,0,0), (0,0,0), 2, fs.died_header_font)
         self.died_text.set_alpha(self.text_surfs_alpha)
 
+        self.survived_text = fs.render_outlined("You Survived!", (0,255,0), (0,0,0), 2, fs.died_header_font)
+        self.survived_text.set_alpha(self.text_surfs_alpha)
+
+        self.try_again_text_surf = fs.render_outlined("Try Again", (255,255,255), (0,0,0), 2, fs.header_font)
+        self.try_again_text_pos = [(DISPLAY_WIDTH//2) - (self.try_again_text_surf.get_rect().w//2), 240]
+        self.try_again_text_rect = self.try_again_text_surf.get_rect(topleft=(self.try_again_text_pos[0], self.try_again_text_pos[1]))
+        self.try_again_text_surf.set_alpha(self.text_surfs_alpha)
+
+        self.win_back_text_surf = fs.render_outlined("Back to Main Menu", (255,255,255), (0,0,0), 2, fs.header_font)
+        self.win_back_text_pos = [(DISPLAY_WIDTH//2) - (self.win_back_text_surf.get_rect().w//2), 340]
+        self.win_back_text_rect = self.win_back_text_surf.get_rect(topleft=(self.win_back_text_pos[0], self.win_back_text_pos[1]))
+        self.win_back_text_surf.set_alpha(self.text_surfs_alpha)
+
         self.retry_text_surf = fs.render_outlined("Retry", (255,255,255), (0,0,0), 2, fs.skill_name_font)
         self.retry_text_pos = [30, 470]
         self.retry_text_rect = self.retry_text_surf.get_rect(topleft=(self.retry_text_pos[0], self.retry_text_pos[1]))
@@ -115,6 +128,8 @@ class Player(pygame.sprite.Sprite):
         self.back_text_pos = [30, 520]
         self.back_text_rect = self.back_text_surf.get_rect(topleft=(self.back_text_pos[0], self.back_text_pos[1]))
         self.back_text_surf.set_alpha(self.text_surfs_alpha)
+    
+        self.has_survived = False
 
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, wand):
@@ -140,7 +155,8 @@ class Player(pygame.sprite.Sprite):
             self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
 
             # Shoot bullets
-            self.shoot_bullet(scroll, player_bullet_group, dt)
+            if not self.has_survived:
+                self.shoot_bullet(scroll, player_bullet_group, dt)
 
             # Check if player is hit
             self.player_is_hit(dt)
@@ -155,7 +171,8 @@ class Player(pygame.sprite.Sprite):
             self.update_image()
 
             # Keys checking for movement
-            self._move(keys, jump_particles)
+            if not self.has_survived:
+                self._move(keys, jump_particles)
 
             # this is for checking whether enemy is stuck below or above
             self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
@@ -232,6 +249,30 @@ class Player(pygame.sprite.Sprite):
                 self.y_velocity += GRAVITY * dt * .8
 
             self._detect_tiles_collision_y()
+
+    def show_after_winning_options(self, events):
+        mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
+
+        if self.text_surfs_alpha >= 255:
+            for evt in events:
+                if evt.type == pygame.MOUSEBUTTONDOWN and evt.button == 1:
+                    if self.try_again_text_rect.collidepoint(mx, my):
+                        print("Try again")
+                    elif self.win_back_text_rect.collidepoint(mx, my):
+                        print("Back")
+
+        self.text_surfs_alpha = min(255, self.text_surfs_alpha+3)
+        self.survived_text.set_alpha(self.text_surfs_alpha)
+        self.try_again_text_surf.set_alpha(self.text_surfs_alpha)
+        self.win_back_text_surf.set_alpha(self.text_surfs_alpha)
+
+        self.try_again_text_pos[1] = max(220, self.try_again_text_pos[1]-2) if self.try_again_text_rect.collidepoint(mx, my) else min(240, self.try_again_text_pos[1]+2)
+
+        self.win_back_text_pos[1] = max(320, self.win_back_text_pos[1]-2) if self.win_back_text_rect.collidepoint(mx, my) else min(340, self.win_back_text_pos[1]+2)
+
+        display.blit(self.survived_text, ((DISPLAY_WIDTH//2) - (self.survived_text.get_rect().w//2), 50))
+        display.blit(self.try_again_text_surf, (self.try_again_text_pos[0], self.try_again_text_pos[1]))
+        display.blit(self.win_back_text_surf, (self.win_back_text_pos[0], self.win_back_text_pos[1]))
 
     def show_after_death_options(self, events):
         mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)

@@ -156,7 +156,7 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
     Timer.projectiles_hit_player_invincible_timer += dt
     Timer.projectiles_hit_wand_invincible_timer += dt
 
-    if not player.is_invincible:
+    if not player.is_invincible and not player.has_survived:
         tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
         player_tile_loc = (int(player.rect.x // TILE_SIZE), int(player.rect.y // TILE_SIZE))
         player_grid_locs = {f"{player_tile_loc[0] + offset[0]};{player_tile_loc[1] + offset[1]}" for offset in tiles_offset}
@@ -195,7 +195,7 @@ def all_enemies_touch_player(player: pygame.sprite.Sprite, wand, all_enemies_gro
     Timer.enemies_touch_player_invincible_timer += dt
     Timer.enemies_touch_wand_invincible_timer += dt
 
-    if not player.is_invincible:
+    if not player.is_invincible and not player.has_survived:
         hits = pygame.sprite.spritecollide(player, all_enemies_group, False, collide_rect_then_mask)
 
         for enemy in hits:

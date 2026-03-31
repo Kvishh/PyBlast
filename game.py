@@ -130,10 +130,15 @@ class Game:
 
         spawn_timer = 0
 
+        
         timer_active = False
+        dt_multiplier = 1
+        
         death_start_time = 0
-        death_dt_multiplier = 1
         death_slow_down = False
+
+        win_start_time = 0
+        win_slow_down = False
 
 
         running = True
@@ -151,7 +156,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         # Player can only pause when they are alive, else
                         # they can't pause
-                        if self.player.alive():
+                        if self.player.alive() and not self.player.has_survived:
                             pause_screen = display.copy()
                             is_paused[0] = not is_paused[0]
                     if event.key == pygame.K_u:
@@ -168,12 +173,16 @@ class Game:
                 self.spawn_session_timer += dt
 
                 # Countdown decrements 1 second if 1 second has passed
-                # and if player is still alive, if player is dead stop
-                # the countdown timer
-                if countdown_timer >= 1 and self.player.alive():
+                # and if player is still alive and if player hasn't won
+                # yet, if player is dead stop the countdown timer
+                if countdown_timer >= 1 and self.player.alive() and not self.player.has_survived:
                     countdown_time -= 1
                     countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
                     countdown_timer -= 1
+                
+                # Check if countdown time has reached 00:00
+                if countdown_time <= 0:
+                    self.player.has_survived = True
                 
                 if self.spawn_session_timer >= 60:
                     self.spawn_session_num = min(7, self.spawn_session_num + 1)
@@ -185,9 +194,9 @@ class Game:
                     dt = cs.slow_down_time(self.player, self.all_enemy_projectiles_that_hit_player, dt)
                 
                 # If player has died, slow down time
-                if death_slow_down:
-                    death_dt_multiplier = max(0.25, death_dt_multiplier - .1)
-                    dt = max(0.0038, dt * death_dt_multiplier)
+                if death_slow_down or win_slow_down:
+                    dt_multiplier = max(0.25, dt_multiplier - .1)
+                    dt = max(0.0038, dt * dt_multiplier)
 
                 # Changing the scroll (camera) value
                 self.true_scroll[0] += (self.player.rect.x - self.true_scroll[0] - (DISPLAY_WIDTH//2 - PLAYER_WIDTH//2))/20
@@ -387,6 +396,21 @@ class Game:
                         # Check if 1 seconds has passed since player died
                         if current_time - death_start_time >= 1000:
                             self.player.show_after_death_options(events)
+                
+                # If player won/survived
+                if self.player.has_survived:
+                    display.blit(pause_overlay, (0,0))
+                    win_slow_down = True
+
+                    if not timer_active:
+                        win_start_time = pygame.time.get_ticks()
+                        timer_active = True
+
+                    if timer_active:
+                        current_time = pygame.time.get_ticks()
+                        # Check if 1 seconds has passed since player won
+                        if current_time - win_start_time >= 1000:
+                            self.player.show_after_winning_options(events)
 
                 # Clearing of set
                 self.enemies_killed.clear()
