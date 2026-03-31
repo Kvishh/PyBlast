@@ -10,6 +10,8 @@ class FontSystem:
     skill_name_font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 42)
     skill_desc_font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 22)
 
+    died_header_font = pygame.font.Font("assets/font/Micro_5/Micro5-Regular.ttf", 128)
+
     def render_outlined(text: str, text_color: pygame.typing.ColorLike, outline_color: pygame.typing.ColorLike, outline_width: int, font) -> pygame.Surface:
         old_outline = font.outline
         if old_outline != 0:

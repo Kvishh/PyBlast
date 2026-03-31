@@ -4,6 +4,7 @@ from game_map import tiles_blocks
 from images import PlayerImages, GradientImage
 from bullet import PlayerBullet
 from negator import Negator
+from font_system import FontSystem as fs
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
@@ -100,121 +101,165 @@ class Player(pygame.sprite.Sprite):
         self.dash_num = 0
 
         self.dash_particles = []
+        self.text_surfs_alpha = 2
+
+        self.died_text = fs.render_outlined("You Died!", (255,0,0), (0,0,0), 2, fs.died_header_font)
+        self.died_text.set_alpha(self.text_surfs_alpha)
+
+        self.retry_text_surf = fs.render_outlined("Retry", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.retry_text_pos = [30, 470]
+        self.retry_text_rect = self.retry_text_surf.get_rect(topleft=(self.retry_text_pos[0], self.retry_text_pos[1]))
+        self.retry_text_surf.set_alpha(self.text_surfs_alpha)
+
+        self.back_text_surf = fs.render_outlined("Back to Main Menu", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.back_text_pos = [30, 520]
+        self.back_text_rect = self.back_text_surf.get_rect(topleft=(self.back_text_pos[0], self.back_text_pos[1]))
+        self.back_text_surf.set_alpha(self.text_surfs_alpha)
 
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, wand):
-        self.current_timer += dt
+        # Only update character if player is alive
+        if self.alive():
+            self.current_timer += dt
 
-        if self.slow_time_active:
-            self.slow_rect = pygame.Rect(self.rect.x - (180//2) + (self.rect.w//2), (self.rect.y - (180//2) + (self.rect.h//2)), 180, 180)
-            # pygame.draw.rect(display, (255,0,0), (self.slow_rect.x-scroll[0], self.slow_rect.y-scroll[1], self.slow_rect.w, self.slow_rect.h), 2)
+            if self.slow_time_active:
+                self.slow_rect = pygame.Rect(self.rect.x - (180//2) + (self.rect.w//2), (self.rect.y - (180//2) + (self.rect.h//2)), 180, 180)
+                # pygame.draw.rect(display, (255,0,0), (self.slow_rect.x-scroll[0], self.slow_rect.y-scroll[1], self.slow_rect.w, self.slow_rect.h), 2)
 
-        if self.negator_active:
-            self.negator.update(self.rect.center, dt)
-            self.negator.render(scroll)
+            if self.negator_active:
+                self.negator.update(self.rect.center, dt)
+                self.negator.render(scroll)
 
-        # For shield regeneration
-        now = pygame.time.get_ticks()
-        if now - self.shield_timer > 120000: # 2 mins
-            self.shield_timer = now
-            self.current_shield = min(self.current_shield+1, self.max_shield)
+            # For shield regeneration
+            now = pygame.time.get_ticks()
+            if now - self.shield_timer > 120000: # 2 mins
+                self.shield_timer = now
+                self.current_shield = min(self.current_shield+1, self.max_shield)
 
-        self.on_ground = False
-        self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
+            self.on_ground = False
+            self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
 
-        # Shoot bullets
-        self.shoot_bullet(scroll, player_bullet_group, dt)
+            # Shoot bullets
+            self.shoot_bullet(scroll, player_bullet_group, dt)
 
-        # Check if player is hit
-        self.player_is_hit(dt)
+            # Check if player is hit
+            self.player_is_hit(dt)
 
-        # Draw the gradient circle behind player
-        self.draw_glow(dark_overlay, scroll)
+            # Draw the gradient circle behind player
+            self.draw_glow(dark_overlay, scroll)
 
-        # checks if ground_test_rect is touching any tiles
-        self.check_if_on_ground()
+            # checks if ground_test_rect is touching any tiles
+            self.check_if_on_ground()
 
-        # Update animation image
-        self.update_image()
+            # Update animation image
+            self.update_image()
 
-        # Keys checking for movement
-        self._move(keys, jump_particles)
+            # Keys checking for movement
+            self._move(keys, jump_particles)
 
-        # this is for checking whether enemy is stuck below or above
-        self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
-        # pygame.draw.rect(display, (255, 0, 0), self.vertical_rect, 2) # original
-        
-        # Creating and drawing of dust particles
-        self.create_dust_particles()
-        self.draw_dust_particles(scroll)
+            # this is for checking whether enemy is stuck below or above
+            self.vertical_rect = pygame.Rect(self.rect.centerx-10, 0, 20, 700)
+            # pygame.draw.rect(display, (255, 0, 0), self.vertical_rect, 2) # original
+            
+            # Creating and drawing of dust particles
+            self.create_dust_particles()
+            self.draw_dust_particles(scroll)
 
-        if self.y_velocity > 3000: self.y_velocity = 3000
+            if self.y_velocity > 3000: self.y_velocity = 3000
 
-        # display.blit(self.idle_animations_frames_list[0], (60-scroll[0], 60-scroll[1], self.idle_animations_frames_list[0].get_rect().w, self.idle_animations_frames_list[0].get_rect().h))
-        # display.blit(self.idle_animations_frames_list[1], (100-scroll[0], 60-scroll[1], self.idle_animations_frames_list[1].get_rect().w, self.idle_animations_frames_list[1].get_rect().h))
+            # display.blit(self.idle_animations_frames_list[0], (60-scroll[0], 60-scroll[1], self.idle_animations_frames_list[0].get_rect().w, self.idle_animations_frames_list[0].get_rect().h))
+            # display.blit(self.idle_animations_frames_list[1], (100-scroll[0], 60-scroll[1], self.idle_animations_frames_list[1].get_rect().w, self.idle_animations_frames_list[1].get_rect().h))
 
-        # Border limit x
-        if self.pos.x < 0:
-            self.pos.x = 0
-        elif self.pos.x > WINDOW_WIDTH - PLAYER_WIDTH:
-            self.pos.x = WINDOW_WIDTH - PLAYER_WIDTH
-        # Border limit y
-        if self.pos.y < 0:
-            self.pos.y = 0
-        elif self.pos.y > WINDOW_HEIGHT - PLAYER_HEIGHT:
-            self.y_velocity = 0
-            self.pos.x = (WINDOW_WIDTH // 2) - PLAYER_WIDTH
-            self.pos.y = 365
+            # Border limit x
+            if self.pos.x < 0:
+                self.pos.x = 0
+            elif self.pos.x > WINDOW_WIDTH - PLAYER_WIDTH:
+                self.pos.x = WINDOW_WIDTH - PLAYER_WIDTH
+            # Border limit y
+            if self.pos.y < 0:
+                self.pos.y = 0
+            elif self.pos.y > WINDOW_HEIGHT - PLAYER_HEIGHT:
+                self.y_velocity = 0
+                self.pos.x = (WINDOW_WIDTH // 2) - PLAYER_WIDTH
+                self.pos.y = 365
 
-            if not self.is_invincible:
-                self.current_hp -= 1
-                self.invincible_timer = self.current_timer
+                if not self.is_invincible:
+                    self.current_hp -= 1
+                    self.invincible_timer = self.current_timer
+                    self.is_invincible = True
+                    wand.invincible_timer = self.current_timer
+                    wand.is_invincible = True
+                    self.hurt_overlay_alpha = 92
+
+            self.dash_num = max(0, self.dash_num - 1) if self.dash_num > 0 else min(0, self.dash_num + 1)
+            
+            # Apply dash movement independent of slow-time dt
+            dash_applied = False
+            if abs(self.dash_num) > 50:
+                self.x_velocity = 18 if self.dash_direction > 0 else -18
+                if abs(self.dash_num) == 51:
+                    self.x_velocity *= 0.4 # Slow down at last frame of dash
+                
+                self._detect_tiles_collision_x()
+                self.pos.x += self.x_velocity
+                dash_applied = True
+                self.create_dash_particles()
+                
+            if abs(self.dash_num) >= 45:
+                self.image.set_alpha(0)
                 self.is_invincible = True
-                wand.invincible_timer = self.current_timer
-                wand.is_invincible = True
-                self.hurt_overlay_alpha = 92
+            
+            self.draw_dash_particles(scroll)
 
-        self.dash_num = max(0, self.dash_num - 1) if self.dash_num > 0 else min(0, self.dash_num + 1)
-        
-        # Apply dash movement independent of slow-time dt
-        dash_applied = False
-        if abs(self.dash_num) > 50:
-            self.x_velocity = 18 if self.dash_direction > 0 else -18
-            if abs(self.dash_num) == 51:
-                self.x_velocity *= 0.4 # Slow down at last frame of dash
+            # Apply normal movement only if not dashing
+            if not dash_applied:
+                if int(self.x_velocity) == 0:
+                    self.x_velocity = 0
+                elif self.x_velocity > 0:
+                    self.x_velocity = max(0, self.x_velocity-FRICTION)
+                elif self.x_velocity < 0:
+                    self.x_velocity = min(0, self.x_velocity+FRICTION)
+                self.pos.x += self.x_velocity * dt
+            self.rect.x = int(self.pos.x)
             
             self._detect_tiles_collision_x()
-            self.pos.x += self.x_velocity
-            dash_applied = True
-            self.create_dash_particles()
-            
-        if abs(self.dash_num) >= 45:
-            self.image.set_alpha(0)
-            self.is_invincible = True
+
+            # Responsible for y movement
+            if not dash_applied:
+                self.y_velocity += GRAVITY * dt * .8
+                self.pos.y += self.y_velocity * dt * .8
+                self.rect.y = int(self.pos.y)
+                self.y_velocity += GRAVITY * dt * .8
+
+            self._detect_tiles_collision_y()
+
+    def show_after_death_options(self, events):
+        mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
         
-        self.draw_dash_particles(scroll)
-
-        # Apply normal movement only if not dashing
-        if not dash_applied:
-            if int(self.x_velocity) == 0:
-                self.x_velocity = 0
-            elif self.x_velocity > 0:
-                self.x_velocity = max(0, self.x_velocity-FRICTION)
-            elif self.x_velocity < 0:
-                self.x_velocity = min(0, self.x_velocity+FRICTION)
-            self.pos.x += self.x_velocity * dt
-        self.rect.x = int(self.pos.x)
+        # Only allowed click if options are fully visible
+        if self.text_surfs_alpha >= 255:
+            for evt in events:
+                if evt.type == pygame.MOUSEBUTTONDOWN and evt.button == 1:
+                    if self.retry_text_rect.collidepoint(mx, my):
+                        print("Retry")
+                    elif self.back_text_rect.collidepoint(mx, my):
+                        print("Back")
         
-        self._detect_tiles_collision_x()
+        self.text_surfs_alpha = min(255, self.text_surfs_alpha+2)
+        self.died_text.set_alpha(self.text_surfs_alpha)
+        self.retry_text_surf.set_alpha(self.text_surfs_alpha)
+        self.back_text_surf.set_alpha(self.text_surfs_alpha)
 
-        # Responsible for y movement
-        if not dash_applied:
-            self.y_velocity += GRAVITY * dt * .8
-            self.pos.y += self.y_velocity * dt * .8
-            self.rect.y = int(self.pos.y)
-            self.y_velocity += GRAVITY * dt * .8
+        # This is responsible for the text surfaces movement since
+        # they move x when mouse hovers over them
+        # Move right if it is being hovered over else go back to normal position
+        self.retry_text_pos[0] = min(50, self.retry_text_pos[0]+2) if self.retry_text_rect.collidepoint(mx, my) else max(30, self.retry_text_pos[0]-2)
 
-        self._detect_tiles_collision_y()
+        self.back_text_pos[0] = min(50, self.back_text_pos[0]+2) if self.back_text_rect.collidepoint(mx, my) else max(30, self.back_text_pos[0]-2)
+
+        display.blit(self.died_text, ((DISPLAY_WIDTH//2) - (self.died_text.get_rect().w//2), 50))
+        display.blit(self.retry_text_surf, (self.retry_text_pos[0], self.retry_text_pos[1]))
+        display.blit(self.back_text_surf, (self.back_text_pos[0], self.back_text_pos[1]))
 
     def render(self, scroll):
         display.blit(self.image, (self.rect.x-scroll[0], self.rect.y-scroll[1]))

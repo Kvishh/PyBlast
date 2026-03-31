@@ -130,6 +130,11 @@ class Game:
 
         spawn_timer = 0
 
+        timer_active = False
+        death_start_time = 0
+        death_dt_multiplier = 1
+        death_slow_down = False
+
 
         running = True
         is_paused = [False]
@@ -144,8 +149,11 @@ class Game:
                     self.player.is_shooting = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        pause_screen = display.copy()
-                        is_paused[0] = not is_paused[0]
+                        # Player can only pause when they are alive, else
+                        # they can't pause
+                        if self.player.alive():
+                            pause_screen = display.copy()
+                            is_paused[0] = not is_paused[0]
                     if event.key == pygame.K_u:
                         self.hud.current_xp_width += 490
                         self.hud.update_level_bar(self.xp_increment, self.level_up_state, last_frame)
@@ -159,7 +167,10 @@ class Game:
                 spawn_timer += dt
                 self.spawn_session_timer += dt
 
-                if countdown_timer >= 1:
+                # Countdown decrements 1 second if 1 second has passed
+                # and if player is still alive, if player is dead stop
+                # the countdown timer
+                if countdown_timer >= 1 and self.player.alive():
                     countdown_time -= 1
                     countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
                     countdown_timer -= 1
@@ -172,6 +183,11 @@ class Game:
                 # if player has obtained the ability to slow down movement
                 if self.player.slow_time_active:
                     dt = cs.slow_down_time(self.player, self.all_enemy_projectiles_that_hit_player, dt)
+                
+                # If player has died, slow down time
+                if death_slow_down:
+                    death_dt_multiplier = max(0.25, death_dt_multiplier - .1)
+                    dt = max(0.0038, dt * death_dt_multiplier)
 
                 # Changing the scroll (camera) value
                 self.true_scroll[0] += (self.player.rect.x - self.true_scroll[0] - (DISPLAY_WIDTH//2 - PLAYER_WIDTH//2))/20
@@ -279,11 +295,12 @@ class Game:
                 # After killing enemies, remove them in current enemies on game
                 for enemy in self.enemies_killed: self.set_of_alive_enemies.remove(enemy)
 
-                # Player and Wand update and draw methods
-                self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery, dt)
-                self.wand.render(self.scroll)
-                self.player.update(pygame.key.get_pressed(), dt, fx.FxList.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group, self.wand)
-                self.player.render(self.scroll)
+                if self.player.alive():
+                    # Player and Wand update and draw methods
+                    self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery, dt)
+                    self.wand.render(self.scroll)
+                    self.player.update(pygame.key.get_pressed(), dt, fx.FxList.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group, self.wand)
+                    self.player.render(self.scroll)
 
                 # Draw jump particles
                 fx.draw_jump_particles(self.scroll)
@@ -355,7 +372,22 @@ class Game:
                 # self.hud.update(countdown_time_text, self.xp_increment, self.level_up_state, last_frame)
                 # The split is done to separate the minute (00) and seconds (59) since they are used as keys for cache
                 self.hud.update(self.player, countdown_time_text.split(":"), self.xp_increment, self.level_up_state, last_frame)
-                
+
+                # If player is killed 
+                if not self.player.alive():
+                    display.blit(pause_overlay, (0,0))
+                    death_slow_down = True
+
+                    if not timer_active:
+                        death_start_time = pygame.time.get_ticks()
+                        timer_active = True
+
+                    if timer_active:
+                        current_time = pygame.time.get_ticks()
+                        # Check if 1 seconds has passed since player died
+                        if current_time - death_start_time >= 1000:
+                            self.player.show_after_death_options(events)
+
                 # Clearing of set
                 self.enemies_killed.clear()
 

@@ -173,6 +173,9 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                                 player.current_shield -= 1
                             else:
                                 player.current_hp -= 1
+                            if player.current_hp <= 0:
+                                player.kill()
+                                wand.kill()
                             player.invincible_timer = Timer.projectiles_hit_player_invincible_timer
                             player.is_invincible = True
 
@@ -188,7 +191,7 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                             projectile.kill()
                             break
 
-def all_enemies_touch_player(player, wand, all_enemies_group, dt):
+def all_enemies_touch_player(player: pygame.sprite.Sprite, wand, all_enemies_group, dt):
     Timer.enemies_touch_player_invincible_timer += dt
     Timer.enemies_touch_wand_invincible_timer += dt
 
@@ -201,6 +204,9 @@ def all_enemies_touch_player(player, wand, all_enemies_group, dt):
                 player.shield_timer = pygame.time.get_ticks()
             else:
                 player.current_hp -= 1
+            if player.current_hp <= 0:
+                player.kill()
+                wand.kill()
             player.invincible_timer = Timer.enemies_touch_player_invincible_timer
             player.is_invincible = True
 
@@ -208,6 +214,11 @@ def all_enemies_touch_player(player, wand, all_enemies_group, dt):
             wand.is_invincible = True
 
             player.hurt_overlay_alpha = 92
+
+            # If touched by an enemy, break so that player wouldn't take
+            # another damage if there are more than 2 enemies colliding
+            # with player
+            break
 
 def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):
     # collided_tiles_loc = []
