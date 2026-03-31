@@ -17,6 +17,9 @@ from wand import Wand
 from customgroup import CustomGroup
 from hud import HUD
 from light import Light
+from shoot import Shoot
+from burst import Burst
+from specter import Specter
 
 class Game:
     def __init__(self):
@@ -62,7 +65,7 @@ class Game:
         # Soar Enemy-----------------------------------------------------------------------------------------------
         # self.soar_enemy = Soar(50, 0, ems.soar_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_flying_enemies)
 
-        # Shooting Enemy-------------------------------------------------------------------------------------------
+        # # Shooting Enemy-------------------------------------------------------------------------------------------
         # self.shoot_enemy = Shoot(250, 0, ems.shoot_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_flying_enemies)
 
         # # Burst Shooting Enemy-------------------------------------------------------------------------------------
@@ -418,20 +421,20 @@ class Game:
                 # Reset for xp_increment so that when it levels up it does not add the old values
                 # It will not accumulate. It is not cumulative
                 self.xp_increment[0] = 0
-            elif self.level_up_state[0]:
-                display.blit(last_frame[0], (0,0))
-                display.blit((pause_overlay), (0,0))
-
-                rs.roll(events, self.level_up_state, self.player, last_frame)
-
-                clock.tick()
-                self.player.is_shooting = False
             elif is_paused[0]:
                 # Blitting of the last screen and the dark overlay when paused
                 display.blit(pause_screen, (0,0))
                 display.blit((pause_overlay), (0,0))
 
                 p.show_pause_options(events, is_paused)
+
+                clock.tick()
+                self.player.is_shooting = False
+            elif self.level_up_state[0]:
+                display.blit(last_frame[0], (0,0))
+                display.blit((pause_overlay), (0,0))
+
+                rs.roll(events, self.level_up_state, self.player, last_frame)
 
                 clock.tick()
                 self.player.is_shooting = False
