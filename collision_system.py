@@ -10,6 +10,7 @@ from soar import Soar
 from shoot import Shoot
 from burst import Burst
 from specter import Specter
+from sound_system import SFX
 
 class Timer:
     projectiles_hit_player_invincible_timer = 0
@@ -92,7 +93,9 @@ def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, pla
     for bullet, enemies in hits.items():
         shake_timer[0] = 20
         pos = list(bullet.rect.center)
-        
+
+        SFX.normal_bullet_hit_enemies_sfx.play()
+
         for enemy in enemies:
             enemy.is_hit = True
             enemy.flashed_timer = pygame.time.get_ticks()
@@ -117,6 +120,8 @@ def check_enemies_within_explosion_radius(player, hud, xp_increment, enemies_kil
     enemies_within_radius = set([])
     for bullet in hits.keys():
         pos = bullet.rect.center
+
+        SFX.bullet_explosion_sfx.play()
         
         shake_timer[0] = 20
         for enemy in all_enemies_that_can_be_hit_by_playerbullet_group.sprites():
@@ -152,6 +157,9 @@ def check_enemies_within_explosion_radius(player, hud, xp_increment, enemies_kil
 def projectiles_hit_negator(player, all_enemy_projectiles_that_hit_player):
     hits = pygame.sprite.spritecollide(player.negator, all_enemy_projectiles_that_hit_player, True, collide_rect_then_mask)
 
+    for hit in hits:
+        SFX.enemies_projectiles_hit_negator_sfx.play()
+
 def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, shake_timer, dt):
     Timer.projectiles_hit_player_invincible_timer += dt
     Timer.projectiles_hit_wand_invincible_timer += dt
@@ -169,6 +177,8 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                 if check_loc in player_grid_locs:
                     if projectile.rect.colliderect(player.rect):
                         if pygame.sprite.collide_mask(projectile, player):
+                            SFX.player_hit_sfx.play()
+
                             if player.current_shield != 0:
                                 player.current_shield -= 1
                             else:
@@ -199,6 +209,8 @@ def all_enemies_touch_player(player: pygame.sprite.Sprite, wand, all_enemies_gro
         hits = pygame.sprite.spritecollide(player, all_enemies_group, False, collide_rect_then_mask)
 
         for enemy in hits:
+            SFX.player_hit_sfx.play()
+
             if player.current_shield != 0:
                 player.current_shield -= 1
                 player.shield_timer = pygame.time.get_ticks()
@@ -232,6 +244,9 @@ def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):
                 collided_tile = tiles_blocks[check_loc]
                 if collided_tile.rect.colliderect(projectile.rect):
                     shake_timer[0] = 20
+
+                    SFX.projectile_hit_tiles_sfx.play()
+
                     pos = list(projectile.rect.center)
                     fx.create_debris(pos)
                     fx.create_impacts(pos)

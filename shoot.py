@@ -3,6 +3,7 @@ from configs import *
 from game_map import tiles, tiles_blocks
 from enemy_bullet import EnemyBullet
 from images import ShootImage
+from sound_system import SFX
 
 class Shoot(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
@@ -96,6 +97,8 @@ class Shoot(pygame.sprite.Sprite):
         self.current_time += dt
         self.slow_down()
         if self.current_time - self.previous_time > 5:
+                SFX.enemies_bullet_fire_sfx.play()
+                
                 self.previous_time = self.current_time
                 target_x = player.rect.centerx
                 target_y = player.rect.centery

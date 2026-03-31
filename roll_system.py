@@ -4,6 +4,7 @@ import abilities
 from configs import *
 from abilities import apply_ability
 from font_system import FontSystem as fs
+from sound_system import SFX
 
 class RollSystem:
     list_of_skill_trees = [abilities.swift_fire_skill_tree,
@@ -96,6 +97,7 @@ def show_choices(skills_choices, events, level_up_state, player, last_frame):
     # with skill name and description (not actual object)
     if not RollSystem.choices:
         for skill in skills_choices: RollSystem.choices.append((skill.name, skill.description))
+        SFX.level_up_sfx.play()
     
     # The alpha is used as timer and also used as the alpha for flash overlay
     if RollSystem.flash_overlay_alpha < 192:

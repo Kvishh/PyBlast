@@ -5,6 +5,7 @@ from images import PlayerImages, GradientImage
 from bullet import PlayerBullet
 from negator import Negator
 from font_system import FontSystem as fs
+from sound_system import SFX
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
@@ -131,11 +132,15 @@ class Player(pygame.sprite.Sprite):
     
         self.has_survived = False
 
+        self.walk_timer = 0
+
 
     def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, wand):
         # Only update character if player is alive
         if self.alive():
             self.current_timer += dt
+
+            if self.walk_timer > 0: self.walk_timer -= 1
 
             if self.slow_time_active:
                 self.slow_rect = pygame.Rect(self.rect.x - (180//2) + (self.rect.w//2), (self.rect.y - (180//2) + (self.rect.h//2)), 180, 180)
@@ -312,6 +317,7 @@ class Player(pygame.sprite.Sprite):
         if self.is_shooting:
 
             if self.current_time - self.shoot_previous_time > self.shooting_cd:
+                SFX.player_bullet_fire_sfx.play()
 
                 mouse_x = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH) + scroll[0]
                 mouse_y = (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT) + scroll[1]
@@ -431,12 +437,16 @@ class Player(pygame.sprite.Sprite):
         for offset in ground_offset_tiles:
             check_loc = str(player_tile_loc[0] + offset[0]) + ";" + str(player_tile_loc[1])
             if check_loc in tiles_blocks:
+                if self.x_velocity != 0 and self.walk_timer == 0:
+                    self.walk_timer = 45
+                    random.choice(SFX.walk_sfx_list).play()
                 self.on_ground = True
 
     def _move(self, keys_hold, jump_particles):
         if keys_hold[pygame.K_SPACE] and not self.jumping and self.on_ground:
             self.y_velocity = -1170 # ORIGINAL 1050
             self.jumping = True
+            SFX.jump_sfx.play()
             for _ in range(3): # location, y_velocity, radius
                 jump_particles.append([[random.randrange(self.rect.midbottom[0]-5, self.rect.midbottom[0]+5), self.rect.midbottom[1]],
                                        [random.randrange(-2, 2), 2],
@@ -444,6 +454,7 @@ class Player(pygame.sprite.Sprite):
 
         if not self.dash_num:
             if keys_hold[pygame.K_LSHIFT]:
+                SFX.dash_sfx.play()
                 self.dash_num = 60 if self.x_direction > 0 else -60
                 self.dash_direction = 1 if self.x_direction > 0 else -1
                 self.is_invincible = True

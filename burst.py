@@ -3,6 +3,7 @@ from configs import *
 from game_map import tiles, tiles_blocks
 from enemy_bullet import EnemyBullet
 from images import BurstImage
+from sound_system import SFX
 
 class Burst(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
@@ -99,6 +100,7 @@ class Burst(pygame.sprite.Sprite):
 
         if self.current_time - self.previous_time > 5.5:
                 if self.shoot_count < 3 and self.current_time - self.shot_interval > 1:
+                    SFX.enemies_bullet_fire_sfx.play()
                     self.shot_interval = self.current_time
 
                     target_x = player.rect.centerx

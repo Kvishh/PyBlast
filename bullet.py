@@ -3,6 +3,7 @@ from configs import *
 from game_map import tiles_blocks
 import effects_sytem as fx
 from images import BulletImage
+from sound_system import SFX
 
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, pierce_number, bounce_number, direction, skill_activated, mouse_target_x, mouse_target_y, spread=0):
@@ -112,6 +113,9 @@ class PlayerBullet(pygame.sprite.Sprite):
             if check_loc in tiles_blocks:
                 if tiles_blocks[check_loc].rect.colliderect(self.rect):
                     shake_timer[0] = 20
+
+                    SFX.projectile_hit_tiles_sfx.play()
+
                     pos = list(self.rect.center)
                     fx.create_debris(pos)
                     fx.create_impacts(pos)

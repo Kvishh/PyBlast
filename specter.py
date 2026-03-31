@@ -3,6 +3,7 @@ from configs import *
 from game_map import tiles, tiles_blocks
 from enemy_bullet import SpecterEnemyBullet
 from images import SpecterImage
+from sound_system import SFX
 
 class Specter(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
@@ -97,6 +98,8 @@ class Specter(pygame.sprite.Sprite):
         self.current_time += dt
         self.slow_down()
         if self.current_time - self.previous_time > 3.3:
+                SFX.enemies_bullet_fire_sfx.play()
+                
                 self.previous_time = self.current_time
                 target_x = player.rect.centerx
                 target_y = player.rect.centery
