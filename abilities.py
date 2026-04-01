@@ -127,11 +127,6 @@ shield_skill_tree = SkillTree("Shield tree", 3, [s1, s2, s3])
 ############################
 # Count: 1
 ############################
-sdtime = Skill("Slow down time I", "Slow down time when enemies' projectiles are near player", "state", False, attribute="slow_time_active")
-
-# Slow down skill tree
-slow_down_skill_tree = SkillTree("Slow down tree", 1, [sdtime])
-
 negate = Skill("Projectile negation I", "Spawn object that orbits around player that negates enemies' projectiles", "state", False, attribute="negator_active")
 
 # Projectile negation skill tree

@@ -15,7 +15,6 @@ class RollSystem:
                        abilities.bullet_pierce_skill_tree,
                        abilities.shield_skill_tree,
                        abilities.bullet_bounce_skill_tree,
-                       abilities.slow_down_skill_tree,
                        abilities.projectile_negation_skill_tree,
                        abilities.bullet_size_skill_tree,
                        abilities.bullet_explosion_skill_tree]

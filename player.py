@@ -32,7 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.bullet_size_doubled_activated = False
         self.bullets_explode_state = False
         self.negator_active = False
-        self.slow_time_active = False
+        self.slow_time_active = True
 
         self.negator = Negator(self.rect.center)
 
