@@ -23,9 +23,9 @@ def show_pause_options(events, is_paused):
             if Pause.continue_text_rect.collidepoint(mx, my):
                 is_paused[0] = not is_paused[0]
             elif Pause.retry_text_rect.collidepoint(mx, my):
-                print("Retry")
+                return False
             elif Pause.back_text_rect.collidepoint(mx, my):
-                print("Back")
+                return True
 
     # This is responsible for the text surfaces movement since
     # they move x when mouse hovers over them

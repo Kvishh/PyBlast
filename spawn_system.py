@@ -51,6 +51,17 @@ class Enemies:
     # Group for all enemies that can be detected as hit by player bullet----------------------------------------
     all_enemies_that_can_be_hit_by_playerbullet_group = pygame.sprite.Group(*all_ground_enemies, *flight_enemy_group, *soar_enemy_group, *shoot_enemy_group, *burst_enemy_group, *specter_enemy_group)
 
+    list_of_all_groups = [light_enemy_group,
+                          tank_enemy_group,
+                          flight_enemy_group,
+                          soar_enemy_group,
+                          shoot_enemy_group,
+                          burst_enemy_group,
+                          specter_enemy_group,
+                          all_ground_enemies,
+                          all_flying_enemies,
+                          all_enemies_group,
+                          all_enemies_that_can_be_hit_by_playerbullet_group]
 
     # Set of all types of enemies-------------------------------------------------------------------------------
     enemies_types = ["Light", "Tank", "Flight", "Soar", "Shoot", "Burst", "Specter"]

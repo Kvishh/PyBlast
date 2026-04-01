@@ -1,17 +1,15 @@
-import pygame, random, time
-
-# Initialize pygame---------------------------------------------------------------------------------------
-pygame.init()
+import pygame, random, time, sys
 
 import effects_sytem as fx
 import collision_system as cs
 import roll_system as rs
 import spawn_system as ss
 import pause as p
+from state import State
 from spawn_system import Enemies as ems
 from configs import *
 from images import CrosshairImage
-from game_map import draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from game_map import tiles_group, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
 from customgroup import CustomGroup
@@ -21,8 +19,10 @@ from shoot import Shoot
 from burst import Burst
 from specter import Specter
 
-class Game:
-    def __init__(self):
+class Gameplay(State):
+    def __init__(self, state_manager):
+        super().__init__(state_manager)
+
         # Setting custom cursor-----------------------------------------------------------------------------------
         crosshair_image = CrosshairImage.crosshair_image_scaled
         cursor = pygame.cursors.Cursor((16, 16,), crosshair_image)
@@ -46,7 +46,7 @@ class Game:
         self.shake_timer = [0]
 
         # Player---------------------------------------------------------------------------------------------------
-        self.player = Player(0, FLOOR, self.player_group)
+        self.player = Player((WINDOW_WIDTH // 2) - PLAYER_WIDTH, 365, self.player_group)
 
         # Wand-----------------------------------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
@@ -77,7 +77,8 @@ class Game:
 
         ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------ ###
         # Function for creating tile-------------------------------------------------------------------------------
-        create_tiles()
+        # This checks if tiles_group.sprites() is empty, if it is empty call the function
+        if not tiles_group.sprites(): create_tiles()
 
 
         ### AGGREGATED GROUPS ------------------------------------------------------------------------------------------------ ###
@@ -120,7 +121,7 @@ class Game:
         self.spawn_session_timer = 0
 
 
-    def game_run(self):
+    def update(self):
         pause_screen = None
         last_frame = []
 
@@ -143,6 +144,7 @@ class Game:
         win_start_time = 0
         win_slow_down = False
 
+        retry = False
 
         running = True
         is_paused = [False]
@@ -150,7 +152,8 @@ class Game:
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.player.is_shooting = True
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -426,7 +429,14 @@ class Game:
                 display.blit(pause_screen, (0,0))
                 display.blit((pause_overlay), (0,0))
 
-                p.show_pause_options(events, is_paused)
+                exit = p.show_pause_options(events, is_paused)
+
+                if exit is not None:
+                    if exit == True: break
+
+                    if exit == False:
+                        retry = True
+                        break
 
                 clock.tick()
                 self.player.is_shooting = False
@@ -443,7 +453,19 @@ class Game:
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
             pygame.display.flip()
         
-        # Quit the window
-        pygame.quit()
+        self.state_manager.state_stack.pop()
 
+        # Reset, this happens so that the old status/upgrades done in last game
+        # wouldn't get pass to another game if player retried the game
+        self.reset_game()
+
+        if retry: return "retry"
     
+    def reset_game(self):
+        for group in ss.Enemies.list_of_all_groups:
+            group.empty()
+        
+        for tree in rs.RollSystem.list_of_skill_trees:
+            for skill in tree.abilities_list:
+                skill.acquired = False
+            tree.is_exhausted = False
