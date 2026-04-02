@@ -51,16 +51,32 @@ class Menu(State):
         self.abilities2_rect = self.abilities2_surf.get_rect(topleft=(self.abilities2_pos[0], self.abilities2_pos[1]))
 
         self.controls_surf = fs.render_outlined("Controls", (255,255,255), (0,0,0), 2, fs.font_timer)
-        self.controls_pos = [(DISPLAY_WIDTH//2) - (self.controls_surf.get_rect().w//2), 370] # new 370
+        self.controls_pos = [(DISPLAY_WIDTH//2) - (self.controls_surf.get_rect().w//2), 370]
         self.controls_rect = self.controls_surf.get_rect(topleft=(self.controls_pos[0], self.controls_pos[1]))
 
         self.keys_surf = fs.render_outlined("LEFT CLICK - SHOOT | A/D - LEFT/RIGHT | SPACE - JUMP |", (255,255,255), (0,0,0), 2, fs.skill_name_font)
-        self.keys_pos = [(DISPLAY_WIDTH//2) - self.keys_surf.get_rect().w//2, 440] # new 440
+        self.keys_pos = [(DISPLAY_WIDTH//2) - self.keys_surf.get_rect().w//2, 440]
         self.keys_rect = self.keys_surf.get_rect(topleft=(self.keys_pos[0], self.keys_pos[1]))
 
         self.keys2_surf = fs.render_outlined("LEFT SHIFT - DASH | ESC - PAUSE", (255,255,255), (0,0,0), 2, fs.skill_name_font)
-        self.keys2_pos = [(DISPLAY_WIDTH//2) - self.keys2_surf.get_rect().w//2, 490] # new 490
+        self.keys2_pos = [(DISPLAY_WIDTH//2) - self.keys2_surf.get_rect().w//2, 490]
         self.keys2_rect = self.keys2_surf.get_rect(topleft=(self.keys2_pos[0], self.keys2_pos[1]))
+
+        self.title_surf = fs.render_outlined("PyBlast", (255,255,255), (0,0,0), 2, fs.title_font)
+        self.title_pos = [(DISPLAY_WIDTH//2) - self.title_surf.get_rect().w//2, 50]
+        self.title_rect = self.title_surf.get_rect(topleft=(self.title_pos[0], self.title_pos[1]))
+
+        self.py_title_surf = fs.render_outlined("Py", (90, 0, 166), (0,0,0), 2, fs.title_font)
+        self.py_title_pos = [289, 50]
+        self.py_title_rect = self.py_title_surf.get_rect(topleft=(self.py_title_pos[0], self.py_title_pos[1]))
+        self.py_title_shadow = fs.render_outlined("Py", (0,0,0,150), (0,0,0), 2, fs.title_font)
+
+
+        self.blast_title_surf = fs.render_outlined("Blast", (195, 255, 74), (0,0,0), 2, fs.title_font)
+        self.blast_title_pos = [410, 50]
+        self.blast_title_rect = self.blast_title_surf.get_rect(topright=(410, self.blast_title_pos[1]))
+        self.blast_title_shadow = fs.render_outlined("Blast", (0,0,0,150), (0,0,0), 2, fs.title_font)
+
 
 
         # For background ------------------------------------------------------------------------------------------------ #
@@ -93,6 +109,8 @@ class Menu(State):
         self.instruction_state = False
 
         main_menu_state = [True]
+
+        self.counter = 0
 
         running = True
         while running:
@@ -168,6 +186,20 @@ class Menu(State):
 
             # If player is in main menu and not in instruction state, draw buttons
             if main_menu_state[0] and not self.instruction_state:
+                oscillate = self.counter % 80
+
+                self.py_title_pos[1] = min(53, self.py_title_pos[1]+1) if oscillate >= 40 else max(50, self.py_title_pos[1]-1)
+                self.blast_title_pos[1] = min(53, self.blast_title_pos[1]+1) if oscillate >= 40 else max(50, self.blast_title_pos[1]-1)
+
+                display.blit(self.py_title_shadow, (self.py_title_pos[0], self.py_title_pos[1]+15))
+                display.blit(self.blast_title_shadow, (self.blast_title_pos[0], self.blast_title_pos[1]+15))
+                
+                display.blit(self.py_title_surf, (self.py_title_pos[0], self.py_title_pos[1]))
+                display.blit(self.blast_title_surf, (self.blast_title_pos[0], self.blast_title_pos[1]))
+                # display.blit(self.title_surf, (self.title_pos[0], self.title_pos[1]))
+
+                self.counter += 1
+
                 # Drawing of buttons
                 self.draw_buttons()
 
