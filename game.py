@@ -144,7 +144,7 @@ class Gameplay(State):
         win_start_time = 0
         win_slow_down = False
 
-        retry = False
+        retry = [False]
 
         running = True
         is_paused = [False]
@@ -403,7 +403,11 @@ class Gameplay(State):
                         current_time = pygame.time.get_ticks()
                         # Check if 1 seconds has passed since player died
                         if current_time - death_start_time >= 1000:
-                            self.player.show_after_death_options(events)
+                            result = self.player.show_after_death_options(events, retry)
+                            if result is not None and result == False:
+                                break
+
+                            if retry[0]: break
                 
                 # If player won/survived
                 if self.player.has_survived:
@@ -418,7 +422,11 @@ class Gameplay(State):
                         current_time = pygame.time.get_ticks()
                         # Check if 1 seconds has passed since player won
                         if current_time - win_start_time >= 1000:
-                            self.player.show_after_winning_options(events)
+                            result = self.player.show_after_winning_options(events, retry)
+                            if result is not None and result == False:
+                                break
+
+                            if retry[0]: break
 
                 # Clearing of set
                 self.enemies_killed.clear()
@@ -437,7 +445,7 @@ class Gameplay(State):
                     if exit == True: break
 
                     if exit == False:
-                        retry = True
+                        retry[0] = True
                         break
 
                 clock.tick()
@@ -461,7 +469,7 @@ class Gameplay(State):
         # wouldn't get pass to another game if player retried the game
         self.reset_game()
 
-        if retry: return "retry"
+        if retry[0]: return "retry"
     
     def reset_game(self):
         for group in ss.Enemies.list_of_all_groups:

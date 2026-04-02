@@ -255,16 +255,16 @@ class Player(pygame.sprite.Sprite):
 
             self._detect_tiles_collision_y()
 
-    def show_after_winning_options(self, events):
+    def show_after_winning_options(self, events, retry):
         mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
 
         if self.text_surfs_alpha >= 255:
             for evt in events:
                 if evt.type == pygame.MOUSEBUTTONDOWN and evt.button == 1:
                     if self.try_again_text_rect.collidepoint(mx, my):
-                        print("Try again")
+                        retry[0] = True
                     elif self.win_back_text_rect.collidepoint(mx, my):
-                        print("Back")
+                        return False
 
         self.text_surfs_alpha = min(255, self.text_surfs_alpha+3)
         self.survived_text.set_alpha(self.text_surfs_alpha)
@@ -279,7 +279,7 @@ class Player(pygame.sprite.Sprite):
         display.blit(self.try_again_text_surf, (self.try_again_text_pos[0], self.try_again_text_pos[1]))
         display.blit(self.win_back_text_surf, (self.win_back_text_pos[0], self.win_back_text_pos[1]))
 
-    def show_after_death_options(self, events):
+    def show_after_death_options(self, events, retry):
         mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
         
         # Only allowed click if options are fully visible
@@ -287,9 +287,9 @@ class Player(pygame.sprite.Sprite):
             for evt in events:
                 if evt.type == pygame.MOUSEBUTTONDOWN and evt.button == 1:
                     if self.retry_text_rect.collidepoint(mx, my):
-                        print("Retry")
+                        retry[0] = True
                     elif self.back_text_rect.collidepoint(mx, my):
-                        print("Back")
+                        return False
         
         self.text_surfs_alpha = min(255, self.text_surfs_alpha+2)
         self.died_text.set_alpha(self.text_surfs_alpha)
