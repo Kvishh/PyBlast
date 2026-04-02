@@ -51,14 +51,14 @@ class Burst(pygame.sprite.Sprite):
         self.particles = []
 
 
-    def update(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt, flying_enemies_group, scroll):
+    def update(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt, flying_enemies_group, scroll, enemy_shoot_sfx_count):
         # pygame.draw.rect(display, (255, 0, 0), (self.rect.x - scroll[0], self.rect.y - scroll[1], self.rect.w, self.rect.h), 1)
         # pygame.draw.line(display, (0, 255, 0), (self.rect.centerx-scroll[0], self.rect.centery-scroll[1]), (pl.rect.midbottom[0]-scroll[0], pl.rect.midbottom[1]-scroll[1]), 2)
         self._draw_particles(scroll)
 
         self.rotate_sprite(pl)
 
-        self.shoot(enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt)
+        self.shoot(enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, pl, dt, enemy_shoot_sfx_count)
 
         self.seek_force = self.seek(pl)
         self.avoid_force = self.flee(flying_enemies_group)
@@ -90,7 +90,7 @@ class Burst(pygame.sprite.Sprite):
 
         self.rect.center = self.hit_rect.center
 
-    def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player, dt):
+    def shoot(self, enemy_bullet_group, all_projectiles_that_hit_tiles, all_enemy_projectiles_that_hit_player, player, dt, enemy_shoot_sfx_count):
         self.current_time += dt
         
         if self.current_time - self.previous_time_slowing_down > 3.5:
@@ -100,7 +100,9 @@ class Burst(pygame.sprite.Sprite):
 
         if self.current_time - self.previous_time > 5.5:
                 if self.shoot_count < 3 and self.current_time - self.shot_interval > 1:
-                    SFX.enemies_bullet_fire_sfx.play()
+                    if enemy_shoot_sfx_count[0] < 5:
+                        SFX.enemies_bullet_fire_sfx.play()
+                        enemy_shoot_sfx_count[0] += 1
                     self.shot_interval = self.current_time
 
                     target_x = player.rect.centerx

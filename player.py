@@ -135,9 +135,9 @@ class Player(pygame.sprite.Sprite):
         self.walk_timer = 0
 
 
-    def update(self, keys, dt, jump_particles, dark_overlay, scroll, player_bullet_group, wand):
+    def update(self, keys, dt, dark_overlay, scroll, wand, jump_particles=None, player_bullet_group=None, alive=False):
         # Only update character if player is alive
-        if self.alive():
+        if self.alive() or alive:
             self.current_timer += dt
 
             if self.walk_timer > 0: self.walk_timer -= 1
@@ -160,7 +160,7 @@ class Player(pygame.sprite.Sprite):
             self.ground_test_rect = pygame.Rect(self.rect.midleft[0], self.rect.midbottom[1]+5, PLAYER_WIDTH, 3)
 
             # Shoot bullets
-            if not self.has_survived:
+            if not self.has_survived and player_bullet_group is not None:
                 self.shoot_bullet(scroll, player_bullet_group, dt)
 
             # Check if player is hit
@@ -176,7 +176,7 @@ class Player(pygame.sprite.Sprite):
             self.update_image()
 
             # Keys checking for movement
-            if not self.has_survived:
+            if not self.has_survived and jump_particles is not None:
                 self._move(keys, jump_particles)
 
             # this is for checking whether enemy is stuck below or above

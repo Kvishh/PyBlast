@@ -168,6 +168,8 @@ class Gameplay(State):
                     if event.key == pygame.K_u:
                         self.hud.current_xp_width += 490
                         self.hud.update_level_bar(self.xp_increment, self.level_up_state, last_frame)
+
+            enemy_shoot_sfx_count = [0]
             
             if not is_paused[0] and not self.level_up_state[0]:
                 dt = clock.tick(FPS) / 1000
@@ -314,7 +316,7 @@ class Gameplay(State):
                     # Player and Wand update and draw methods
                     self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery, dt)
                     self.wand.render(self.scroll)
-                    self.player.update(pygame.key.get_pressed(), dt, fx.FxList.jump_particles, self.dark_overlay, self.scroll, self.player_bullet_group, self.wand)
+                    self.player.update(pygame.key.get_pressed(), dt, self.dark_overlay, self.scroll, self.wand, jump_particles=fx.FxList.jump_particles, player_bullet_group=self.player_bullet_group)
                     self.player.render(self.scroll)
 
                 # Draw jump particles
@@ -340,15 +342,15 @@ class Gameplay(State):
                 ems.soar_enemy_group.draw(display, self.scroll)
 
                 # Shooting Enemy update and render
-                ems.shoot_enemy_group.update(ems.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, ems.all_flying_enemies, self.scroll)
+                ems.shoot_enemy_group.update(ems.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, ems.all_flying_enemies, self.scroll, enemy_shoot_sfx_count)
                 ems.shoot_enemy_group.draw(display, self.scroll)
 
                 # Burst Enemy update and render
-                ems.burst_enemy_group.update(ems.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, ems.all_flying_enemies, self.scroll)
+                ems.burst_enemy_group.update(ems.enemy_bullet_group, self.all_projectile_that_hit_tiles, self.all_enemy_projectiles_that_hit_player, self.player, dt, ems.all_flying_enemies, self.scroll, enemy_shoot_sfx_count)
                 ems.burst_enemy_group.draw(display, self.scroll)
 
                 # Specter Enemy update and render
-                ems.specter_enemy_group.update(ems.specter_enemy_bullet_group, self.player, dt, ems.all_flying_enemies, self.all_enemy_projectiles_that_hit_player)
+                ems.specter_enemy_group.update(ems.specter_enemy_bullet_group, self.player, dt, ems.all_flying_enemies, self.all_enemy_projectiles_that_hit_player, enemy_shoot_sfx_count)
                 ems.specter_enemy_group.draw(display, self.scroll)
 
                 # Drawing impacts/sparks
@@ -469,3 +471,13 @@ class Gameplay(State):
             for skill in tree.abilities_list:
                 skill.acquired = False
             tree.is_exhausted = False
+
+        fx.FxList.sparks.clear()
+        fx.FxList.explosion_sparks.clear()
+        fx.FxList.explosions.clear()
+        fx.FxList.explosion_radiations.clear()
+        fx.FxList.particles.clear()
+        fx.FxList.falling_particles.clear()
+        fx.FxList.radiations.clear()
+        fx.FxList.debris.clear()
+        fx.FxList.jump_particles.clear()
