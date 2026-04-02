@@ -9,6 +9,7 @@ from game import Gameplay
 from player import Player
 from wand import Wand
 from game_map import tiles_group, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from images import CrosshairImage
 
 class Menu(State):
     def __init__(self, state_manager):
@@ -71,11 +72,16 @@ class Menu(State):
         self.py_title_rect = self.py_title_surf.get_rect(topleft=(self.py_title_pos[0], self.py_title_pos[1]))
         self.py_title_shadow = fs.render_outlined("Py", (0,0,0,150), (0,0,0), 2, fs.title_font)
 
-
         self.blast_title_surf = fs.render_outlined("Blast", (195, 255, 74), (0,0,0), 2, fs.title_font)
         self.blast_title_pos = [410, 50]
         self.blast_title_rect = self.blast_title_surf.get_rect(topright=(410, self.blast_title_pos[1]))
         self.blast_title_shadow = fs.render_outlined("Blast", (0,0,0,150), (0,0,0), 2, fs.title_font)
+
+        # Setting custom cursor-----------------------------------------------------------------------------------
+        crosshair_image = CrosshairImage.crosshair_image_scaled
+        cursor = pygame.cursors.Cursor((16, 16,), crosshair_image)
+        pygame.mouse.set_cursor(cursor)
+
 
 
 

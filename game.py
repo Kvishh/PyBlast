@@ -8,7 +8,6 @@ import pause as p
 from state import State
 from spawn_system import Enemies as ems
 from configs import *
-from images import CrosshairImage
 from game_map import tiles_group, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
 from player import Player
 from wand import Wand
@@ -22,11 +21,6 @@ from specter import Specter
 class Gameplay(State):
     def __init__(self, state_manager):
         super().__init__(state_manager)
-
-        # Setting custom cursor-----------------------------------------------------------------------------------
-        crosshair_image = CrosshairImage.crosshair_image_scaled
-        cursor = pygame.cursors.Cursor((16, 16,), crosshair_image)
-        pygame.mouse.set_cursor(cursor)
 
         # GAME COMPONENTS-----------------------------------------------------------------------------------------
         # Scrolling (Camera effect)-------------------------------------------------------------------------------
