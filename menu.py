@@ -42,20 +42,24 @@ class Menu(State):
         self.abilities1_pos = [50, 170]
         self.abilities1_rect = self.abilities1_surf.get_rect(topleft=(self.abilities1_pos[0], self.abilities1_pos[1]))
 
+        self.abilities1_5_surf = fs.render_outlined("Player can't take any damage mid dash.", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.abilities1_5_pos = [173, 220]
+        self.abilities1_5_rect = self.abilities1_5_surf.get_rect(topleft=(self.abilities1_5_pos[0], self.abilities1_5_pos[1]))
+
         self.abilities2_surf = fs.render_outlined("Movement slows down when enemies' projectiles are\nnear player.", (255,255,255), (0,0,0), 2, fs.skill_name_font)
-        self.abilities2_pos = [173, 220]
+        self.abilities2_pos = [173, 270]
         self.abilities2_rect = self.abilities2_surf.get_rect(topleft=(self.abilities2_pos[0], self.abilities2_pos[1]))
 
         self.controls_surf = fs.render_outlined("Controls", (255,255,255), (0,0,0), 2, fs.font_timer)
-        self.controls_pos = [(DISPLAY_WIDTH//2) - (self.controls_surf.get_rect().w//2), 320]
+        self.controls_pos = [(DISPLAY_WIDTH//2) - (self.controls_surf.get_rect().w//2), 370] # new 370
         self.controls_rect = self.controls_surf.get_rect(topleft=(self.controls_pos[0], self.controls_pos[1]))
 
         self.keys_surf = fs.render_outlined("LEFT CLICK - SHOOT | A/D - LEFT/RIGHT | SPACE - JUMP |", (255,255,255), (0,0,0), 2, fs.skill_name_font)
-        self.keys_pos = [(DISPLAY_WIDTH//2) - self.keys_surf.get_rect().w//2, 390]
+        self.keys_pos = [(DISPLAY_WIDTH//2) - self.keys_surf.get_rect().w//2, 440] # new 440
         self.keys_rect = self.keys_surf.get_rect(topleft=(self.keys_pos[0], self.keys_pos[1]))
 
         self.keys2_surf = fs.render_outlined("LEFT SHIFT - DASH | ESC - PAUSE", (255,255,255), (0,0,0), 2, fs.skill_name_font)
-        self.keys2_pos = [(DISPLAY_WIDTH//2) - self.keys2_surf.get_rect().w//2, 440]
+        self.keys2_pos = [(DISPLAY_WIDTH//2) - self.keys2_surf.get_rect().w//2, 490] # new 490
         self.keys2_rect = self.keys2_surf.get_rect(topleft=(self.keys2_pos[0], self.keys2_pos[1]))
 
 
@@ -178,6 +182,7 @@ class Menu(State):
 
                 display.blit(self.goal_surf, self.goal_rect)
                 display.blit(self.abilities1_surf, self.abilities1_rect)
+                display.blit(self.abilities1_5_surf, self.abilities1_5_rect)
                 display.blit(self.abilities2_surf, self.abilities2_rect)
 
                 display.blit(self.controls_surf, self.controls_rect)
