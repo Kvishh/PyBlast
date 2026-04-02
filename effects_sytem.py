@@ -43,20 +43,6 @@ class FxList:
     # For jump particles----------------------------------------------------------------------------------------
     jump_particles = []
 
-    # Particle cache--------------------------------------------------------------------------------------------
-    particle_cache = {}
-
-def get_cached_particle(radius, color):
-    radius = int(radius)
-    
-    if radius <= 0: return None
-
-    tag = (radius, color)
-    if tag not in FxList.particle_cache:
-        surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(surf, (color[0], color[1], color[2]), (radius, radius), radius)
-        FxList.particle_cache[tag] = surf.convert_alpha()
-    return FxList.particle_cache[tag]
 
 
 def create_background_particles():
