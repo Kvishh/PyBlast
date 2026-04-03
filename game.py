@@ -14,10 +14,6 @@ from player import Player
 from wand import Wand
 from customgroup import CustomGroup
 from hud import HUD
-from light import Light
-from shoot import Shoot
-from burst import Burst
-from specter import Specter
 
 class Gameplay(State):
     def __init__(self, state_manager):
@@ -45,30 +41,6 @@ class Gameplay(State):
 
         # Wand-----------------------------------------------------------------------------------------------------
         self.wand = Wand(self.player.rect.centerx, self.player.rect.centery)
-
-        # Light Enemy----------------------------------------------------------------------------------------------
-        # self.light = Light(WINDOW_WIDTH-LIGHT_ENEMY_WIDTH, 0, ems.light_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_ground_enemies, ems.all_enemies_group)
-        # self.another_light = Light(300, 0, ems.light_enemy_group, ems.all_ground_enemies)
-        # self.ground_en = Light(600, 0, ems.light_enemy_group, ems.all_ground_enemies)
-
-        # Heavy Enemy----------------------------------------------------------------------------------------------
-        # self.tank = Tank(WINDOW_WIDTH-HEAVY_ENEMY_WIDTH, FLOOR, ems.tank_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_ground_enemies)
-
-        # # Flight Enemy---------------------------------------------------------------------------------------------
-        # self.flight_enemy = Flight(50, 0, ems.flight_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_flying_enemies)
-
-        # Soar Enemy-----------------------------------------------------------------------------------------------
-        # self.soar_enemy = Soar(50, 0, ems.soar_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_flying_enemies)
-
-        # # Shooting Enemy-------------------------------------------------------------------------------------------
-        # self.shoot_enemy = Shoot(250, 0, ems.shoot_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_flying_enemies)
-
-        # # Burst Shooting Enemy-------------------------------------------------------------------------------------
-        # self.burst_enemy = Burst(350, 0, ems.burst_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_flying_enemies)
-
-        # # Specter Shooting Enemy-----------------------------------------------------------------------------------
-        # self.specter_enemy = Specter(350, 0, ems.specter_enemy_group, ems.all_enemies_that_can_be_hit_by_playerbullet_group, ems.all_flying_enemies)
-
 
         ### FUNCTIONS BEFORE STARTING GAME LOOP ------------------------------------------------------------------------------ ###
         # Function for creating tile-------------------------------------------------------------------------------

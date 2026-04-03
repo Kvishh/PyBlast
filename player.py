@@ -135,9 +135,9 @@ class Player(pygame.sprite.Sprite):
         self.walk_timer = 0
 
 
-    def update(self, keys, dt, dark_overlay, scroll, wand, jump_particles=None, player_bullet_group=None, alive=False):
+    def update(self, keys, dt, dark_overlay, scroll, wand, jump_particles=None, player_bullet_group=None, menu=False):
         # Only update character if player is alive
-        if self.alive() or alive:
+        if self.alive() or menu:
             self.current_timer += dt
 
             if self.walk_timer > 0: self.walk_timer -= 1
@@ -214,11 +214,13 @@ class Player(pygame.sprite.Sprite):
                         self.kill()
                         wand.kill()
 
-                    self.invincible_timer = self.current_timer
-                    self.is_invincible = True
-                    wand.invincible_timer = self.current_timer
-                    wand.is_invincible = True
-                    self.hurt_overlay_alpha = 92
+                    # Only turn invincible if not on menu, meaning when on gameplay
+                    if not menu:
+                        self.invincible_timer = self.current_timer
+                        self.is_invincible = True
+                        wand.invincible_timer = self.current_timer
+                        wand.is_invincible = True
+                        self.hurt_overlay_alpha = 92
 
             self.dash_num = max(0, self.dash_num - 1) if self.dash_num > 0 else min(0, self.dash_num + 1)
             

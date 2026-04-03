@@ -205,7 +205,7 @@ class Menu(State):
             fx.create_background_particles()
 
             # Update and render of both player and wand
-            self.player.update(pygame.key.get_pressed(), dt, self.dark_overlay, self.scroll, self.wand, alive=True)
+            self.player.update(pygame.key.get_pressed(), dt, self.dark_overlay, self.scroll, self.wand, menu=True)
             self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery, dt)
             self.wand.render(self.scroll)
             self.player.render(self.scroll)
