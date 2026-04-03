@@ -16,6 +16,7 @@ class Menu(State):
     def __init__(self, state_manager):
         super().__init__(state_manager)
 
+        # Buttons in main menu
         self.play_surf = fs.render_outlined("Play", (255,255,255), (0,0,0), 2, fs.menu_font)
         self.play_pos = [30, 360]
         self.play_rect = self.play_surf.get_rect(topleft=(self.play_pos[0] ,self.play_pos[1]))
@@ -32,10 +33,12 @@ class Menu(State):
         self.quit_pos = [30, 510]
         self.quit_rect = self.quit_surf.get_rect(topleft=(self.quit_pos[0], self.quit_pos[1]))
 
+        # Back button (when in instruction or credits)
         self.back_surf = fs.render_outlined("Back", (255,255,255), (0,0,0), 2, fs.menu_font)
         self.back_pos = [30, 20]
         self.back_rect = self.back_surf.get_rect(topleft=(self.back_pos[0], self.back_pos[1]))
 
+        # Instruction state
         self.goal_surf = fs.render_outlined("Goal: Survive for 10 minutes. Defeat enemies to obtain upgrades.", (255,255,255), (0,0,0), 2, fs.skill_name_font)
         self.goal_pos = [50, 90]
         self.goal_rect = self.goal_surf.get_rect(topleft=(self.goal_pos[0], self.goal_pos[1]))
@@ -64,10 +67,28 @@ class Menu(State):
         self.keys2_pos = [(DISPLAY_WIDTH//2) - self.keys2_surf.get_rect().w//2, 490]
         self.keys2_rect = self.keys2_surf.get_rect(topleft=(self.keys2_pos[0], self.keys2_pos[1]))
 
-        self.title_surf = fs.render_outlined("PyBlast", (255,255,255), (0,0,0), 2, fs.title_font)
-        self.title_pos = [(DISPLAY_WIDTH//2) - self.title_surf.get_rect().w//2, 50]
-        self.title_rect = self.title_surf.get_rect(topleft=(self.title_pos[0], self.title_pos[1]))
+        # Credits state
+        self.font_credit_surf = fs.render_outlined("Font: Micro 5 by Sarah Cadigan-Fried at Google Fonts", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.font_credit_pos = [50, 90]
+        self.font_credit_rect = self.font_credit_surf.get_rect(topleft=(self.font_credit_pos[0], self.font_credit_pos[1]))
 
+        self.font2_credit_surf = fs.render_outlined("Typeface Mario World Pixel Filled by ripoof at FontStruct", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.font2_credit_pos = [125, 130]
+        self.font2_credit_rect = self.font2_credit_surf.get_rect(topleft=(self.font2_credit_pos[0], self.font2_credit_pos[1]))
+
+        self.sfx_credit_surf = fs.render_outlined("SFX: Every sound effect is made from bfxr.net", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.sfx_pos = [50, 250]
+        self.sfx_rect = self.sfx_credit_surf.get_rect(topleft=(self.sfx_pos[0], self.sfx_pos[1]))
+
+        self.music_credit_surf = fs.render_outlined("Music: 8-Bit Battle Music by mapr at itch.io", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.music_credit_pos = [50, 370]
+        self.music_credit_rect = self.music_credit_surf.get_rect(topleft=(self.music_credit_pos[0], self.music_credit_pos[1]))
+
+        self.music2_credit_surf = fs.render_outlined("Falling to Earth (Loop) by tiptoptomcat at itch.io", (255,255,255), (0,0,0), 2, fs.skill_name_font)
+        self.music2_credit_pos = [145, 410]
+        self.music2_credit_rect = self.music2_credit_surf.get_rect(topleft=(self.music2_credit_pos[0], self.music2_credit_pos[1]))
+
+        # Title
         self.py_title_surf = fs.render_outlined("Py", (90, 0, 166), (0,0,0), 2, fs.title_font)
         self.py_title_pos = [289, 50]
         self.py_title_rect = self.py_title_surf.get_rect(topleft=(self.py_title_pos[0], self.py_title_pos[1]))
@@ -117,6 +138,7 @@ class Menu(State):
 
         self.new_state = False
         self.instruction_state = False
+        self.credits_state = False
 
         main_menu_state = [True]
 
@@ -135,7 +157,7 @@ class Menu(State):
             # Checks the buttons that are clicked and perform the actions the buttons
             # are supposed to do
             mx, my = (pygame.mouse.get_pos()[0] * DISPLAY_WIDTH / WINDOW_WIDTH), (pygame.mouse.get_pos()[1] * DISPLAY_HEIGHT / WINDOW_HEIGHT)
-            if not self.instruction_state:
+            if not self.instruction_state and not self.credits_state:
                 self.check_buttons(events, (mx, my), main_menu_state)
 
             # This is for stopping this loop, used when transitioning to new state
@@ -188,6 +210,9 @@ class Menu(State):
             self.wand.render(self.scroll)
             self.player.render(self.scroll)
 
+            if self.player.rect.y > 365:
+                self.player.rect.y = 365
+
             # Drawing background particles
             fx.draw_background_particles(self.dark_overlay, self.scroll, dt)
             # For dark overlay
@@ -195,7 +220,7 @@ class Menu(State):
 
 
             # If player is in main menu and not in instruction state, draw buttons
-            if main_menu_state[0] and not self.instruction_state:
+            if main_menu_state[0] and not self.instruction_state and not self.credits_state:
                 oscillate = self.counter % 80
 
                 self.py_title_pos[1] = min(53, self.py_title_pos[1]+1) if oscillate >= 40 else max(50, self.py_title_pos[1]-1)
@@ -233,6 +258,22 @@ class Menu(State):
                 display.blit(self.keys2_surf, self.keys2_rect)
 
                 self.show_back_button(events, (mx, my), main_menu_state)
+            elif not main_menu_state[0] and self.credits_state:
+                # Lines responsible for the blurred background
+                pygame.transform.box_blur(display, 5, dest_surface=self.blur_dest_surf)
+                display.blit(self.blur_dest_surf)
+                
+                # Dark overlay 
+                display.blit(self.dark_blur_background, (0,0), special_flags=pygame.BLEND_RGB_MULT)
+
+                display.blit(self.font_credit_surf, self.font_credit_rect)
+                display.blit(self.font2_credit_surf, self.font2_credit_rect)
+                display.blit(self.sfx_credit_surf, self.sfx_rect)
+                display.blit(self.music_credit_surf, self.music_credit_rect)
+                display.blit(self.music2_credit_surf, self.music2_credit_rect)
+
+
+                self.show_back_button(events, (mx, my), main_menu_state)
 
             # last methods to be called
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
@@ -253,7 +294,8 @@ class Menu(State):
                         self.instruction_state = True
                         main_menu_state[0] = False
                     elif self.credits_rect.collidepoint(mx, my):
-                        print("credits")
+                        self.credits_state = True
+                        main_menu_state[0] = False
                     elif self.quit_rect.collidepoint(mx, my):
                         pygame.quit()
                         sys.exit()
@@ -277,6 +319,7 @@ class Menu(State):
                 if evt.button == 1:
                     if self.back_rect.collidepoint(mx, my):
                         self.instruction_state = False
+                        self.credits_state = False
                         main_menu_state[0] = True
 
         self.back_pos[0] = min(40, self.back_pos[0]+2) if self.back_rect.collidepoint(mx, my) else max(30, self.back_pos[0]-2)
