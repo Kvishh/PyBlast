@@ -2,6 +2,7 @@ import pygame
 
 import sys
 import effects_sytem as fx
+import sound_system as sss
 from font_system import FontSystem as fs
 from configs import *
 from state import State
@@ -111,6 +112,9 @@ class Menu(State):
 
 
     def update(self):
+        # Bg music play
+        sss.Music.play_music(sss.Music.menu_music, volume=.4)
+
         self.new_state = False
         self.instruction_state = False
 
@@ -241,6 +245,7 @@ class Menu(State):
             if evt.type == pygame.MOUSEBUTTONDOWN:
                 if evt.button == 1:
                     if self.play_rect.collidepoint(mx, my):
+                        sss.Music.stop_music()
                         self.state_manager.state_stack.append(Gameplay(self.state_manager))
                         print(len(self.state_manager.state_stack))
                         self.new_state = True

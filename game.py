@@ -5,6 +5,7 @@ import collision_system as cs
 import roll_system as rs
 import spawn_system as ss
 import pause as p
+import sound_system as sss
 from state import State
 from spawn_system import Enemies as ems
 from configs import *
@@ -114,6 +115,8 @@ class Gameplay(State):
         # Spawn session timer -------------------------------------------------------------------------------------
         self.spawn_session_timer = 0
 
+        # Bg music play -------------------------------------------------------------------------------------------
+        sss.Music.play_music(sss.Music.battle_music, volume=0.1)
 
     def update(self):
         pause_screen = None
@@ -458,6 +461,7 @@ class Gameplay(State):
             pygame.display.flip()
         
         self.state_manager.state_stack.pop()
+        sss.Music.stop_music()
 
         # Reset, this happens so that the old status/upgrades done in last game
         # wouldn't get pass to another game if player retried the game

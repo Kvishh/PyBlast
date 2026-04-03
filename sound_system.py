@@ -36,5 +36,18 @@ class SFX:
     dash_sfx.set_volume(.2)
 
     level_up_sfx = pygame.mixer.Sound("assets/sfx/level_up_sfx.wav")
-    level_up_sfx.set_volume(1)
+    level_up_sfx.set_volume(.2)
+
+class Music:
+    battle_music = "assets/bg_music/battle_music_1.wav"
+    menu_music = "assets/bg_music/Falling to Earth (Loop).wav"
+
+    def play_music(path, volume=.2, fade_ms=500):
+        pygame.mixer.music.load(path)
+        pygame.mixer.music.play(-1, fade_ms=fade_ms)
+        pygame.mixer.music.set_volume(volume)
     
+    def stop_music(fadeout_ms=500):
+        pygame.mixer.music.fadeout(fadeout_ms)
+        pygame.mixer.music.stop()
+        pygame.mixer.music.unload()
