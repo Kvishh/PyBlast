@@ -17,7 +17,7 @@ class Menu(State):
         super().__init__(state_manager)
 
         # Buttons in main menu
-        self.play_surf = fs.render_outlined("Play", (255,255,255), (0,0,0), 2, fs.menu_font)
+        self.play_surf = fs.render_outlined("Play", (0,255,0), (0,0,0), 2, fs.menu_font)
         self.play_pos = [30, 360]
         self.play_rect = self.play_surf.get_rect(topleft=(self.play_pos[0] ,self.play_pos[1]))
 
@@ -29,7 +29,7 @@ class Menu(State):
         self.credits_pos = [30, 460]
         self.credits_rect = self.credits_surf.get_rect(topleft=(self.credits_pos[0], self.credits_pos[1]))
 
-        self.quit_surf = fs.render_outlined("Quit", (255,255,255), (0,0,0), 2, fs.menu_font)
+        self.quit_surf = fs.render_outlined("Quit", (255,0,0), (0,0,0), 2, fs.menu_font)
         self.quit_pos = [30, 510]
         self.quit_rect = self.quit_surf.get_rect(topleft=(self.quit_pos[0], self.quit_pos[1]))
 
@@ -210,8 +210,9 @@ class Menu(State):
             self.wand.render(self.scroll)
             self.player.render(self.scroll)
 
-            if self.player.rect.y > 365:
-                self.player.rect.y = 365
+            if self.player.rect.y > 365 or self.player.pos.y > 365:
+                self.player.rect.y = 368
+                self.player.pos.y = 368
 
             # Drawing background particles
             fx.draw_background_particles(self.dark_overlay, self.scroll, dt)
