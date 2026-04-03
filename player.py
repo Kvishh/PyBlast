@@ -206,7 +206,14 @@ class Player(pygame.sprite.Sprite):
                 self.pos.y = 365
 
                 if not self.is_invincible:
-                    self.current_hp -= 1
+                    if self.current_shield != 0:
+                        self.current_shield -= 1
+                    else:
+                        self.current_hp -= 1
+                    if self.current_hp <= 0:
+                        self.kill()
+                        wand.kill()
+
                     self.invincible_timer = self.current_timer
                     self.is_invincible = True
                     wand.invincible_timer = self.current_timer
