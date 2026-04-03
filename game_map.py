@@ -1,6 +1,5 @@
 import pygame
 from configs import *
-from customgroup import CustomGroup
 from images import TileImage, BackgroundImages, LongRocksImages
 
 class Tile(pygame.sprite.Sprite):

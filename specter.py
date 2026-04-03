@@ -1,6 +1,6 @@
 import pygame, math
 from configs import *
-from game_map import tiles, tiles_blocks
+from game_map import tiles_blocks
 from enemy_bullet import SpecterEnemyBullet
 from images import SpecterImage
 from sound_system import SFX

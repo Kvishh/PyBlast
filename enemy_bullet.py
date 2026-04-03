@@ -1,6 +1,6 @@
 import pygame, math, random
 from configs import *
-from game_map import tiles, tile_map
+from game_map import tile_map
 from images import EnemyBulletImage, SpecterEnemyBulletImage
 
 class EnemyBullet(pygame.sprite.Sprite):

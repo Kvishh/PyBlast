@@ -1,6 +1,6 @@
 import pygame, math, random
 from configs import *
-from game_map import tiles, tiles_blocks
+from game_map import tiles_blocks
 from enemy_bullet import EnemyBullet
 from images import BurstImage
 from sound_system import SFX

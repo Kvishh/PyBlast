@@ -1,6 +1,6 @@
-import pygame, math, random
+import pygame, random
 from configs import *
-from game_map import tiles, tiles_blocks
+from game_map import tiles_blocks
 from images import SoarImage
 
 class Soar(pygame.sprite.Sprite):
