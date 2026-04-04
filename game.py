@@ -16,6 +16,9 @@ from customgroup import CustomGroup
 from hud import HUD
 
 class Gameplay(State):
+    """This is where the main gameplay is initialized and created. This class is where the 
+    player actually plays the game."""
+
     def __init__(self, state_manager):
         super().__init__(state_manager)
 
@@ -91,33 +94,56 @@ class Gameplay(State):
         sss.Music.play_music(sss.Music.battle_music, volume=0.1)
 
     def update(self):
+        """Override the parent update method"""
+
+        # Last frame before player paused
         pause_screen = None
+        # Last frame before player goes to level up state
+        # The copy() is done in update_level_bar method of HUD class
         last_frame = []
 
+        # These two lines are the dark overlay used when on pause, player died and player won
         pause_overlay = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.SRCALPHA)
         pause_overlay.fill((0,0,0, 128))
 
+        # Countdown time text found on top right of display/screen
         countdown_time = 600
         countdown_timer = 0
         countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
 
+        # Spawn timer that checks if 5 seconds has passed and if it is then spawn enemies
         spawn_timer = 0
 
-        
+        # Turns true when player died or won, it is used to capture time and used with 
+        # current_time/now to check if 1 sec has passed since the capture
         timer_active = False
+        # Used to slow down time when player won or died
         dt_multiplier = 1
         
+        # This is where the captured time is stored, in this case when player died
+        # It is used as current_time/now - death_start_time >= 1000 to check if 1 
+        # sec has passed since the captured time
         death_start_time = 0
+        # Turns true when it is time to slow down, used along with dt_multiplier
         death_slow_down = False
 
+        # Same as death_start_time, it is where time captured is stored and used to
+        # check with current_time/now if certain amount of time has passed since
+        # captured time
         win_start_time = 0
+        # Turns true when it is time to slow down, used along with dt_multiplier
         win_slow_down = False
 
+        # It is encapsulated in list to be a mutable object. 
+        # If True, the update method of the State, in this case Gameplay, will return
+        # a string "retry". It is then checked in StateManager if the State object
+        # returned value is not None. If it is not None, in main file, it will be
+        # handled which will create a new Gameplay object
         retry = [False]
 
-        running = True
+        # Used to check if in pause state
         is_paused = [False]
-        while running:
+        while True:
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
@@ -134,17 +160,18 @@ class Gameplay(State):
                         if self.player.alive() and not self.player.has_survived:
                             pause_screen = display.copy()
                             is_paused[0] = not is_paused[0]
-                    if event.key == pygame.K_u:
-                        self.hud.current_xp_width += 490
-                        self.hud.update_level_bar(self.xp_increment, self.level_up_state, last_frame)
 
+            # Counter for how many time the enemy shoot sfx played per frame
+            # Max is 4
             enemy_shoot_sfx_count = [0]
             
             if not is_paused[0] and not self.level_up_state[0]:
+                # DEFAULT
                 dt = clock.tick(FPS) / 1000
                 display.fill((42, 59, 95))
                 self.dark_overlay.fill((190,190,190,100))
 
+                # Time using dt
                 countdown_timer += dt
                 spawn_timer += dt
                 self.spawn_session_timer += dt
@@ -161,6 +188,7 @@ class Gameplay(State):
                 if countdown_time <= 0:
                     self.player.has_survived = True
                 
+                # If 1 minute has passed, increase spawn session number
                 if self.spawn_session_timer >= 60:
                     self.spawn_session_num = min(7, self.spawn_session_num + 1)
                     self.spawn_session_timer -= 60
@@ -170,7 +198,7 @@ class Gameplay(State):
                 if self.player.slow_time_active:
                     dt = cs.slow_down_time(self.player, self.all_enemy_projectiles_that_hit_player, dt)
                 
-                # If player has died, slow down time
+                # If player has died or won, slow down time
                 if death_slow_down or win_slow_down:
                     dt_multiplier = max(0.25, dt_multiplier - .1)
                     dt = max(0.0038, dt * dt_multiplier)
@@ -179,11 +207,13 @@ class Gameplay(State):
                 self.true_scroll[0] += (self.player.rect.x - self.true_scroll[0] - (DISPLAY_WIDTH//2 - PLAYER_WIDTH//2))/20
                 self.true_scroll[1] += (self.player.rect.y - self.true_scroll[1] - (DISPLAY_HEIGHT//2 - PLAYER_HEIGHT//2))/20
 
+                # x limit of camera/scroll
                 if self.true_scroll[0] < 0:
                     self.true_scroll[0] = 0
-                elif self.true_scroll[0] > 1300-DISPLAY_WIDTH:
-                    self.true_scroll[0] = 1300-DISPLAY_WIDTH 
+                elif self.true_scroll[0] > WINDOW_WIDTH-DISPLAY_WIDTH:
+                    self.true_scroll[0] = WINDOW_WIDTH-DISPLAY_WIDTH
 
+                # y limit of camera/scroll
                 if self.true_scroll[1] < 0:
                     self.true_scroll[1] = 0
                 elif self.true_scroll[1] > 800-DISPLAY_HEIGHT:
@@ -197,15 +227,18 @@ class Gameplay(State):
                 # Movement of spawn rect x and y and limits
                 self.spawn_rect.x = self.player.rect.centerx - DISPLAY_WIDTH // 2
                 self.spawn_rect.y = self.player.rect.centery - DISPLAY_HEIGHT // 2
+
+                # x limit of the spawn rect
                 if self.spawn_rect.x < 0:
                     self.spawn_rect.x = 0
-                elif self.spawn_rect.x > 1300-DISPLAY_WIDTH:
-                    self.spawn_rect.x = 1300-DISPLAY_WIDTH 
+                elif self.spawn_rect.x > WINDOW_WIDTH-DISPLAY_WIDTH:
+                    self.spawn_rect.x = WINDOW_WIDTH-DISPLAY_WIDTH 
 
+                # y limit of the spawn rect
                 if self.spawn_rect.y < 0:
                     self.spawn_rect.y = 0
-                elif self.spawn_rect.y > 800-DISPLAY_HEIGHT:
-                    self.spawn_rect.y = 800-DISPLAY_HEIGHT
+                elif self.spawn_rect.y > WINDOW_HEIGHT-DISPLAY_HEIGHT:
+                    self.spawn_rect.y = WINDOW_HEIGHT-DISPLAY_HEIGHT
 
                 # Applying shake in scroll
                 if self.shake_timer[0]:
@@ -281,6 +314,7 @@ class Gameplay(State):
                 # After killing enemies, remove them in current enemies on game
                 for enemy in self.enemies_killed: self.set_of_alive_enemies.remove(enemy)
 
+                # If player is alive, update it and the wand
                 if self.player.alive():
                     # Player and Wand update and draw methods
                     self.wand.update(self.player, self.scroll, self.player.rect.centerx, self.player.rect.centery, dt)
@@ -348,6 +382,7 @@ class Gameplay(State):
                 if self.shake_timer[0] > 0:
                     self.shake_timer[0] -= 1
                 
+                # The red overlay when player has been hit
                 if self.player.hurt_overlay_alpha:
                     self.player.hurt_overlay.fill((255,0,0,self.player.hurt_overlay_alpha))
                     display.blit(self.player.hurt_overlay, (0,0))
@@ -459,3 +494,8 @@ class Gameplay(State):
         fx.FxList.radiations.clear()
         fx.FxList.debris.clear()
         fx.FxList.jump_particles.clear()
+
+        cs.Timer.projectiles_hit_player_invincible_timer = 0
+        cs.Timer.projectiles_hit_wand_invincible_timer = 0
+        cs.Timer.enemies_touch_player_invincible_timer = 0
+        cs.Timer.enemies_touch_wand_invincible_timer = 0
