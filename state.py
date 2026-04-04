@@ -1,8 +1,5 @@
 import pygame
 
-# Initialize pygame---------------------------------------------------------------------------------------
-pygame.init()
-
 class State:
     def __init__(self, state_manager):
         self.state_manager = state_manager

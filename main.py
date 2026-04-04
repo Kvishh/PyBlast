@@ -1,7 +1,10 @@
+import pygame
+# Initialize pygame
+pygame.init()
+
 from state import StateManager
 from game import Gameplay
 from menu import Menu
-
 
 if __name__ == "__main__":
     state_manager = StateManager()
