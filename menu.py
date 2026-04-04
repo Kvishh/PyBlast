@@ -17,7 +17,7 @@ class Menu(State):
         super().__init__(state_manager)
 
         # Buttons in main menu
-        self.play_surf = fs.render_outlined("Play", (0,255,0), (0,0,0), 2, fs.menu_font)
+        self.play_surf = fs.render_outlined("Play", (255,255,255), (0,0,0), 2, fs.menu_font)
         self.play_pos = [30, 360]
         self.play_rect = self.play_surf.get_rect(topleft=(self.play_pos[0] ,self.play_pos[1]))
 
