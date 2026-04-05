@@ -9,7 +9,7 @@ import sound_system as sss
 from state import State
 from spawn_system import Enemies as ems
 from configs import *
-from game_map import tiles_group, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from game_map import tiles_group, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks, TileTimer
 from player import Player
 from wand import Wand
 from customgroup import CustomGroup
@@ -107,7 +107,8 @@ class Gameplay(State):
         pause_overlay.fill((0,0,0, 128))
 
         # Countdown time text found on top right of display/screen
-        countdown_time = 600
+        # countdown_time = 600
+        countdown_time = 180
         countdown_timer = 0
         countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
 
@@ -499,3 +500,7 @@ class Gameplay(State):
         cs.Timer.projectiles_hit_wand_invincible_timer = 0
         cs.Timer.enemies_touch_player_invincible_timer = 0
         cs.Timer.enemies_touch_wand_invincible_timer = 0
+
+        TileTimer.tile_time = 0
+        TileTimer.interval_tile_timer = 0
+        TileTimer.blink_timer = 0

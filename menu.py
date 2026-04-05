@@ -9,7 +9,7 @@ from state import State
 from game import Gameplay
 from player import Player
 from wand import Wand
-from game_map import tiles_group, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks
+from game_map import tiles_group, draw_background, create_tiles, draw_tiles, draw_behind_long_rocks, draw_front_long_rocks, TileTimer
 from images import CrosshairImage
 
 class Menu(State):
@@ -280,6 +280,11 @@ class Menu(State):
             window.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
             pygame.display.flip()
         
+        # Reset
+        TileTimer.tile_time = 0
+        TileTimer.interval_tile_timer = 0
+        TileTimer.blink_timer = 0
+        
     def check_buttons(self, events, mouse_pos, main_menu_state):
         mx, my = mouse_pos[0], mouse_pos[1]
 
@@ -289,7 +294,6 @@ class Menu(State):
                     if self.play_rect.collidepoint(mx, my):
                         sss.Music.stop_music()
                         self.state_manager.state_stack.append(Gameplay(self.state_manager))
-                        print(len(self.state_manager.state_stack))
                         self.new_state = True
                     elif self.instructions_rect.collidepoint(mx, my):
                         self.instruction_state = True
