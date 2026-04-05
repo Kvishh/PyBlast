@@ -107,8 +107,7 @@ class Gameplay(State):
         pause_overlay.fill((0,0,0, 128))
 
         # Countdown time text found on top right of display/screen
-        # countdown_time = 600
-        countdown_time = 180
+        countdown_time = 600
         countdown_timer = 0
         countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
 

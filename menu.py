@@ -21,7 +21,7 @@ class Menu(State):
         self.play_pos = [30, 360]
         self.play_rect = self.play_surf.get_rect(topleft=(self.play_pos[0] ,self.play_pos[1]))
 
-        self.instructions_surf = fs.render_outlined("Instructions", (255,255,255), (0,0,0), 2, fs.menu_font)
+        self.instructions_surf = fs.render_outlined("Mechanics", (255,255,255), (0,0,0), 2, fs.menu_font)
         self.instructions_pos = [30, 410]
         self.instructions_rect = self.instructions_surf.get_rect(topleft=(self.instructions_pos[0] ,self.instructions_pos[1]))
 
