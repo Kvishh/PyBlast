@@ -449,7 +449,7 @@ class Player(pygame.sprite.Sprite):
                 if self.x_velocity != 0 and self.walk_timer == 0:
                     self.walk_timer = 45
                     random.choice(SFX.walk_sfx_list).play()
-                self.on_ground = True
+                if tiles_blocks[check_loc].image.get_alpha() == 255: self.on_ground = True
 
     def _move(self, keys_hold, jump_particles):
         if keys_hold[pygame.K_SPACE] and not self.jumping and self.on_ground:
