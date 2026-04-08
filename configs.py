@@ -50,7 +50,7 @@ EMPTY_HEART_IMAGE_HEIGHT = 40
 SHIELD_IMAGE_WIDTH = 40
 SHIELD_IMAGE_HEIGHT = 48
 
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN | pygame.SCALED)
 pygame.display.set_caption("PyBlast")
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 clock = pygame.time.Clock()
