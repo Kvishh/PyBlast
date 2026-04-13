@@ -101,9 +101,20 @@ def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, pla
             enemy.flashed_timer = pygame.time.get_ticks()
 
             enemy.hp -= player.damage
-                
-            if enemy.hp <= 0:
-                enemies_killed.add(enemy)
+
+            # This kills the enemy if their hp has reached 0
+            if enemy.hp <= 0:enemies_killed.add(enemy)
+            
+            # This piece of code is responsible for incrementing/adding the xp/level bar
+            # The reason the killing of enemy and incrementing of xp/level are separated
+            # is because it solves an issue when player had died but still killed an enemy
+            # with the last projectile they fired before dying and still gained xp which
+            # then, if player before dying can level up with the xp of killing one enemy,
+            # activates the level-up state of player, which in turn shows the upgrades/abilities.
+            # Essentially, it prevents the player from gaining xp when player is dead, but still
+            # kills enemy if ever they fired a projectile before dying and the enemy can be killed
+            # with one shot.
+            if enemy.hp <= 0 and player.alive():
                 if hud.level <= 15:
                     xp_increment[0] += 120 - (hud.level*5)
                 elif hud.level > 15 and hud.level <= 19:
@@ -143,9 +154,20 @@ def check_enemies_within_explosion_radius(player, hud, xp_increment, enemies_kil
         enemy.flashed_timer = pygame.time.get_ticks()
 
         enemy.hp -= player.damage
-            
-        if enemy.hp <= 0:
-                enemies_killed.add(enemy)
+
+        # This kills the enemy if their hp has reached 0
+        if enemy.hp <= 0:enemies_killed.add(enemy)
+
+        # This piece of code is responsible for incrementing/adding the xp/level bar
+        # The reason the killing of enemy and incrementing of xp/level are separated
+        # is because it solves an issue when player had died but still killed an enemy
+        # with the last projectile they fired before dying and still gained xp which
+        # then, if player before dying can level up with the xp of killing one enemy,
+        # activates the level-up state of player, which in turn shows the upgrades/abilities.
+        # Essentially, it prevents the player from gaining xp when player is dead, but still
+        # kills enemy if ever they fired a projectile before dying and the enemy can be killed
+        # with one shot
+        if enemy.hp <= 0 and player.alive():
                 if hud.level <= 15:
                     xp_increment[0] += 120 - (hud.level*5)
                 elif hud.level > 15 and hud.level <= 19:
