@@ -10,10 +10,18 @@ PyBlast is a survival roguelike game where you defeat horde of enemies and try t
 
 3. Ensure you are in the project directory and in your terminal/command line, type `python main.py`.
 
+## Images
+
 ![Preview image 1](previews/images/preview_1.png)
+
 ![Preview image 2](previews/images/preview_2.png)
+
 ![Preview image 3](previews/images/preview_3.png)
+
 ![Preview image 4](previews/images/preview_4.png)
+
 ![Preview image 5](previews/images/preview_5.png)
+
 ![Preview image 6](previews/images/preview_6.png)
+
 ![Preview image 7](previews/images/preview_7.png)
