@@ -55,6 +55,8 @@ tile_map = [
 ]
 
 def create_tiles():
+    """Responsible for creating the Tile objects. These are the platforms the entities touch"""
+    
     for x, row in enumerate(tile_map):
         for y, column in enumerate(row):
             if column == 1:

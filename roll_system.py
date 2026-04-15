@@ -182,14 +182,7 @@ def show_choices(skills_choices, events, level_up_state, player, last_frame):
                                     skill_tree.is_exhausted = True
                             
                             # Reset
-                            RollSystem.skills_choices.clear()
-                            RollSystem.skill_trees_choices.clear()
-                            RollSystem.choices.clear()
-                            last_frame.clear()
-                            RollSystem.flash_overlay_alpha = 2
-                            RollSystem.bounce_up = False
-                            RollSystem.roll_layer_pos_y = -DISPLAY_HEIGHT
-                            RollSystem.is_clickable = False
+                            reset(last_frame)
 
                             # Applying the ability
                             apply_ability(skill, player)
@@ -198,3 +191,14 @@ def show_choices(skills_choices, events, level_up_state, player, last_frame):
                 # Continue game loop
                 level_up_state[0] = False
                 break
+    
+def reset(last_frame=None):
+    if last_frame is not None: last_frame.clear()
+
+    RollSystem.skills_choices.clear()
+    RollSystem.skill_trees_choices.clear()
+    RollSystem.choices.clear()
+    RollSystem.flash_overlay_alpha = 2
+    RollSystem.bounce_up = False
+    RollSystem.roll_layer_pos_y = -DISPLAY_HEIGHT
+    RollSystem.is_clickable = False

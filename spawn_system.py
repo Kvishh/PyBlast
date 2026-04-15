@@ -69,7 +69,7 @@ class Enemies:
     enemies_types = ["Light", "Tank", "Flight", "Soar", "Shoot", "Burst", "Specter"]
 
 
-def spawn_enemies(current_level, spawn_rect, spawn_session_num, set_of_alive_enemies, countdown_time):
+def spawn_enemies(current_level, spawn_rect, spawn_session_num, set_of_alive_enemies):
     multiplier = 4 if spawn_session_num < 2 else 3
 
     if current_level <= 10:

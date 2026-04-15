@@ -144,6 +144,7 @@ class Gameplay(State):
         # Used to check if in pause state
         is_paused = [False]
         while True:
+            # Events handling
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
@@ -155,7 +156,7 @@ class Gameplay(State):
                     self.player.is_shooting = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        # Player can only pause when they are alive, else
+                        # Player can only pause when they are alive and hasn't finished the game yet, else
                         # they can't pause
                         if self.player.alive() and not self.player.has_survived:
                             pause_screen = display.copy()
@@ -166,7 +167,7 @@ class Gameplay(State):
             enemy_shoot_sfx_count = [0]
             
             if not is_paused[0] and not self.level_up_state[0]:
-                # DEFAULT
+                # DEFAULT - must lines before updating and displaying anything
                 dt = clock.tick(FPS) / 1000
                 display.fill((42, 59, 95))
                 self.dark_overlay.fill((190,190,190,100))
@@ -184,19 +185,17 @@ class Gameplay(State):
                     countdown_time_text = time.strftime("%M:%S", time.gmtime(countdown_time))
                     countdown_timer -= 1
                 
-                # Check if countdown time has reached 00:00
-                if countdown_time <= 0:
-                    self.player.has_survived = True
+                # Check if countdown time has reached 00:00, if it is then player won
+                if countdown_time <= 0: self.player.has_survived = True
                 
                 # If 1 minute has passed, increase spawn session number
                 if self.spawn_session_timer >= 60:
                     self.spawn_session_num = min(7, self.spawn_session_num + 1)
                     self.spawn_session_timer -= 60
 
-                # Checks if enemies' projectiles are near player radius only
-                # if player has obtained the ability to slow down movement
-                if self.player.slow_time_active:
-                    dt = cs.slow_down_time(self.player, self.all_enemy_projectiles_that_hit_player, dt)
+                # Checks if enemies' projectiles are near player radius then slow
+                # down time/movement if there is
+                if self.player.slow_time_active: dt = cs.slow_down_time(self.player, self.all_enemy_projectiles_that_hit_player, dt)
                 
                 # If player has died or won, slow down time
                 if death_slow_down or win_slow_down:
@@ -247,7 +246,7 @@ class Gameplay(State):
 
                 # Every 5 seconds spawn enemies
                 if spawn_timer > 5:
-                    ss.spawn_enemies(self.hud.level, self.spawn_rect, self.spawn_session_num, self.set_of_alive_enemies, countdown_time)
+                    ss.spawn_enemies(self.hud.level, self.spawn_rect, self.spawn_session_num, self.set_of_alive_enemies)
                     spawn_timer -= 5
 
                 # For drawing background
@@ -503,3 +502,5 @@ class Gameplay(State):
         TileTimer.tile_time = 0
         TileTimer.interval_tile_timer = 0
         TileTimer.blink_timer = 0
+
+        rs.reset()

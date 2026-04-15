@@ -58,6 +58,10 @@ def avoid_overlap(all_ground_enemies):
                         y.pos.x -= overlap.h // 6
 
 def slow_down_time(player, all_enemy_projectiles_that_hit_player, dt):
+    """This function is responsible for checking if enemies' projectiles
+    are near player. It slows down time/movement if there is an enemy's
+    projectile near the player."""
+
     for bullet in all_enemy_projectiles_that_hit_player.sprites():
         if bullet.rect.colliderect(player.slow_rect):
             # This is responsible for slowing down movement smoothly

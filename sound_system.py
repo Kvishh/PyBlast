@@ -43,6 +43,8 @@ class Music:
     menu_music = "assets/bg_music/Falling to Earth (Loop).wav"
 
     def play_music(path, volume=.2, fade_ms=500):
+        """Responsible for playing the background music"""
+
         pygame.mixer.music.load(path)
         pygame.mixer.music.play(-1, fade_ms=fade_ms)
         pygame.mixer.music.set_volume(volume)
