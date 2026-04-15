@@ -13,6 +13,8 @@ from specter import Specter
 
 
 class FxList:
+    """Class for storing the effects list."""
+
     # For background particles---------------------------------------------------------------------------------
     background_particles = []
 
@@ -46,6 +48,8 @@ class FxList:
 
 
 def create_background_particles():
+    """Creation of the fireflies/background particles"""
+
     if len(FxList.background_particles) < 10: # loc, radius, direction
         FxList.background_particles.append([[random.randrange(WINDOW_WIDTH), random.randrange(WINDOW_HEIGHT)],
                                     2,
@@ -54,6 +58,8 @@ def create_background_particles():
                                     random.choice(GradientImage.gradient_background_image_list)])
 
 def draw_background_particles(dark_overlay, scroll, dt):
+    """Drawing of the fireflies/background particles"""
+
     if FxList.background_particles:
         FxList.background_particles = [background_particle for background_particle in FxList.background_particles
                                 if (background_particle[0][1] > 0 and background_particle[0][1] < WINDOW_HEIGHT) and 
@@ -98,6 +104,8 @@ def draw_background_particles(dark_overlay, scroll, dt):
 
 
 def create_floating_particles(pos):
+    """Creation of the fireflies/background particles"""
+
     for _ in range(15): # location, velocity, radius, color
         FxList.particles.append([[random.randrange(pos[0]-30, pos[0]+30), random.randrange(pos[1]-20, pos[1]+20)],
                                 [random.randrange(-4, 4), -5], 
@@ -105,6 +113,8 @@ def create_floating_particles(pos):
                                 255])
 
 def draw_floating_particles(scroll):
+    """Drawing of floating """
+
     if FxList.particles:
         FxList.particles = [particle for particle in FxList.particles if particle[2] > 0]
 
@@ -133,6 +143,8 @@ def draw_floating_particles(scroll):
 
 
 def create_falling_particles(enemy, pos):
+    """Creation of the falling particles when any of the ground enemies is hit."""
+
     if isinstance(enemy, Light):
         for _ in range(15): # location, velocity, radius, color
             FxList.falling_particles.append([[random.randrange(pos[0]-20, pos[0]+20), random.randrange(pos[1]-20, pos[1]+20)],
@@ -147,6 +159,8 @@ def create_falling_particles(enemy, pos):
                                     (155, 86, 186)])
 
 def draw_falling_particles(scroll):
+    """Drawing of falling particles."""
+
     if FxList.falling_particles:
         FxList.falling_particles = [particle for particle in FxList.falling_particles if particle[2] > 0]
 
@@ -173,6 +187,8 @@ def draw_falling_particles(scroll):
 
 
 def create_debris(pos):
+    """Creation of debris when projectiles hit tiles."""
+
     for _ in range(15):  # location, velocity, radius, color
         r = random.randrange(60, 80)
         g = r
@@ -182,6 +198,8 @@ def create_debris(pos):
                     (r, g, 125)])
 
 def draw_debris(scroll):
+    """Drawing of the debris."""
+
     if FxList.debris:
         FxList.debris = [debris for debris in FxList.debris if debris[2] > 0]
 
@@ -219,6 +237,8 @@ def draw_debris(scroll):
 
 
 def create_radiation(enemy, pos):
+    """Creation of radiations when any of flying enemies is hit."""
+
     if isinstance(enemy, Soar):
         FxList.radiations.append([[pos[0], pos[1]],
                                 15,
@@ -257,6 +277,8 @@ def create_radiation(enemy, pos):
                                 [(114, 0, 143), (71, 36, 82)]])
 
 def draw_radiations(scroll):
+    """Drawing of the radiations."""
+
     if FxList.radiations:
         FxList.radiations = [radiation for radiation in FxList.radiations if radiation[2] > 1.1]
 
@@ -304,18 +326,23 @@ def draw_radiations(scroll):
 
 
 def create_impacts(pos):
+    """Creation of impacts for normal projectiles that hit tile or enemies."""
+
     for _ in range(6):
         FxList.sparks.append(Spark([pos[0], pos[1]], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 2))
 
 def draw_impact(scroll):
+    """Drawing of sparks/impacts when projectile hit something."""
+
     for i, spark in sorted(enumerate(FxList.sparks), reverse=True):
         spark.move(1)
         spark.draw(display, scroll)
         if not spark.alive:
             FxList.sparks.pop(i)
 
-
 def create_explosion_impacts(pos):
+    """Creation of explosion impacts from the explosion when player projectiles hit something"""
+
     for i in range(13):
         angle = math.pi * 2 * (i/10)
         speed = random.randint(5,7)
@@ -323,6 +350,8 @@ def create_explosion_impacts(pos):
         FxList.explosion_sparks.append(Spark([pos[0], pos[1]], angle-.1, speed-1, (238, 255, 107), scale=4))
 
 def draw_explosion_impact(scroll):
+    """Drawing of explosion/sparks when projectiles explode"""
+
     for i, spark in sorted(enumerate(FxList.explosion_sparks), reverse=True):
         spark.move(1)
         spark.draw(display, scroll)
@@ -331,6 +360,8 @@ def draw_explosion_impact(scroll):
 
 
 def create_explosion(pos):
+    """Creation of the huge green radiation."""
+
     # location, radius, width, color, new_loc, timer, color # id here if you want
     FxList.explosions.append([[pos[0], pos[1]],
                                        70,
@@ -341,6 +372,8 @@ def create_explosion(pos):
                                        (252, 255, 209)])
 
 def draw_explosions(scroll):
+    """Drawing of explosion impact, the one where projectiles explode when enemies hit"""
+
     if FxList.explosions:
         FxList.explosions = [explosion for explosion in FxList.explosions if explosion[1] > 0]
 
@@ -368,12 +401,16 @@ def draw_explosions(scroll):
 
 
 def create_explosion_radiations(pos):
+    """Creation of the huge green radiation."""
+
     # location, radius, width
     FxList.explosion_radiations.append([[pos[0], pos[1]],
                                         80,
                                         12])
 
 def draw_explosion_radiations(scroll):
+    """Drawing of explosion radiations"""
+
     if FxList.explosion_radiations:
         FxList.explosion_radiations = [radiation for radiation in FxList.explosion_radiations if radiation[2] > 0]
 
@@ -386,6 +423,8 @@ def draw_explosion_radiations(scroll):
 
 
 def draw_jump_particles(scroll):
+    """Drawing of jump particles of player when it jumps."""
+
     if FxList.jump_particles:
         FxList.jump_particles = [p for p in FxList.jump_particles if p[2] > 0]
 

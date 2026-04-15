@@ -1,4 +1,4 @@
-import pygame, random, math
+import pygame, random
 from configs import *
 from customgroup import CustomGroup, ShootCustomGroup
 from light import Light
@@ -10,6 +10,8 @@ from burst import Burst
 from specter import Specter
 
 class Enemies:
+    """Class used to store all attributes related to every enemy, from group to lists"""
+
     # Light enemy Group----------------------------------------------------------------------------------------
     light_enemy_group = CustomGroup()
 
@@ -70,14 +72,27 @@ class Enemies:
 
 
 def spawn_enemies(current_level, spawn_rect, spawn_session_num, set_of_alive_enemies):
+    """Responsible for spawing enemies. The calculation is done with the current level of player
+    and the current number of enemies alive. This is multiplied with the multiplier variable. The
+    calculation is done where it will be lower if there are many enemies alive currently in the game
+    and higher if there are few enemies alive. The current level of player will also affect the number
+    of enemies that will be spawned in which it is significantly lower if the level of player is below
+    10 (inclusive) and higher if above that. The reasoning here is the player has obtained plenty of 
+    abilities to fight more enemies."""
+
+    # This variable is responsible for multiplying the number of enemies that
+    # will spawn. It is a higher number if countdown is above 8 min mark (10-8)
+    # lower if it is below 8 min mark (7:59-0)
     multiplier = 4 if spawn_session_num < 2 else 3
 
+    # Lower number of enemies will be spawned if player level is below 10 (inclusive)
     if current_level <= 10:
         num_of_enemies_that_will_spawn = ((current_level * multiplier) // (len(set_of_alive_enemies) if len(set_of_alive_enemies) != 0 else 1)) // 2
     else:
         num_of_enemies_that_will_spawn = (current_level * multiplier) // (len(set_of_alive_enemies) if len(set_of_alive_enemies) != 0 else 1)
 
     for i in range(num_of_enemies_that_will_spawn):
+        # The odds that control which type of enemy will be spawned
         chance = random.random()
 
         match str(spawn_session_num):
@@ -131,6 +146,8 @@ def spawn_enemies(current_level, spawn_rect, spawn_session_num, set_of_alive_ene
                     spawn_flying_enemies(set_of_alive_enemies, "Specter") if current_level < 20 else spawn_flying_enemies(set_of_alive_enemies, "Specter", multiply_hp=True)
 
 def choose_enemy(selected_type):
+    """Responsible for selecting the types of enemies chosen on dedicated spawn session number"""
+
     enemy_type = random.choice(Enemies.enemies_types)
     while True:
         if enemy_type in selected_type:
@@ -139,6 +156,8 @@ def choose_enemy(selected_type):
     return enemy_type
 
 def spawn_ground_enemies(spawn_rect, set_of_alive_enemies, enemy_type, multiply_hp=False):
+    """Responsible for spawning ground enemies"""
+
     x = random.randint(0, WINDOW_WIDTH-HEAVY_ENEMY_WIDTH)
     if enemy_type == "Tank":
         while True:
@@ -159,6 +178,8 @@ def spawn_ground_enemies(spawn_rect, set_of_alive_enemies, enemy_type, multiply_
         set_of_alive_enemies.add(enemy)
 
 def spawn_flying_enemies(set_of_alive_enemies, enemy_type, multiply_hp=False):
+    """Responsible for spawning flying enemies"""
+
     x = random.randint(0, WINDOW_WIDTH)
     match enemy_type:
         case "Flight":

@@ -6,6 +6,9 @@ from images import BulletImage
 from sound_system import SFX
 
 class PlayerBullet(pygame.sprite.Sprite):
+    """This class represents the player's projectiles/bullets. All the calculation, movement, and abilities (e.g. pierce)
+    are handled here."""
+
     def __init__(self, x, y, speed, pierce_number, bounce_number, direction, skill_activated, mouse_target_x, mouse_target_y, spread=0):
         super().__init__()
         self.image = BulletImage.bullet_image_scaled if not skill_activated else BulletImage.bullet_image_doubled_scaled

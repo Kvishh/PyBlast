@@ -283,8 +283,7 @@ class Gameplay(State):
                 ems.specter_enemy_bullet_group.draw(display, self.scroll)
 
                 # Check if enemies' projectiles hit player's negator
-                if self.player.negator_active:
-                    cs.projectiles_hit_negator(self.player, self.all_enemy_projectiles_that_hit_player)
+                if self.player.negator_active: cs.projectiles_hit_negator(self.player, self.all_enemy_projectiles_that_hit_player)
 
                 # Check if projectiles hit tiles
                 cs.projectiles_hit_tiles(self.all_projectile_that_hit_tiles, self.shake_timer)

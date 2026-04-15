@@ -4,6 +4,8 @@ from images import HUDImage
 from font_system import FontSystem as fs
 
 class HUD:
+    """Class responsible for the heads up display, i.e. the hp, shield, level bar, countdown timer etc."""
+
     def __init__(self, player):
         self.player = player
         self.heart = HUDImage.heart_image_scaled

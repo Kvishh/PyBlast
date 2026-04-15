@@ -3,6 +3,8 @@ from configs import display, DISPLAY_WIDTH, DISPLAY_HEIGHT, WINDOW_WIDTH, WINDOW
 from font_system import FontSystem as fs
 
 class Pause:
+    """Class responsible for storing the variables used in pause ui."""
+
     continue_text_surf = fs.render_outlined("Continue", (255,255,255), (0,0,0), 2, fs.skill_name_font)
     continue_text_pos = [30, 420]
     continue_text_rect = continue_text_surf.get_rect(topleft=(continue_text_pos[0], continue_text_pos[1]))

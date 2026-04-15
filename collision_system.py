@@ -13,6 +13,8 @@ from specter import Specter
 from sound_system import SFX
 
 class Timer:
+    """Class responsible for storing the time variables for invisibility of both wand and player."""
+
     projectiles_hit_player_invincible_timer = 0
     projectiles_hit_wand_invincible_timer = 0
     enemies_touch_player_invincible_timer = 0
@@ -21,11 +23,16 @@ class Timer:
     dt_multiplier = 1
 
 def collide_rect_then_mask(sprite1, sprite2):
+    """Checks first if there is rect collision and if there is, then perform mask collision."""
+
     if not sprite1.rect.colliderect(sprite2.rect): return False
 
     return True if pygame.sprite.collide_mask(sprite1, sprite2) else False
 
 def collide_rect_then_mask_with_piercing_fx(sprite1, sprite2):
+    """Checks if an enemy (sprite2) is already in dict of enemies hit by player's projectile (sprite1),
+    if not check first if there are collisions in rect and mask and if there are then add it in dict"""
+
     if sprite2 not in sprite1.enemies_hit:
 
         if not sprite1.rect.colliderect(sprite2.rect):
@@ -38,6 +45,8 @@ def collide_rect_then_mask_with_piercing_fx(sprite1, sprite2):
             return False
 
 def avoid_overlap(all_ground_enemies):
+    """Built for ground enemies to avoid overlapping."""
+
     for x in all_ground_enemies:
         for y in all_ground_enemies:
             if x is y:
@@ -92,6 +101,8 @@ def check_explosion_radius_rect_collision(explosion_center, radius, rect):
 
 
 def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer):
+    """Checks if player projectiles hit enemies."""
+
     hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
 
     for bullet, enemies in hits.items():
@@ -130,6 +141,8 @@ def player_bullet_hit_all_enemies(player, hud, xp_increment, enemies_killed, pla
         fx.create_floating_particles(pos)
 
 def check_enemies_within_explosion_radius(player, hud, xp_increment, enemies_killed, player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, shake_timer):
+    """Checks if enemy is within explosion radius of player's projectile."""
+
     hits = pygame.sprite.groupcollide(player_bullet_group, all_enemies_that_can_be_hit_by_playerbullet_group, False, False, collide_rect_then_mask_with_piercing_fx)
 
     enemies_within_radius = set([])
@@ -181,25 +194,37 @@ def check_enemies_within_explosion_radius(player, hud, xp_increment, enemies_kil
 
 
 def projectiles_hit_negator(player, all_enemy_projectiles_that_hit_player):
+    """Checks if enemies' projectiles hit the negator which erases/deletes/removes the enemies'
+    projectile."""
+
     hits = pygame.sprite.spritecollide(player.negator, all_enemy_projectiles_that_hit_player, True, collide_rect_then_mask)
 
     for hit in hits:
         SFX.enemies_projectiles_hit_negator_sfx.play()
 
 def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, shake_timer, dt):
+    """Checks if projectiles hit player's hitbox."""
+
     Timer.projectiles_hit_player_invincible_timer += dt
     Timer.projectiles_hit_wand_invincible_timer += dt
 
     if not player.is_invincible and not player.has_survived:
         tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+        
+        # Convertion of player location to grid location
         player_tile_loc = (int(player.rect.x // TILE_SIZE), int(player.rect.y // TILE_SIZE))
         player_grid_locs = {f"{player_tile_loc[0] + offset[0]};{player_tile_loc[1] + offset[1]}" for offset in tiles_offset}
 
         for projectile in all_enemy_projectiles_that_hit_player:
+            # Convertion of projectile location to grid location
             projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
 
+            # Checks every surrounding cell in grid of the player
             for offset in tiles_offset:
+                # Projectile's grid location plus every offset/surrounding cells
                 check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
+
+                # Checks if projectiles are in player grid location plus its surrounding cells
                 if check_loc in player_grid_locs:
                     if projectile.rect.colliderect(player.rect):
                         if pygame.sprite.collide_mask(projectile, player):
@@ -228,6 +253,8 @@ def projectiles_hit_player(player, wand, all_enemy_projectiles_that_hit_player, 
                             break
 
 def all_enemies_touch_player(player: pygame.sprite.Sprite, wand, all_enemies_group, dt):
+    """Checks if enemies touch player's hitbox."""
+
     Timer.enemies_touch_player_invincible_timer += dt
     Timer.enemies_touch_wand_invincible_timer += dt
 
@@ -259,14 +286,22 @@ def all_enemies_touch_player(player: pygame.sprite.Sprite, wand, all_enemies_gro
             break
 
 def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):
-    # collided_tiles_loc = []
+    """Responsible for checking if projectiles hit a tile."""
+    
     tiles_offset = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
 
     for projectile in all_projectile_that_hit_tiles.sprites():
+        # Convertion of projectile location to grid location
         projectile_tile_loc = (int(projectile.rect.x // TILE_SIZE), int(projectile.rect.y // TILE_SIZE))
+
+        # Checks every surrounding cell in grid of the projectile
         for offset in tiles_offset:
+            # Convertion to grid location
             check_loc = str(projectile_tile_loc[0] + offset[0]) + ";" + str(projectile_tile_loc[1] + offset[1])
+
+            # Checks if the converted location is in dict of the tiles (grid location)
             if check_loc in tiles_blocks:
+                # Get the actual Tile object to check for rect collision
                 collided_tile = tiles_blocks[check_loc]
                 if collided_tile.rect.colliderect(projectile.rect):
                     shake_timer[0] = 20
@@ -280,6 +315,8 @@ def projectiles_hit_tiles(all_projectile_that_hit_tiles, shake_timer):
                     projectile.kill()
 
 def player_bullet_hit_flying_enemies(player_bullet_group):
+    """Performs the effects for flying enemies"""
+
     for bullet in player_bullet_group.sprites():
         for enemy in bullet.enemies_hit:
             if isinstance(enemy, (Flight, Soar, Shoot, Burst, Specter)):
@@ -294,6 +331,8 @@ def player_bullet_hit_flying_enemies(player_bullet_group):
                     bullet.kill()
 
 def player_bullet_hit_ground_enemies(player_bullet_group):
+    """Performs the effects for ground enemies"""
+
     for bullet in player_bullet_group.sprites():
         for enemy in bullet.enemies_hit:
             if isinstance(enemy, (Tank, Light)):

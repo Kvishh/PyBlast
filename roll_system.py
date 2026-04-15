@@ -60,6 +60,8 @@ class RollSystem:
 
 
 def roll(events, level_up_state, player, last_frame):
+    """Responsible for the randomize abilities that show when player leveled up."""
+
     # This is to ensure that skills choices and skill trees choices roll only once
     if not RollSystem.skills_choices and not RollSystem.skill_trees_choices:
         RollSystem.stop = False
@@ -92,6 +94,8 @@ def roll(events, level_up_state, player, last_frame):
     show_choices(RollSystem.skills_choices, events, level_up_state, player, last_frame)
 
 def show_choices(skills_choices, events, level_up_state, player, last_frame):
+    """The function responsible for showing the available abilities player can choose, including the animation"""
+
     # Checks if RollSystem.choices is empty, if it is empty then fill it in
     # with skill name and description (not actual object)
     if not RollSystem.choices:

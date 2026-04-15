@@ -56,7 +56,7 @@ tile_map = [
 
 def create_tiles():
     """Responsible for creating the Tile objects. These are the platforms the entities touch"""
-    
+
     for x, row in enumerate(tile_map):
         for y, column in enumerate(row):
             if column == 1:
@@ -68,6 +68,9 @@ def create_tiles():
             
 
 def draw_tiles(scroll, countdown_time, dt):
+    """Drawing of tiles/platform which the entities touch. It also handles when the ground/floor
+    start to turn invisible."""
+
     TileTimer.interval_tile_timer += dt
 
     if countdown_time <= 180 and TileTimer.interval_tile_timer >= 30:
@@ -102,18 +105,24 @@ def draw_tiles(scroll, countdown_time, dt):
         display.blit(tile.image, (tile.rect.x-scroll[0], tile.rect.y-scroll[1]))
 
 def draw_background(scroll):
+    """Drawing of background, the speed is responsible for the parallax effect"""
+
     speed = .4
     for bg_image in bg_images:
         display.blit(bg_image, (0 - scroll[0] * speed, 0-scroll[1]))
         speed+=.2
 
 def draw_behind_long_rocks(scroll):
+    """Drawing of long rocks, the two vertical rocks behind the platform"""
+
     long_rocks[1].set_alpha(220)
     long_rocks[2].set_alpha(220)
     display.blit(long_rocks[1], (0-scroll[0], 200-scroll[1]))
     display.blit(long_rocks[2], ((WINDOW_WIDTH - long_rocks[2].width + 150) - scroll[0], 0 - scroll[1]))
 
 def draw_front_long_rocks(scroll):
+    """Drawing of long rocks, the two vertical rocks in front of the platform"""
+    
     long_rocks[0].set_alpha(110)
     long_rocks[3].set_alpha(110)
     display.blit(long_rocks[0], (-100 - scroll[0], 0 - scroll[1]))
